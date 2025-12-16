@@ -248,12 +248,18 @@ const App: React.FC = () => {
 
   const handleFormSubmit = async (gameData: Game) => {
     try {
+        // Sanitize data to remove undefined values which Firestore throws error on
+        // Using JSON parse/stringify is a quick way to strip undefined keys
+        const sanitize = (obj: any): any => {
+            return JSON.parse(JSON.stringify(obj));
+        };
+
         if (editingGame) {
             // Update existing in Firestore
             const gameRef = doc(db, 'games', gameData.id);
             // We destructure to remove the 'id' field from the data payload, as doc ref holds ID
             const { id, ...dataToUpdate } = gameData;
-            await updateDoc(gameRef, dataToUpdate);
+            await updateDoc(gameRef, sanitize(dataToUpdate));
             
             if (selectedGame && selectedGame.id === gameData.id) {
                 setSelectedGame(gameData);
@@ -261,13 +267,22 @@ const App: React.FC = () => {
         } else {
             // Create new in Firestore
             const { id, ...newGameData } = gameData; 
-            // We ignore the passed ID for creation and let Firestore generate one, or use it if we really want custom IDs.
-            // But usually addDoc generates one.
-            await addDoc(collection(db, 'games'), newGameData);
+            
+            // Ensure essential arrays exist if they were lost
+            const payload = {
+                ...newGameData,
+                comments: newGameData.comments || [],
+                screenshots: newGameData.screenshots || [],
+                languages: newGameData.languages || ['English'],
+                downloads: newGameData.downloads || 0,
+                rating: newGameData.rating || 0
+            };
+
+            await addDoc(collection(db, 'games'), sanitize(payload));
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error saving game:", error);
-        alert("Failed to save game. Check console.");
+        alert(`Error al guardar: ${error.message || 'Error desconocido'}`);
     }
   };
 
@@ -279,9 +294,9 @@ const App: React.FC = () => {
             // Clean URL
             window.history.pushState({}, '', window.location.pathname);
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error deleting game:", error);
-        alert("Failed to delete game.");
+        alert(`Error al eliminar: ${error.message}`);
     }
   };
 

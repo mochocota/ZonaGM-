@@ -7,6 +7,7 @@ import Footer from './components/Footer';
 import GameForm from './components/GameForm';
 import AdminPanel from './components/AdminPanel';
 import LoginModal from './components/LoginModal';
+import AdBlockDetector from './components/AdBlockDetector';
 import SEO from './components/SEO';
 import SitemapView from './components/SitemapView';
 import { SortOption, Game, Report } from './types';
@@ -605,6 +606,7 @@ const App: React.FC = () => {
 
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden font-sans bg-background text-text-main">
+      <AdBlockDetector />
       
       {/* Default SEO for Home */}
       {!selectedGame && (

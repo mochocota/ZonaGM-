@@ -484,7 +484,9 @@ const App: React.FC = () => {
     content = (
         <div className="flex w-full max-w-[1000px] flex-col gap-2">
             
-            <Hero searchTerm={searchTerm} setSearchTerm={handleSearch} />
+            {!searchTerm && !selectedConsole && (
+                <Hero searchTerm={searchTerm} setSearchTerm={handleSearch} />
+            )}
 
             {/* Controls Bar */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-border-color pb-4 mt-2 gap-4">

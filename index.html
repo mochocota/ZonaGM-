@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZonaGM</title>
+    <meta name="description" content="Search the Archive for verified ISOs and ROMs. Secure downloads for GameCube, PS2, SNES and more." />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Security: Hide traffic source (Referrer) from external links -->
+    <meta name="referrer" content="no-referrer" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Spline Sans', 'sans-serif'],
+            },
+            colors: {
+              primary: 'var(--color-primary)', 
+              'primary-hover': 'var(--color-primary-hover)',
+              background: 'var(--color-background)', 
+              surface: 'var(--color-surface)',
+              'text-main': 'var(--color-text-main)',
+              'text-muted': 'var(--color-text-muted)',
+              'border-color': 'var(--color-border)',
+            },
+            boxShadow: {
+              'soft': 'var(--shadow-soft)',
+              'hover': 'var(--shadow-hover)',
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      :root {
+        /* Light Mode Defaults */
+        --color-primary: #F9F506;
+        --color-primary-hover: #EBE705;
+        --color-background: #F8F8F5;
+        --color-surface: #FFFFFF;
+        --color-text-main: #1C1C0D;
+        --color-text-muted: #5C5C4F;
+        --color-border: #E9E8CE;
+        
+        --shadow-soft: 0 4px 20px -2px rgba(28, 28, 13, 0.05);
+        --shadow-hover: 0 10px 25px -5px rgba(28, 28, 13, 0.1);
+      }
+
+      /* Dark Mode Overrides */
+      .dark {
+        --color-primary: #F9F506;
+        --color-primary-hover: #EBE705;
+        --color-background: #09090b; /* Zinc 950 */
+        --color-surface: #18181b;    /* Zinc 900 */
+        --color-text-main: #f4f4f5;  /* Zinc 100 */
+        --color-text-muted: #a1a1aa; /* Zinc 400 */
+        --color-border: #27272a;     /* Zinc 800 */
+
+        --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+        --shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      }
+
+      body {
+        background-color: var(--color-background);
+        color: var(--color-text-main);
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      /* Smooth scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #D4D4D0;
+        border-radius: 4px;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: #3f3f46;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #BEBEBA;
+      }
+      .dark ::-webkit-scrollbar-thumb:hover {
+        background: #52525b;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+    "vite": "https://esm.sh/vite@^7.3.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "firebase/app": "https://esm.sh/firebase@10.8.0/app",
+    "firebase/firestore": "https://esm.sh/firebase@10.8.0/firestore",
+    "firebase/auth": "https://esm.sh/firebase@10.8.0/auth",
+    "firebase/": "https://esm.sh/firebase@^12.6.0/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

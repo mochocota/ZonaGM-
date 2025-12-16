@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Lock, User, LogIn, Loader2 } from 'lucide-react';
 import { auth } from '../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useToast } from './Toast';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface LoginModalProps {
 }
 
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin }) => {
+  const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -41,10 +43,12 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin }) => 
     try {
         await signInWithEmailAndPassword(auth, email, password);
         onLogin(true);
+        toast.success("Bienvenido Admin", "Has iniciado sesión correctamente.");
         onClose();
     } catch (err: any) {
         console.error("Login failed", err);
         setError('Error: Credenciales inválidas o usuario no encontrado.');
+        toast.error("Error de Acceso", "Credenciales inválidas.");
     } finally {
         setIsLoading(false);
     }

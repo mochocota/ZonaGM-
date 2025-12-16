@@ -4,6 +4,7 @@ import { ArrowLeft, Download, HardDrive, Calendar, Gamepad2, Layers, ShieldCheck
 import SEO from './SEO';
 import { db } from '../firebase';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { useToast } from './Toast';
 
 interface GameDetailProps {
   game: Game;
@@ -178,6 +179,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
 };
 
 const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelectGame, onEdit, onDelete, onReport, isLoggedIn }) => {
+  const { toast } = useToast();
   // We use the passed game.comments for rendering, which is updated by App.tsx listeners
   const comments = game.comments || [];
   
@@ -337,7 +339,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
       if (!userName.trim() || !replyText.trim()) return;
 
       if (!validateContent(replyText, userName, isLoggedIn && isAdminComment)) {
-        alert('Tu respuesta contiene lenguaje no permitido.');
+        toast.warning("Contenido no permitido", "Tu respuesta contiene lenguaje ofensivo.");
         return;
       }
 
@@ -426,7 +428,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
       onReport(game.id, game.title, reportReason, reportDescription);
       setIsReportModalOpen(false);
       setReportDescription('');
-      alert('Reporte enviado al Panel ZONA_ADMiN');
+      // Toast handled in App.tsx
   };
 
   return (

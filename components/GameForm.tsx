@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Game } from '../types';
 import { X, Save, Upload, Download, Search, Loader2, Gamepad2, Globe, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import { searchIGDB } from '../services/igdb';
+import { useToast } from './Toast';
 
 interface GameFormProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ const POPULAR_CONSOLES = [
 const LANGUAGES = ['English', 'Spanish', 'Japanese', 'Multi'] as const;
 
 const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState<Omit<Game, 'id'>>({ ...emptyGame });
   const [errors, setErrors] = useState<Record<string, string>>({});
   
@@ -115,7 +117,7 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
         setSearchResults(results);
     } catch (err) {
         console.error(err);
-        alert('Error fetching from IGDB');
+        toast.error("Error IGDB", "No se pudo conectar con la base de datos de juegos.");
     } finally {
         setIsSearching(false);
     }
@@ -147,6 +149,7 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
     setIsSearchOpen(false);
     setSearchQuery('');
     setSearchResults([]);
+    toast.success("Datos Importados", "Información cargada desde IGDB.");
   };
 
   const toggleLanguage = (lang: typeof LANGUAGES[number]) => {

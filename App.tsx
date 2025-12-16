@@ -14,10 +14,14 @@ import { LayoutGrid, List as ListIcon, ChevronDown, Loader2 } from 'lucide-react
 import { db, auth } from './firebase';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy, QuerySnapshot, DocumentData } from 'firebase/firestore';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { useToast } from './components/Toast';
 
 const ITEMS_PER_PAGE = 20;
 
 const App: React.FC = () => {
+  // Toast Hook
+  const { toast } = useToast();
+
   // Main Data State
   const [games, setGames] = useState<Game[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
@@ -95,7 +99,7 @@ const App: React.FC = () => {
         console.error("Error reading games:", error);
         // If read fails, it's likely rules too
         if (error.code === 'permission-denied') {
-            alert("Error de Permisos: No se pueden leer los juegos. Verifica las Reglas de Firestore en la consola de Firebase.");
+            toast.error("Error de Lectura", "No tienes permisos para ver los juegos. Verifica las reglas de Firebase.");
         }
     });
 
@@ -108,6 +112,7 @@ const App: React.FC = () => {
         })) as Report[];
         setReports(reportsData);
     }, (error) => {
+        // Silent fail for reports if not admin, usually expected
         console.error("Error reading reports:", error);
     });
 
@@ -132,6 +137,7 @@ const App: React.FC = () => {
   const handleLogout = async () => {
       await signOut(auth);
       setIsAdminPanelOpen(false);
+      toast.info("Sesión cerrada", "Has salido del panel de administración.");
   };
 
   // Derive unique consoles for the menu
@@ -257,7 +263,6 @@ const App: React.FC = () => {
   const handleFormSubmit = async (gameData: Game) => {
     try {
         // Sanitize data to remove undefined values which Firestore throws error on
-        // Using JSON parse/stringify is a quick way to strip undefined keys
         const sanitize = (obj: any): any => {
             return JSON.parse(JSON.stringify(obj));
         };
@@ -265,13 +270,13 @@ const App: React.FC = () => {
         if (editingGame) {
             // Update existing in Firestore
             const gameRef = doc(db, 'games', gameData.id);
-            // We destructure to remove the 'id' field from the data payload, as doc ref holds ID
             const { id, ...dataToUpdate } = gameData;
             await updateDoc(gameRef, sanitize(dataToUpdate));
             
             if (selectedGame && selectedGame.id === gameData.id) {
                 setSelectedGame(gameData);
             }
+            toast.success("Juego Actualizado", `"${gameData.title}" se ha guardado correctamente.`);
         } else {
             // Create new in Firestore
             const { id, ...newGameData } = gameData; 
@@ -287,13 +292,14 @@ const App: React.FC = () => {
             };
 
             await addDoc(collection(db, 'games'), sanitize(payload));
+            toast.success("Juego Creado", `"${gameData.title}" se ha añadido al archivo.`);
         }
     } catch (error: any) {
         console.error("Error saving game:", error);
         if (error.code === 'permission-denied') {
-            alert("Error de Permisos: No tienes permiso para escribir en la base de datos. Ve a la consola de Firebase -> Firestore -> Reglas y cambia 'allow write: if false;' por 'allow write: if request.auth != null;'");
+            toast.error("Error de Permisos", "No tienes permiso. Verifica que estés logueado y las reglas de Firebase.");
         } else {
-            alert(`Error al guardar: ${error.message || 'Error desconocido'}`);
+            toast.error("Error al guardar", error.message || 'Error desconocido');
         }
     }
   };
@@ -306,12 +312,13 @@ const App: React.FC = () => {
             // Clean URL
             window.history.pushState({}, '', window.location.pathname);
         }
+        toast.success("Juego Eliminado", "El archivo ha sido borrado permanentemente.");
     } catch (error: any) {
         console.error("Error deleting game:", error);
         if (error.code === 'permission-denied') {
-            alert("Error de Permisos: Firebase bloqueó la eliminación. Verifica las reglas de seguridad.");
+            toast.error("Error de Permisos", "Firebase bloqueó la eliminación.");
         } else {
-            alert(`Error al eliminar: ${error.message}`);
+            toast.error("Error al eliminar", error.message);
         }
     }
   };
@@ -327,24 +334,28 @@ const App: React.FC = () => {
             date: new Date().toLocaleDateString('es-ES'),
             status: 'Pending'
         });
+        toast.success("Reporte Enviado", "Gracias por ayudarnos a mantener el archivo.");
     } catch (error) {
         console.error("Error sending report:", error);
+        toast.error("Error", "No se pudo enviar el reporte.");
     }
   };
 
   const handleResolveReport = async (id: string) => {
       try {
           await updateDoc(doc(db, 'reports', id), { status: 'Resolved' });
+          toast.success("Reporte Resuelto", "El estado ha sido actualizado.");
       } catch (error) {
-          console.error("Error resolving report:", error);
+          toast.error("Error", "No se pudo actualizar el reporte.");
       }
   };
 
   const handleDeleteReport = async (id: string) => {
       try {
           await deleteDoc(doc(db, 'reports', id));
+          toast.success("Reporte Eliminado", "Se ha borrado del panel.");
       } catch (error) {
-          console.error("Error deleting report:", error);
+          toast.error("Error", "No se pudo eliminar el reporte.");
       }
   };
 

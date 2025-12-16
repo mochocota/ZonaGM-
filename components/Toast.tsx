@@ -58,10 +58,10 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {children}
       
       {/* Toast Container 
-          - Mobile: Fixed roughly in the middle-top of the screen (top-1/3) and centered horizontally.
+          - Mobile: Fixed at the bottom-center of the screen.
           - Desktop: Fixed bottom-right.
       */}
-      <div className="fixed top-[30%] left-1/2 -translate-x-1/2 md:top-auto md:bottom-6 md:right-6 md:left-auto md:translate-x-0 z-[9999] flex flex-col gap-3 pointer-events-none w-full max-w-[90vw] md:max-w-[380px] items-center md:items-end px-4 md:px-0">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 md:right-6 md:left-auto md:translate-x-0 z-[9999] flex flex-col gap-3 pointer-events-none w-full max-w-[90vw] md:max-w-[380px] items-center md:items-end px-4 md:px-0">
         {toasts.map((t) => (
           <div 
             key={t.id}
@@ -69,7 +69,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 pointer-events-auto relative overflow-hidden w-full
                 bg-surface/95 backdrop-blur-xl border border-border-color 
                 shadow-2xl rounded-2xl p-4 flex gap-4 items-start 
-                animate-zoom-in
+                animate-slide-in-up
                 transition-all md:hover:translate-x-[-4px]
             `}
             style={{

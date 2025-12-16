@@ -260,7 +260,7 @@ const App: React.FC = () => {
     setIsFormOpen(true);
   };
 
-  const handleFormSubmit = async (gameData: Game) => {
+  const handleFormSubmit = async (gameData: Game): Promise<boolean> => {
     try {
         // Sanitize data to remove undefined values which Firestore throws error on
         const sanitize = (obj: any): any => {
@@ -294,13 +294,22 @@ const App: React.FC = () => {
             await addDoc(collection(db, 'games'), sanitize(payload));
             toast.success("Juego Creado", `"${gameData.title}" se ha añadido al archivo.`);
         }
+        return true;
     } catch (error: any) {
         console.error("Error saving game:", error);
-        if (error.code === 'permission-denied') {
-            toast.error("Error de Permisos", "No tienes permiso. Verifica que estés logueado y las reglas de Firebase.");
+        
+        // Robust error checking for permissions
+        const isPermissionError = 
+            error.code === 'permission-denied' || 
+            (error.message && error.message.toLowerCase().includes('permission')) ||
+            (error.message && error.message.toLowerCase().includes('insufficient'));
+
+        if (isPermissionError) {
+            toast.error("Permiso Denegado", "Revisa: 1. Reglas Firestore 2. Dominios Autorizados en Auth (Vercel debe estar en la lista).");
         } else {
             toast.error("Error al guardar", error.message || 'Error desconocido');
         }
+        return false;
     }
   };
 

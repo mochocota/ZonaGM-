@@ -209,6 +209,9 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
   const [reportReason, setReportReason] = useState<'Link Caído' | 'Imagen Rota' | 'Información Incorrecta' | 'Otro'>('Link Caído');
   const [reportDescription, setReportDescription] = useState('');
 
+  // Delete Confirmation Modal State
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   // Download Security Modal
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [downloadTimer, setDownloadTimer] = useState(5);
@@ -394,12 +397,6 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
     setHoverRating(0);
   };
 
-  const handleDeleteClick = () => {
-    if (window.confirm('Are you sure you want to delete this game permanently?')) {
-        onDelete(game.id);
-    }
-  };
-
   const initiateDownload = () => {
       if (game.downloadUrl) {
           setIsDownloadModalOpen(true);
@@ -441,6 +438,38 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
         image={game.imageUrl}
         url={window.location.href}
       />
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+          <div className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+              <div className="bg-surface w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-red-200 text-center">
+                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
+                      <Trash2 size={32} />
+                  </div>
+                  <h3 className="text-xl font-bold text-text-main mb-2">¿Eliminar Juego?</h3>
+                  <p className="text-text-muted mb-6">
+                      Esta acción es irreversible. El juego "{game.title}" será eliminado permanentemente del archivo.
+                  </p>
+                  <div className="flex gap-3">
+                      <button 
+                          onClick={() => setIsDeleteModalOpen(false)}
+                          className="flex-1 py-3 rounded-xl border border-border-color font-bold text-text-muted hover:bg-gray-100 transition-colors"
+                      >
+                          Cancelar
+                      </button>
+                      <button 
+                          onClick={() => {
+                              onDelete(game.id);
+                              setIsDeleteModalOpen(false);
+                          }}
+                          className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold shadow-lg transition-colors"
+                      >
+                          Sí, Eliminar
+                      </button>
+                  </div>
+              </div>
+          </div>
+      )}
 
       {/* Download Security Modal */}
       {isDownloadModalOpen && (
@@ -600,7 +629,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                     <span className="hidden sm:inline">Edit</span>
                 </button>
                 <button 
-                    onClick={handleDeleteClick}
+                    onClick={() => setIsDeleteModalOpen(true)}
                     className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface border border-border-color hover:border-red-500 hover:text-red-500 hover:bg-red-50 transition-all text-sm font-medium"
                 >
                     <Trash2 size={16} />

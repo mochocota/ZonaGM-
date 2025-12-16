@@ -7,7 +7,7 @@ import { useToast } from './Toast';
 interface GameFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (game: Game) => void;
+  onSubmit: (game: Game) => Promise<boolean>; // Return boolean for success/fail
   initialData?: Game | null;
 }
 
@@ -44,6 +44,9 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
   const [formData, setFormData] = useState<Omit<Game, 'id'>>({ ...emptyGame });
   const [errors, setErrors] = useState<Record<string, string>>({});
   
+  // States
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   // IGDB Search State
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -58,6 +61,7 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
       setFormData({ ...emptyGame });
     }
     setErrors({});
+    setIsSubmitting(false);
   }, [initialData, isOpen]);
 
   // Lock body scroll when modal is open
@@ -84,7 +88,7 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) {
         // Scroll to error
@@ -97,13 +101,19 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
         return;
     }
 
+    setIsSubmitting(true);
     const gameToSubmit: Game = {
       id: initialData?.id || Date.now().toString(),
       ...formData
     };
 
-    onSubmit(gameToSubmit);
-    onClose();
+    const success = await onSubmit(gameToSubmit);
+    setIsSubmitting(false);
+
+    if (success) {
+        onClose();
+    }
+    // If fail, we keep form open so user can retry or check error toast
   };
 
   const handleIGDBSearch = async (e: React.FormEvent) => {
@@ -497,10 +507,11 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
           <button
             type="submit"
             form="game-form"
-            className="px-6 py-3 rounded-xl bg-primary hover:bg-primary-hover text-text-main font-bold shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+            disabled={isSubmitting}
+            className="px-6 py-3 rounded-xl bg-primary hover:bg-primary-hover text-text-main font-bold shadow-lg hover:shadow-xl transition-all flex items-center gap-2 disabled:opacity-50"
           >
-            <Save size={18} />
-            <span>Save Entry</span>
+            {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+            <span>{isSubmitting ? 'Saving...' : 'Save Entry'}</span>
           </button>
         </div>
       </div>

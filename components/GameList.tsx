@@ -129,7 +129,7 @@ const GridCard: React.FC<{ game: Game; onClick: () => void; onSelectConsole: (c:
             e.stopPropagation();
             onSelectConsole(game.console);
         }}
-        className="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm text-white border border-white/10 hover:bg-primary hover:text-text-main transition-colors"
+        className="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm text-white border border-white/10 hover:bg-primary hover:text-black transition-colors"
       >
         {game.console}
       </button>

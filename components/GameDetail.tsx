@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Game, Comment } from '../types';
-import { ArrowLeft, Download, HardDrive, Calendar, Gamepad2, Layers, ShieldCheck, MessageSquare, Send, User, Globe, Star, Pencil, Trash2, Sparkles, Image as ImageIcon, X, AlertTriangle, Crown, Ban, CornerDownRight, ChevronDown, CheckCircle2, Lock, Unlock, Timer, Loader2 } from 'lucide-react';
+import { ArrowLeft, Download, HardDrive, Calendar, Gamepad2, Layers, ShieldCheck, MessageSquare, Send, User, Globe, Star, Pencil, Trash2, Sparkles, Image as ImageIcon, X, AlertTriangle, Crown, Ban, CornerDownRight, ChevronDown, CheckCircle2, Lock, Unlock, Timer, Loader2, ChevronRight, Home } from 'lucide-react';
 import SEO from './SEO';
 import { db } from '../firebase';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
@@ -11,6 +11,8 @@ interface GameDetailProps {
   allGames: Game[];
   onBack: () => void;
   onSelectGame: (game: Game) => void;
+  onSelectConsole: (console: string) => void;
+  onHome: () => void;
   onEdit: (game: Game) => void;
   onDelete: (id: string) => void;
   onReport: (gameId: string, title: string, reason: string, description: string) => void;
@@ -70,7 +72,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
       >
         <div className="shrink-0">
           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              comment.isAdmin ? 'bg-primary text-text-main' : 'bg-gray-100 text-text-muted'
+              comment.isAdmin ? 'bg-primary text-black' : 'bg-gray-100 text-text-muted'
           }`}>
             {comment.isAdmin ? <ShieldCheck size={20} /> : <User size={20} />}
           </div>
@@ -80,7 +82,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
             <div className="flex items-center gap-2">
               <span className={`font-bold ${comment.isAdmin ? 'text-text-main flex items-center gap-1' : 'text-text-main'}`}>
                   {comment.user}
-                  {comment.isAdmin && <span className="bg-primary text-[10px] px-1.5 py-0.5 rounded text-text-main font-bold uppercase">Admin</span>}
+                  {comment.isAdmin && <span className="bg-primary text-[10px] px-1.5 py-0.5 rounded text-black font-bold uppercase">Admin</span>}
               </span>
               <span className="text-xs text-text-muted font-medium">{comment.date}</span>
             </div>
@@ -141,7 +143,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
                           <button 
                               onClick={() => handlePostReply(comment.id, comment.user)}
                               disabled={(!(isLoggedIn && isAdminComment) && !replyName.trim()) || !replyText.trim()}
-                              className="text-xs font-bold bg-primary hover:bg-primary-hover text-text-main px-4 py-1.5 rounded-full transition-colors disabled:opacity-50"
+                              className="text-xs font-bold bg-primary hover:bg-primary-hover text-black px-4 py-1.5 rounded-full transition-colors disabled:opacity-50"
                           >
                               Enviar Respuesta
                           </button>
@@ -178,7 +180,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
   );
 };
 
-const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelectGame, onEdit, onDelete, onReport, isLoggedIn }) => {
+const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelectGame, onSelectConsole, onHome, onEdit, onDelete, onReport, isLoggedIn }) => {
   const { toast } = useToast();
   
   // Local state for Optimistic Updates (UI reflects changes immediately even if backend fails)
@@ -539,7 +541,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
                               <button 
                                   onClick={handleFinalDownload}
-                                  className="w-full bg-primary hover:bg-primary-hover text-text-main text-lg font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 animate-slide-in-up"
+                                  className="w-full bg-primary hover:bg-primary-hover text-black text-lg font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 animate-slide-in-up"
                               >
                                   <Download size={24} strokeWidth={2.5} />
                                   <span>Ir al Servidor de Descarga</span>
@@ -658,6 +660,20 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
       )}
 
       <div className="w-full max-w-[1000px] animate-slide-in-up duration-500">
+        
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-2 text-sm text-text-muted mb-4 overflow-x-auto whitespace-nowrap">
+            <button onClick={onHome} className="flex items-center gap-1 hover:text-primary-hover transition-colors">
+                <Home size={14} /> Inicio
+            </button>
+            <ChevronRight size={14} className="opacity-50" />
+            <button onClick={() => onSelectConsole(game.console)} className="hover:text-primary-hover transition-colors font-medium">
+                {game.console}
+            </button>
+            <ChevronRight size={14} className="opacity-50" />
+            <span className="text-text-main font-bold truncate">{game.title}</span>
+        </nav>
+
         <div className="flex items-center justify-between mb-6">
             {/* Back Button */}
             <button 
@@ -703,7 +719,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
             
             <div className="absolute bottom-0 left-0 w-full p-6 md:p-10">
                 <div className="flex flex-wrap items-center gap-3 mb-4">
-                <span className="bg-primary text-text-main px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                <span className="bg-primary text-black px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
                     {game.console}
                 </span>
                 <span className="bg-white/20 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
@@ -830,7 +846,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                         disabled={!game.downloadUrl}
                         className={`w-full font-bold text-lg py-4 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-3 transform active:scale-[0.98] ${
                             game.downloadUrl 
-                            ? 'bg-primary hover:bg-primary-hover text-text-main hover:shadow-xl cursor-pointer' 
+                            ? 'bg-primary hover:bg-primary-hover text-black hover:shadow-xl cursor-pointer' 
                             : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
                         }`}
                     >
@@ -983,7 +999,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                                 <button 
                                 type="submit" 
                                 disabled={(!(isLoggedIn && isAdminComment) && !newCommentName.trim()) || !newCommentText.trim()}
-                                className="flex items-center gap-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-text-main font-bold px-6 py-2.5 rounded-full transition-colors"
+                                className="flex items-center gap-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold px-6 py-2.5 rounded-full transition-colors"
                                 >
                                 <Send size={16} />
                                 <span>Publicar Comentario</span>

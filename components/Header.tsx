@@ -73,7 +73,7 @@ const Header: React.FC<HeaderProps> = ({
       <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2 md:gap-3 cursor-pointer group shrink-0" onClick={() => { onSelectConsole(null); onHome(); }}>
-          <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary text-text-main group-hover:scale-105 transition-transform duration-200">
+          <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary text-black group-hover:scale-105 transition-transform duration-200">
             <Save size={18} className="md:w-5 md:h-5" strokeWidth={2.5} />
           </div>
           <h1 className="text-lg md:text-xl font-bold tracking-tight text-text-main truncate max-w-[120px] md:max-w-none">ZonaGM</h1>
@@ -160,7 +160,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* Desktop Search */}
             <button 
               onClick={toggleSearch}
-              className={`p-2 rounded-full transition-colors hidden md:flex ${isSearchOpen ? 'bg-primary text-text-main' : 'text-text-main hover:bg-surface hover:shadow-sm'}`}
+              className={`p-2 rounded-full transition-colors hidden md:flex ${isSearchOpen ? 'bg-primary text-black' : 'text-text-main hover:bg-surface hover:shadow-sm'}`}
               aria-label="Toggle Search"
             >
               <Search size={20} strokeWidth={2.5} />
@@ -192,7 +192,7 @@ const Header: React.FC<HeaderProps> = ({
 
               <button 
                 onClick={toggleSearch}
-                className={`p-2 rounded-full transition-colors ${isSearchOpen ? 'bg-primary text-text-main' : 'text-text-main hover:bg-gray-100/50'}`}
+                className={`p-2 rounded-full transition-colors ${isSearchOpen ? 'bg-primary text-black' : 'text-text-main hover:bg-gray-100/50'}`}
                 aria-label="Toggle Search"
               >
                 <Search size={18} />
@@ -280,7 +280,7 @@ const Header: React.FC<HeaderProps> = ({
             <div className="grid grid-cols-2 gap-2">
                 <button 
                     onClick={() => handleSelectConsoleAndClose(null)}
-                    className={`text-sm px-3 py-2.5 rounded-xl border text-center transition-all ${!selectedConsole ? 'bg-primary border-primary text-text-main font-bold shadow-sm' : 'bg-surface border-border-color text-text-muted'}`}
+                    className={`text-sm px-3 py-2.5 rounded-xl border text-center transition-all ${!selectedConsole ? 'bg-primary border-primary text-black font-bold shadow-sm' : 'bg-surface border-border-color text-text-muted'}`}
                 >
                     Todas
                 </button>
@@ -288,7 +288,7 @@ const Header: React.FC<HeaderProps> = ({
                     <button 
                         key={c}
                         onClick={() => handleSelectConsoleAndClose(c)}
-                        className={`text-sm px-3 py-2.5 rounded-xl border text-center transition-all ${selectedConsole === c ? 'bg-primary border-primary text-text-main font-bold shadow-sm' : 'bg-surface border-border-color text-text-muted'}`}
+                        className={`text-sm px-3 py-2.5 rounded-xl border text-center transition-all ${selectedConsole === c ? 'bg-primary border-primary text-black font-bold shadow-sm' : 'bg-surface border-border-color text-text-muted'}`}
                     >
                         {c}
                     </button>

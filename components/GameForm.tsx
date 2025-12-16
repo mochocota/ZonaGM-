@@ -205,7 +205,7 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
                         <button 
                             type="submit" 
                             disabled={isSearching}
-                            className="bg-primary hover:bg-primary-hover text-text-main px-6 py-3 rounded-xl font-bold transition-colors disabled:opacity-50"
+                            className="bg-primary hover:bg-primary-hover text-black px-6 py-3 rounded-xl font-bold transition-colors disabled:opacity-50"
                         >
                             {isSearching ? <Loader2 size={24} className="animate-spin" /> : <Search size={24} />}
                         </button>
@@ -291,7 +291,7 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
                     onClick={() => setIsSearchOpen(true)}
                     className="w-full p-4 rounded-2xl bg-primary/10 border border-primary/20 text-text-main hover:bg-primary/20 transition-all flex flex-col items-center justify-center gap-2 group border-dashed"
                 >
-                    <div className="p-3 bg-primary rounded-full text-text-main group-hover:scale-110 transition-transform">
+                    <div className="p-3 bg-primary rounded-full text-black group-hover:scale-110 transition-transform">
                         <Search size={20} />
                     </div>
                     <span className="font-bold">Auto-fill game data from IGDB</span>
@@ -330,7 +330,7 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
                       onClick={() => setFormData({ ...formData, console: c })}
                       className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${
                         formData.console === c
-                          ? 'bg-primary border-primary text-text-main shadow-sm scale-105'
+                          ? 'bg-primary border-primary text-black shadow-sm scale-105'
                           : 'bg-surface border-border-color text-text-muted hover:border-gray-400'
                       }`}
                     >
@@ -464,7 +464,7 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
                     onClick={() => toggleLanguage(lang)}
                     className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
                       formData.languages.includes(lang)
-                        ? 'bg-primary border-primary text-text-main'
+                        ? 'bg-primary border-primary text-black'
                         : 'bg-surface border-border-color text-text-muted hover:border-gray-400'
                     }`}
                   >
@@ -514,7 +514,7 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
             type="submit"
             form="game-form"
             disabled={isSubmitting}
-            className="px-6 py-3 rounded-xl bg-primary hover:bg-primary-hover text-text-main font-bold shadow-lg hover:shadow-xl transition-all flex items-center gap-2 disabled:opacity-50"
+            className="px-6 py-3 rounded-xl bg-primary hover:bg-primary-hover text-black font-bold shadow-lg hover:shadow-xl transition-all flex items-center gap-2 disabled:opacity-50"
           >
             {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
             <span>{isSubmitting ? 'Saving...' : 'Save Entry'}</span>

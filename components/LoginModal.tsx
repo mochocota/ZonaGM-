@@ -122,7 +122,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin }) => 
           <button 
             type="submit"
             disabled={isLoading}
-            className="w-full bg-primary hover:bg-primary-hover text-text-main font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
+            className="w-full bg-primary hover:bg-primary-hover text-black font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
           >
             {isLoading ? <Loader2 size={20} className="animate-spin" /> : <LogIn size={20} />}
             <span>{isLoading ? 'Ingresando...' : 'Ingresar'}</span>

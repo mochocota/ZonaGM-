@@ -466,6 +466,8 @@ const App: React.FC = () => {
                 allGames={games} 
                 onBack={handleBack} 
                 onSelectGame={handleSelectGame}
+                onSelectConsole={handleSelectConsole}
+                onHome={handleHome}
                 onEdit={handleEditGame}
                 onDelete={handleDeleteGame}
                 onReport={handleReportGame}
@@ -492,7 +494,7 @@ const App: React.FC = () => {
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-border-color pb-4 mt-2 gap-4">
               <h3 className="text-lg font-bold text-text-main flex items-center gap-2">
                 {selectedConsole && (
-                    <span className="bg-primary text-text-main px-3 py-1 rounded-full text-sm font-bold uppercase">
+                    <span className="bg-primary text-black px-3 py-1 rounded-full text-sm font-bold uppercase">
                         {selectedConsole}
                     </span>
                 )}
@@ -574,7 +576,7 @@ const App: React.FC = () => {
                             onClick={() => handlePageChange(pageNum)}
                             className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
                                 currentPage === pageNum 
-                                ? 'bg-primary text-text-main font-bold shadow-sm' 
+                                ? 'bg-primary text-black font-bold shadow-sm' 
                                 : 'hover:bg-gray-200 cursor-pointer text-text-muted'
                             }`}
                         >

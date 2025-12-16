@@ -440,8 +440,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
   };
 
   return (
-    <div className="w-full max-w-[1000px] animate-slide-in-up duration-500">
-      
+    <>
       {/* Dynamic SEO for Game Detail */}
       <SEO 
         title={`Download ${game.title} (${game.year}) - ${game.console} ISO/ROM`}
@@ -614,7 +613,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
           </div>
       )}
 
-      {/* Fullscreen Screenshot Modal - IMPROVED MOBILE */}
+      {/* Fullscreen Screenshot Modal */}
       {selectedScreenshot && (
         <div 
             className="fixed inset-0 z-[5000] bg-black/98 flex items-center justify-center animate-fade-in"
@@ -643,400 +642,402 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-6">
-        {/* Back Button */}
-        <button 
-            onClick={onBack}
-            className="group flex items-center gap-2 text-text-muted hover:text-text-main font-medium transition-colors"
-        >
-            <div className="p-2 rounded-full bg-surface border border-border-color group-hover:border-primary group-hover:bg-primary/10 transition-all">
-            <ArrowLeft size={20} />
-            </div>
-            <span>Back to Archive</span>
-        </button>
+      <div className="w-full max-w-[1000px] animate-slide-in-up duration-500">
+        <div className="flex items-center justify-between mb-6">
+            {/* Back Button */}
+            <button 
+                onClick={onBack}
+                className="group flex items-center gap-2 text-text-muted hover:text-text-main font-medium transition-colors"
+            >
+                <div className="p-2 rounded-full bg-surface border border-border-color group-hover:border-primary group-hover:bg-primary/10 transition-all">
+                <ArrowLeft size={20} />
+                </div>
+                <span>Back to Archive</span>
+            </button>
 
-        {/* Admin Actions - ONLY VISIBLE IF LOGGED IN */}
-        {isLoggedIn && (
-            <div className="flex gap-2">
-                <button 
-                    onClick={() => onEdit(game)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface border border-border-color hover:border-primary hover:text-primary transition-all text-sm font-medium"
-                >
-                    <Pencil size={16} />
-                    <span className="hidden sm:inline">Edit</span>
-                </button>
-                <button 
-                    onClick={() => setIsDeleteModalOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface border border-border-color hover:border-red-500 hover:text-red-500 hover:bg-red-50 transition-all text-sm font-medium"
-                >
-                    <Trash2 size={16} />
-                    <span className="hidden sm:inline">Delete</span>
-                </button>
-            </div>
-        )}
-      </div>
-
-      <article className="bg-surface rounded-3xl border border-border-color overflow-hidden shadow-soft mb-8">
-        {/* Hero Header */}
-        <div className="relative h-[300px] md:h-[400px] w-full bg-gray-900">
-          <img 
-            src={game.imageUrl} 
-            alt={game.title}
-            className="w-full h-full object-cover opacity-60"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-          
-          <div className="absolute bottom-0 left-0 w-full p-6 md:p-10">
-            <div className="flex flex-wrap items-center gap-3 mb-4">
-              <span className="bg-primary text-text-main px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-                {game.console}
-              </span>
-              <span className="bg-white/20 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-                {game.year}
-              </span>
-            </div>
-            <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 leading-tight drop-shadow-md">
-              {game.title}
-            </h1>
-            <p className="text-gray-300 font-medium text-lg drop-shadow-sm">
-              {game.publisher}
-            </p>
-          </div>
+            {/* Admin Actions - ONLY VISIBLE IF LOGGED IN */}
+            {isLoggedIn && (
+                <div className="flex gap-2">
+                    <button 
+                        onClick={() => onEdit(game)}
+                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface border border-border-color hover:border-primary hover:text-primary transition-all text-sm font-medium"
+                    >
+                        <Pencil size={16} />
+                        <span className="hidden sm:inline">Edit</span>
+                    </button>
+                    <button 
+                        onClick={() => setIsDeleteModalOpen(true)}
+                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface border border-border-color hover:border-red-500 hover:text-red-500 hover:bg-red-50 transition-all text-sm font-medium"
+                    >
+                        <Trash2 size={16} />
+                        <span className="hidden sm:inline">Delete</span>
+                    </button>
+                </div>
+            )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-6 md:p-10">
-          {/* Main Content */}
-          <div className="md:col-span-2 space-y-8">
-            <section>
-              <h2 className="text-2xl font-bold text-text-main mb-6">Sobre este juego</h2>
-              <div className="flex flex-col sm:flex-row gap-6 items-start">
-                <div className="shrink-0 mx-auto sm:mx-0 w-full max-w-[200px]">
-                  <img 
-                    src={game.imageUrl} 
-                    alt={`Cover for ${game.title}`}
-                    className="w-full h-auto rounded-xl shadow-md border border-border-color hover:scale-105 transition-transform duration-300"
-                  />
+        <article className="bg-surface rounded-3xl border border-border-color overflow-hidden shadow-soft mb-8">
+            {/* Hero Header */}
+            <div className="relative h-[300px] md:h-[400px] w-full bg-gray-900">
+            <img 
+                src={game.imageUrl} 
+                alt={game.title}
+                className="w-full h-full object-cover opacity-60"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            
+            <div className="absolute bottom-0 left-0 w-full p-6 md:p-10">
+                <div className="flex flex-wrap items-center gap-3 mb-4">
+                <span className="bg-primary text-text-main px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                    {game.console}
+                </span>
+                <span className="bg-white/20 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                    {game.year}
+                </span>
                 </div>
-                <p className="text-text-muted leading-relaxed text-lg">
-                  {game.description}
+                <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 leading-tight drop-shadow-md">
+                {game.title}
+                </h1>
+                <p className="text-gray-300 font-medium text-lg drop-shadow-sm">
+                {game.publisher}
                 </p>
-              </div>
-            </section>
+            </div>
+            </div>
 
-             {/* Screenshots Section */}
-             {game.screenshots && game.screenshots.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-6 md:p-10">
+            {/* Main Content */}
+            <div className="md:col-span-2 space-y-8">
                 <section>
-                    <h3 className="text-xl font-bold text-text-main mb-4 flex items-center gap-2">
-                        <ImageIcon size={20} className="text-primary-hover" />
-                        Galería
-                    </h3>
-                    <div className="grid grid-cols-2 gap-3 md:gap-4">
-                        {game.screenshots.map((screen, idx) => (
-                            <div 
-                                key={idx} 
-                                onClick={() => setSelectedScreenshot(screen)}
-                                className="aspect-video rounded-xl bg-gray-100 overflow-hidden border border-border-color cursor-pointer group relative"
-                            >
-                                <img 
-                                    src={screen} 
-                                    alt={`Screenshot ${idx + 1}`} 
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                />
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                    <div className="bg-black/50 text-white p-2 rounded-full backdrop-blur-sm">
-                                        <ImageIcon size={20} />
+                <h2 className="text-2xl font-bold text-text-main mb-6">Sobre este juego</h2>
+                <div className="flex flex-col sm:flex-row gap-6 items-start">
+                    <div className="shrink-0 mx-auto sm:mx-0 w-full max-w-[200px]">
+                    <img 
+                        src={game.imageUrl} 
+                        alt={`Cover for ${game.title}`}
+                        className="w-full h-auto rounded-xl shadow-md border border-border-color hover:scale-105 transition-transform duration-300"
+                    />
+                    </div>
+                    <p className="text-text-muted leading-relaxed text-lg">
+                    {game.description}
+                    </p>
+                </div>
+                </section>
+
+                {/* Screenshots Section */}
+                {game.screenshots && game.screenshots.length > 0 && (
+                    <section>
+                        <h3 className="text-xl font-bold text-text-main mb-4 flex items-center gap-2">
+                            <ImageIcon size={20} className="text-primary-hover" />
+                            Galería
+                        </h3>
+                        <div className="grid grid-cols-2 gap-3 md:gap-4">
+                            {game.screenshots.map((screen, idx) => (
+                                <div 
+                                    key={idx} 
+                                    onClick={() => setSelectedScreenshot(screen)}
+                                    className="aspect-video rounded-xl bg-gray-100 overflow-hidden border border-border-color cursor-pointer group relative"
+                                >
+                                    <img 
+                                        src={screen} 
+                                        alt={`Screenshot ${idx + 1}`} 
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                        <div className="bg-black/50 text-white p-2 rounded-full backdrop-blur-sm">
+                                            <ImageIcon size={20} />
+                                        </div>
                                     </div>
                                 </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+            </div>
+
+            {/* Sidebar / Stats */}
+            <div className="md:col-span-1 space-y-6">
+                <div className="bg-background rounded-2xl p-6 border border-border-color space-y-4">
+                <h3 className="font-bold text-text-main text-lg mb-2">Información del archivo</h3>
+                
+                <div className="flex items-center justify-between py-2 border-b border-border-color/50">
+                    <div className="flex items-center gap-2 text-text-muted">
+                    <HardDrive size={18} />
+                    <span className="text-sm font-medium">Tamaño</span>
+                    </div>
+                    <span className="text-text-main font-bold">{game.size}</span>
+                </div>
+
+                <div className="flex items-center justify-between py-2 border-b border-border-color/50">
+                    <div className="flex items-center gap-2 text-text-muted">
+                    <Globe size={18} />
+                    <span className="text-sm font-medium">Idioma</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                    {game.languages.map(lang => (
+                        <span key={lang} title={lang} className="cursor-help text-lg" role="img" aria-label={lang}>
+                        {lang === 'English' && '🇺🇸'}
+                        {lang === 'Spanish' && '🇪🇸'}
+                        {lang === 'Japanese' && '🇯🇵'}
+                        {lang === 'Multi' && '🌐'}
+                        </span>
+                    ))}
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-between py-2 border-b border-border-color/50">
+                    <div className="flex items-center gap-2 text-text-muted">
+                    <Layers size={18} />
+                    <span className="text-sm font-medium">Formato</span>
+                    </div>
+                    <span className="text-text-main font-bold">{game.format}</span>
+                </div>
+
+                <div className="flex items-center justify-between py-2 border-b border-border-color/50">
+                    <div className="flex items-center gap-2 text-text-muted">
+                    <Gamepad2 size={18} />
+                    <span className="text-sm font-medium">Plataforma</span>
+                    </div>
+                    <span className="text-text-main font-bold">{game.console}</span>
+                </div>
+
+                <div className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-2 text-text-muted">
+                    <Calendar size={18} />
+                    <span className="text-sm font-medium">Lanzamiento</span>
+                    </div>
+                    <span className="text-text-main font-bold">{game.year}</span>
+                </div>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                    <button 
+                        onClick={initiateDownload}
+                        disabled={!game.downloadUrl}
+                        className={`w-full font-bold text-lg py-4 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-3 transform active:scale-[0.98] ${
+                            game.downloadUrl 
+                            ? 'bg-primary hover:bg-primary-hover text-text-main hover:shadow-xl cursor-pointer' 
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+                        }`}
+                    >
+                    <Download size={24} strokeWidth={2.5} />
+                    <span>{game.downloadUrl ? 'Descargar' : 'No Disponible'}</span>
+                    </button>
+                    
+                    {/* Report Button - Opens Internal Modal */}
+                    <button 
+                        onClick={() => setIsReportModalOpen(true)}
+                        className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-text-muted hover:text-red-500 hover:bg-red-50 transition-colors text-xs font-bold"
+                    >
+                        <AlertTriangle size={14} className="mb-0.5" />
+                        <span>Reportar Problema</span>
+                    </button>
+                </div>
+
+                {/* Rating Section */}
+                <div className="w-full bg-background rounded-2xl p-4 border border-border-color flex flex-col items-center justify-center gap-2">
+                <span className="text-xs font-bold text-text-muted uppercase tracking-wide">
+                    {hasRated ? 'Tu Calificación' : 'Calificar juego'}
+                </span>
+                <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                        key={star}
+                        disabled={hasRated}
+                        onMouseEnter={() => !hasRated && setHoverRating(star)}
+                        onMouseLeave={() => !hasRated && setHoverRating(0)}
+                        onClick={() => handleRateGame(star)}
+                        className={`${hasRated ? 'cursor-default' : 'transition-transform hover:scale-110 cursor-pointer'} focus:outline-none`}
+                        aria-label={`Rate ${star} stars`}
+                    >
+                        <Star
+                        size={28}
+                        className={`${
+                            star <= (hoverRating || Math.round(localRating))
+                            ? 'fill-primary text-primary'
+                            : 'text-gray-300 fill-gray-100'
+                        } transition-colors`}
+                        strokeWidth={1.5}
+                        />
+                    </button>
+                    ))}
+                </div>
+                <div className="text-2xl font-bold text-text-main flex items-baseline gap-1">
+                    {(localRating).toFixed(1)} <span className="text-sm text-text-muted font-normal">/ 5.0</span>
+                </div>
+                {ratingMessage && (
+                    <div className="flex items-center gap-2 text-green-600 font-bold text-sm mt-1 animate-fade-in">
+                        <CheckCircle2 size={16} />
+                        <span>{ratingMessage}</span>
+                    </div>
+                )}
+                </div>
+            </div>
+            </div>
+
+            {/* Comments Section & Recommendations */}
+            <div className="px-6 pb-6 md:px-10 md:pb-10">
+                <section className="pt-8 border-t border-border-color">
+                <button 
+                    onClick={() => setIsCommentsOpen(!isCommentsOpen)}
+                    className="w-full flex items-center justify-between mb-6 group focus:outline-none"
+                >
+                    <h3 className="text-2xl font-bold text-text-main flex items-center gap-2">
+                        <MessageSquare size={24} className="text-text-muted" />
+                        Comentarios <span className="text-base font-medium text-text-muted">({localComments.length})</span>
+                    </h3>
+                    <div className={`p-2 rounded-full bg-surface border border-border-color text-text-muted transition-transform duration-300 ${isCommentsOpen ? 'rotate-180 bg-gray-50' : 'group-hover:bg-gray-50'}`}>
+                        <ChevronDown size={20} />
+                    </div>
+                </button>
+
+                {isCommentsOpen && (
+                    <div className="animate-slide-in-up duration-300">
+                        {/* Main Comment Form */}
+                        <form onSubmit={handlePostComment} className="bg-background rounded-2xl p-6 border border-border-color mb-8">
+                            <div className="flex flex-col gap-4">
+                            
+                            {/* Admin Toggle - ONLY IF LOGGED IN */}
+                            {isLoggedIn && (
+                                <div className="flex items-center gap-2">
+                                    <input 
+                                    type="checkbox" 
+                                    id="adminToggle" 
+                                    checked={isAdminComment}
+                                    onChange={(e) => setIsAdminComment(e.target.checked)}
+                                    className="accent-primary w-4 h-4 cursor-pointer"
+                                    />
+                                    <label htmlFor="adminToggle" className="text-xs font-bold uppercase tracking-wide text-text-muted cursor-pointer select-none">
+                                    Publicar como Admin
+                                    </label>
+                                </div>
+                            )}
+
+                            <div>
+                                <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wide text-text-muted mb-2">Nickname</label>
+                                <input 
+                                type="text" 
+                                id="name"
+                                value={(isLoggedIn && isAdminComment) ? 'ZONA_ADMiN' : newCommentName}
+                                onChange={(e) => {
+                                    if(!(isLoggedIn && isAdminComment)) {
+                                        setNewCommentName(e.target.value);
+                                        setCommentError('');
+                                    }
+                                }}
+                                disabled={isLoggedIn && isAdminComment}
+                                placeholder="Ingresa tu nombre"
+                                className={`w-full border rounded-lg px-4 py-2.5 text-text-main focus:outline-none transition-all ${
+                                    (isLoggedIn && isAdminComment) 
+                                    ? 'bg-primary/10 border-primary font-bold text-primary-hover' 
+                                    : 'bg-surface border-border-color focus:border-primary focus:ring-1 focus:ring-primary'
+                                }`}
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="comment" className="block text-xs font-bold uppercase tracking-wide text-text-muted mb-2">Mensaje</label>
+                                <textarea 
+                                id="comment"
+                                value={newCommentText}
+                                onChange={(e) => {
+                                    setNewCommentText(e.target.value);
+                                    setCommentError('');
+                                }}
+                                placeholder={(isLoggedIn && isAdminComment) ? "Escribe un mensaje oficial..." : "Comparte tu opinión sobre este juego..."}
+                                rows={3}
+                                className="w-full bg-surface border border-border-color rounded-lg px-4 py-2.5 text-text-main focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none"
+                                />
+                            </div>
+
+                            {commentError && (
+                                <div className="p-3 bg-red-50 text-red-600 border border-red-100 rounded-xl text-sm font-medium flex items-center gap-2 animate-fade-in">
+                                    <Ban size={16} className="shrink-0" />
+                                    <span>{commentError}</span>
+                                </div>
+                            )}
+
+                            <div className="flex justify-end">
+                                <button 
+                                type="submit" 
+                                disabled={(!(isLoggedIn && isAdminComment) && !newCommentName.trim()) || !newCommentText.trim()}
+                                className="flex items-center gap-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-text-main font-bold px-6 py-2.5 rounded-full transition-colors"
+                                >
+                                <Send size={16} />
+                                <span>Publicar Comentario</span>
+                                </button>
+                            </div>
+                            </div>
+                        </form>
+
+                        {/* Comments Tree */}
+                        <div className="space-y-4 mb-10">
+                            {localComments.length > 0 ? (
+                            localComments.map((comment) => (
+                                <CommentNode 
+                                    key={comment.id} 
+                                    comment={comment}
+                                    replyingToId={replyingToId}
+                                    setReplyingToId={setReplyingToId}
+                                    setCommentError={setCommentError}
+                                    isLoggedIn={isLoggedIn}
+                                    isAdminComment={isAdminComment}
+                                    setIsAdminComment={setIsAdminComment}
+                                    replyName={replyName}
+                                    setReplyName={setReplyName}
+                                    replyText={replyText}
+                                    setReplyText={setReplyText}
+                                    handlePostReply={handlePostReply} 
+                                />
+                            ))
+                            ) : (
+                            <div className="text-center py-8 text-text-muted italic">
+                                Aún no hay comentarios. ¡Sé el primero en compartir!
+                            </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+                </section>
+
+                {/* Recommendations Section */}
+                <section className="pt-8 border-t border-border-color">
+                    <h3 className="text-xl font-bold text-text-main mb-6 flex items-center gap-2">
+                        <Sparkles size={20} className="text-primary" />
+                        Te pudiera interesar
+                    </h3>
+                    {/* 3 cols on mobile, 4 cols on md/lg */}
+                    <div className="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
+                        {relatedGames.map(related => (
+                            <div 
+                                key={related.id} 
+                                onClick={() => onSelectGame(related)}
+                                className="group cursor-pointer flex flex-col gap-2"
+                            >
+                                <div className="aspect-[3/4] w-full rounded-xl bg-gray-200 overflow-hidden relative shadow-sm border border-border-color group-hover:shadow-md group-hover:border-primary/50 transition-all">
+                                    <img 
+                                        src={related.imageUrl} 
+                                        alt={related.title}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    />
+                                    <div className="absolute top-1.5 left-1.5 bg-black/70 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-bold text-white uppercase tracking-wider">
+                                        {related.console}
+                                    </div>
+                                </div>
+                                <h4 className="text-xs md:text-sm font-bold text-text-main leading-tight line-clamp-2 group-hover:text-primary-hover transition-colors" title={related.title}>
+                                    {related.title}
+                                </h4>
                             </div>
                         ))}
+                        {relatedGames.length === 0 && (
+                            <div className="col-span-full text-center py-4 text-text-muted text-sm italic">
+                                No related games found.
+                            </div>
+                        )}
                     </div>
                 </section>
-            )}
-          </div>
-
-          {/* Sidebar / Stats */}
-          <div className="md:col-span-1 space-y-6">
-            <div className="bg-background rounded-2xl p-6 border border-border-color space-y-4">
-              <h3 className="font-bold text-text-main text-lg mb-2">Información del archivo</h3>
-              
-              <div className="flex items-center justify-between py-2 border-b border-border-color/50">
-                <div className="flex items-center gap-2 text-text-muted">
-                  <HardDrive size={18} />
-                  <span className="text-sm font-medium">Tamaño</span>
-                </div>
-                <span className="text-text-main font-bold">{game.size}</span>
-              </div>
-
-              <div className="flex items-center justify-between py-2 border-b border-border-color/50">
-                <div className="flex items-center gap-2 text-text-muted">
-                  <Globe size={18} />
-                  <span className="text-sm font-medium">Idioma</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  {game.languages.map(lang => (
-                    <span key={lang} title={lang} className="cursor-help text-lg" role="img" aria-label={lang}>
-                      {lang === 'English' && '🇺🇸'}
-                      {lang === 'Spanish' && '🇪🇸'}
-                      {lang === 'Japanese' && '🇯🇵'}
-                      {lang === 'Multi' && '🌐'}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between py-2 border-b border-border-color/50">
-                <div className="flex items-center gap-2 text-text-muted">
-                  <Layers size={18} />
-                  <span className="text-sm font-medium">Formato</span>
-                </div>
-                <span className="text-text-main font-bold">{game.format}</span>
-              </div>
-
-              <div className="flex items-center justify-between py-2 border-b border-border-color/50">
-                <div className="flex items-center gap-2 text-text-muted">
-                  <Gamepad2 size={18} />
-                  <span className="text-sm font-medium">Plataforma</span>
-                </div>
-                <span className="text-text-main font-bold">{game.console}</span>
-              </div>
-
-              <div className="flex items-center justify-between py-2">
-                <div className="flex items-center gap-2 text-text-muted">
-                  <Calendar size={18} />
-                  <span className="text-sm font-medium">Lanzamiento</span>
-                </div>
-                <span className="text-text-main font-bold">{game.year}</span>
-              </div>
             </div>
-
-            <div className="flex flex-col gap-3">
-                <button 
-                    onClick={initiateDownload}
-                    disabled={!game.downloadUrl}
-                    className={`w-full font-bold text-lg py-4 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-3 transform active:scale-[0.98] ${
-                        game.downloadUrl 
-                        ? 'bg-primary hover:bg-primary-hover text-text-main hover:shadow-xl cursor-pointer' 
-                        : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
-                    }`}
-                >
-                <Download size={24} strokeWidth={2.5} />
-                <span>{game.downloadUrl ? 'Descargar' : 'No Disponible'}</span>
-                </button>
-                
-                {/* Report Button - Opens Internal Modal */}
-                <button 
-                    onClick={() => setIsReportModalOpen(true)}
-                    className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-text-muted hover:text-red-500 hover:bg-red-50 transition-colors text-xs font-bold"
-                >
-                    <AlertTriangle size={14} className="mb-0.5" />
-                    <span>Reportar Problema</span>
-                </button>
-            </div>
-
-            {/* Rating Section */}
-            <div className="w-full bg-background rounded-2xl p-4 border border-border-color flex flex-col items-center justify-center gap-2">
-              <span className="text-xs font-bold text-text-muted uppercase tracking-wide">
-                {hasRated ? 'Tu Calificación' : 'Calificar juego'}
-              </span>
-              <div className="flex items-center gap-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    disabled={hasRated}
-                    onMouseEnter={() => !hasRated && setHoverRating(star)}
-                    onMouseLeave={() => !hasRated && setHoverRating(0)}
-                    onClick={() => handleRateGame(star)}
-                    className={`${hasRated ? 'cursor-default' : 'transition-transform hover:scale-110 cursor-pointer'} focus:outline-none`}
-                    aria-label={`Rate ${star} stars`}
-                  >
-                    <Star
-                      size={28}
-                      className={`${
-                        star <= (hoverRating || Math.round(localRating))
-                          ? 'fill-primary text-primary'
-                          : 'text-gray-300 fill-gray-100'
-                      } transition-colors`}
-                      strokeWidth={1.5}
-                    />
-                  </button>
-                ))}
-              </div>
-              <div className="text-2xl font-bold text-text-main flex items-baseline gap-1">
-                {(localRating).toFixed(1)} <span className="text-sm text-text-muted font-normal">/ 5.0</span>
-              </div>
-              {ratingMessage && (
-                  <div className="flex items-center gap-2 text-green-600 font-bold text-sm mt-1 animate-fade-in">
-                      <CheckCircle2 size={16} />
-                      <span>{ratingMessage}</span>
-                  </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Comments Section & Recommendations */}
-        <div className="px-6 pb-6 md:px-10 md:pb-10">
-            <section className="pt-8 border-t border-border-color">
-              <button 
-                onClick={() => setIsCommentsOpen(!isCommentsOpen)}
-                className="w-full flex items-center justify-between mb-6 group focus:outline-none"
-              >
-                  <h3 className="text-2xl font-bold text-text-main flex items-center gap-2">
-                    <MessageSquare size={24} className="text-text-muted" />
-                    Comentarios <span className="text-base font-medium text-text-muted">({localComments.length})</span>
-                  </h3>
-                  <div className={`p-2 rounded-full bg-surface border border-border-color text-text-muted transition-transform duration-300 ${isCommentsOpen ? 'rotate-180 bg-gray-50' : 'group-hover:bg-gray-50'}`}>
-                    <ChevronDown size={20} />
-                  </div>
-              </button>
-
-              {isCommentsOpen && (
-                <div className="animate-slide-in-up duration-300">
-                    {/* Main Comment Form */}
-                    <form onSubmit={handlePostComment} className="bg-background rounded-2xl p-6 border border-border-color mb-8">
-                        <div className="flex flex-col gap-4">
-                        
-                        {/* Admin Toggle - ONLY IF LOGGED IN */}
-                        {isLoggedIn && (
-                            <div className="flex items-center gap-2">
-                                <input 
-                                type="checkbox" 
-                                id="adminToggle" 
-                                checked={isAdminComment}
-                                onChange={(e) => setIsAdminComment(e.target.checked)}
-                                className="accent-primary w-4 h-4 cursor-pointer"
-                                />
-                                <label htmlFor="adminToggle" className="text-xs font-bold uppercase tracking-wide text-text-muted cursor-pointer select-none">
-                                Publicar como Admin
-                                </label>
-                            </div>
-                        )}
-
-                        <div>
-                            <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wide text-text-muted mb-2">Nickname</label>
-                            <input 
-                            type="text" 
-                            id="name"
-                            value={(isLoggedIn && isAdminComment) ? 'ZONA_ADMiN' : newCommentName}
-                            onChange={(e) => {
-                                if(!(isLoggedIn && isAdminComment)) {
-                                    setNewCommentName(e.target.value);
-                                    setCommentError('');
-                                }
-                            }}
-                            disabled={isLoggedIn && isAdminComment}
-                            placeholder="Ingresa tu nombre"
-                            className={`w-full border rounded-lg px-4 py-2.5 text-text-main focus:outline-none transition-all ${
-                                (isLoggedIn && isAdminComment) 
-                                ? 'bg-primary/10 border-primary font-bold text-primary-hover' 
-                                : 'bg-surface border-border-color focus:border-primary focus:ring-1 focus:ring-primary'
-                            }`}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="comment" className="block text-xs font-bold uppercase tracking-wide text-text-muted mb-2">Mensaje</label>
-                            <textarea 
-                            id="comment"
-                            value={newCommentText}
-                            onChange={(e) => {
-                                setNewCommentText(e.target.value);
-                                setCommentError('');
-                            }}
-                            placeholder={(isLoggedIn && isAdminComment) ? "Escribe un mensaje oficial..." : "Comparte tu opinión sobre este juego..."}
-                            rows={3}
-                            className="w-full bg-surface border border-border-color rounded-lg px-4 py-2.5 text-text-main focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none"
-                            />
-                        </div>
-
-                        {commentError && (
-                            <div className="p-3 bg-red-50 text-red-600 border border-red-100 rounded-xl text-sm font-medium flex items-center gap-2 animate-fade-in">
-                                <Ban size={16} className="shrink-0" />
-                                <span>{commentError}</span>
-                            </div>
-                        )}
-
-                        <div className="flex justify-end">
-                            <button 
-                            type="submit" 
-                            disabled={(!(isLoggedIn && isAdminComment) && !newCommentName.trim()) || !newCommentText.trim()}
-                            className="flex items-center gap-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-text-main font-bold px-6 py-2.5 rounded-full transition-colors"
-                            >
-                            <Send size={16} />
-                            <span>Publicar Comentario</span>
-                            </button>
-                        </div>
-                        </div>
-                    </form>
-
-                    {/* Comments Tree */}
-                    <div className="space-y-4 mb-10">
-                        {localComments.length > 0 ? (
-                        localComments.map((comment) => (
-                            <CommentNode 
-                                key={comment.id} 
-                                comment={comment}
-                                replyingToId={replyingToId}
-                                setReplyingToId={setReplyingToId}
-                                setCommentError={setCommentError}
-                                isLoggedIn={isLoggedIn}
-                                isAdminComment={isAdminComment}
-                                setIsAdminComment={setIsAdminComment}
-                                replyName={replyName}
-                                setReplyName={setReplyName}
-                                replyText={replyText}
-                                setReplyText={setReplyText}
-                                handlePostReply={handlePostReply} 
-                            />
-                        ))
-                        ) : (
-                        <div className="text-center py-8 text-text-muted italic">
-                            Aún no hay comentarios. ¡Sé el primero en compartir!
-                        </div>
-                        )}
-                    </div>
-                </div>
-              )}
-            </section>
-
-            {/* Recommendations Section */}
-            <section className="pt-8 border-t border-border-color">
-                <h3 className="text-xl font-bold text-text-main mb-6 flex items-center gap-2">
-                    <Sparkles size={20} className="text-primary" />
-                    Te pudiera interesar
-                </h3>
-                {/* 3 cols on mobile, 4 cols on md/lg */}
-                <div className="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
-                    {relatedGames.map(related => (
-                        <div 
-                            key={related.id} 
-                            onClick={() => onSelectGame(related)}
-                            className="group cursor-pointer flex flex-col gap-2"
-                        >
-                            <div className="aspect-[3/4] w-full rounded-xl bg-gray-200 overflow-hidden relative shadow-sm border border-border-color group-hover:shadow-md group-hover:border-primary/50 transition-all">
-                                <img 
-                                    src={related.imageUrl} 
-                                    alt={related.title}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                                <div className="absolute top-1.5 left-1.5 bg-black/70 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-bold text-white uppercase tracking-wider">
-                                    {related.console}
-                                </div>
-                            </div>
-                            <h4 className="text-xs md:text-sm font-bold text-text-main leading-tight line-clamp-2 group-hover:text-primary-hover transition-colors" title={related.title}>
-                                {related.title}
-                            </h4>
-                        </div>
-                    ))}
-                    {relatedGames.length === 0 && (
-                        <div className="col-span-full text-center py-4 text-text-muted text-sm italic">
-                            No related games found.
-                        </div>
-                    )}
-                </div>
-            </section>
-        </div>
-      </article>
-    </div>
+        </article>
+      </div>
+    </>
   );
 };
 

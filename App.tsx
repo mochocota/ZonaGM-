@@ -18,6 +18,18 @@ import { useToast } from './components/Toast';
 
 const ITEMS_PER_PAGE = 20;
 
+// Helper for SEO Friendly URLs
+const slugify = (text: string) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 const App: React.FC = () => {
   // Toast Hook
   const { toast } = useToast();
@@ -152,10 +164,19 @@ const App: React.FC = () => {
     
     const handlePopState = () => {
         const params = new URLSearchParams(window.location.search);
+        const gameSlug = params.get('game');
         const gameId = params.get('gameId');
         const view = params.get('view');
         
-        if (gameId) {
+        if (gameSlug) {
+            // Find by slug (Friendly URL)
+            const found = games.find(g => slugify(g.title) === gameSlug);
+            if (found) {
+                setSelectedGame(found);
+                setIsSitemapOpen(false);
+            }
+        } else if (gameId) {
+            // Find by ID (Legacy Support)
             const found = games.find(g => g.id === gameId);
             if (found) {
                 setSelectedGame(found);
@@ -407,8 +428,10 @@ const App: React.FC = () => {
     setSelectedGame(game);
     setIsSitemapOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Update URL for SEO/Sharing
-    const newUrl = `?gameId=${game.id}`;
+    
+    // Update URL with Friendly Slug
+    const slug = slugify(game.title);
+    const newUrl = `?game=${slug}`;
     window.history.pushState({ gameId: game.id }, '', newUrl);
   };
 

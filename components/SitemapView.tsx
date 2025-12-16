@@ -7,6 +7,17 @@ interface SitemapViewProps {
   onSelectGame: (game: Game) => void;
 }
 
+const slugify = (text: string) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 const SitemapView: React.FC<SitemapViewProps> = ({ games, onSelectGame }) => {
   // Group games by console and sort them alphabetically
   const gamesByConsole = useMemo(() => {
@@ -50,7 +61,7 @@ const SitemapView: React.FC<SitemapViewProps> = ({ games, onSelectGame }) => {
                     .map(game => (
                   <li key={game.id} className="group">
                     <a 
-                      href={`?gameId=${game.id}`}
+                      href={`?game=${slugify(game.title)}`}
                       onClick={(e) => {
                         e.preventDefault();
                         onSelectGame(game);

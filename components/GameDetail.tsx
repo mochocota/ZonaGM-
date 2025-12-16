@@ -667,7 +667,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                 <div className="p-2 rounded-full bg-surface border border-border-color group-hover:border-primary group-hover:bg-primary/10 transition-all">
                 <ArrowLeft size={20} />
                 </div>
-                <span>Back to Archive</span>
+                <span>Regresar a la página principal</span>
             </button>
 
             {/* Admin Actions - ONLY VISIBLE IF LOGGED IN */}

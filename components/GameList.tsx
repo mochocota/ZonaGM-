@@ -140,11 +140,16 @@ const GridCard: React.FC<{ game: Game; onClick: () => void; onSelectConsole: (c:
 
       {/* Stats Overlay on Image (Mobile/Compact) */}
       <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[10px] font-bold text-white/90">
-         <div className="flex items-center gap-1 bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">
-            <Download size={12} /> {formatNumber(game.downloads)}
+         <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1 bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">
+                <Download size={12} /> {formatNumber(game.downloads)}
+            </div>
+            <div className="flex items-center gap-1 bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">
+                <Star size={12} className="fill-primary text-primary" /> {game.rating}
+            </div>
          </div>
          <div className="flex items-center gap-1 bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">
-            <Star size={12} className="fill-primary text-primary" /> {game.rating}
+            <MessageSquare size={12} /> {game.comments?.length || 0}
          </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Game, Comment } from '../types';
 import { ArrowLeft, Download, HardDrive, Calendar, Gamepad2, Layers, ShieldCheck, MessageSquare, Send, User, Globe, Star, Pencil, Trash2, Sparkles, Image as ImageIcon, X, AlertTriangle, Crown, Ban, CornerDownRight, ChevronDown, CheckCircle2, Lock, Unlock, Timer, Loader2 } from 'lucide-react';
 import SEO from './SEO';
@@ -216,6 +216,10 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [reportReason, setReportReason] = useState<'Link Caído' | 'Imagen Rota' | 'Información Incorrecta' | 'Otro'>('Link Caído');
   const [reportDescription, setReportDescription] = useState('');
+  
+  // Dynamic Mobile Positioning
+  const reportBtnRef = useRef<HTMLButtonElement>(null);
+  const [modalPos, setModalPos] = useState<{bottom: number} | null>(null);
 
   // Delete Confirmation Modal State
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -550,13 +554,24 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
       {/* Report Modal */}
       {isReportModalOpen && (
           <div 
-            className="fixed inset-0 z-[200] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+            className={`fixed inset-0 z-[200] bg-black/50 backdrop-blur-sm p-4 animate-fade-in ${modalPos ? '' : 'flex items-center justify-center'}`}
             onClick={() => setIsReportModalOpen(false)}
           >
               <div 
-                className="bg-surface w-full max-w-md rounded-2xl p-6 shadow-2xl border border-border-color animate-zoom-in"
+                className="bg-surface w-full max-w-md rounded-2xl p-6 shadow-2xl border border-border-color animate-zoom-in relative mx-auto"
                 onClick={(e) => e.stopPropagation()}
+                style={modalPos ? {
+                    position: 'absolute',
+                    bottom: modalPos.bottom,
+                    left: 0,
+                    right: 0,
+                    width: 'calc(100% - 2rem)'
+                } : {}}
               >
+                  {modalPos && (
+                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-surface border-b border-r border-border-color transform rotate-45" />
+                  )}
+
                   <div className="flex justify-between items-center mb-4">
                       <h3 className="text-xl font-bold text-text-main flex items-center gap-2">
                           <AlertTriangle size={24} className="text-red-500" />
@@ -825,7 +840,16 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                     
                     {/* Report Button - Opens Internal Modal */}
                     <button 
-                        onClick={() => setIsReportModalOpen(true)}
+                        ref={reportBtnRef}
+                        onClick={() => {
+                            if (window.innerWidth < 768 && reportBtnRef.current) {
+                                const rect = reportBtnRef.current.getBoundingClientRect();
+                                setModalPos({ bottom: window.innerHeight - rect.top + 12 });
+                            } else {
+                                setModalPos(null);
+                            }
+                            setIsReportModalOpen(true);
+                        }}
                         className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-text-muted hover:text-red-500 hover:bg-red-50 transition-colors text-xs font-bold"
                     >
                         <AlertTriangle size={14} className="mb-0.5" />

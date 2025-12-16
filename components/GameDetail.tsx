@@ -441,8 +441,14 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
-          <div className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-              <div className="bg-surface w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-red-200 text-center animate-zoom-in">
+          <div 
+            className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+            onClick={() => setIsDeleteModalOpen(false)}
+          >
+              <div 
+                className="bg-surface w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-red-200 text-center animate-zoom-in"
+                onClick={(e) => e.stopPropagation()}
+              >
                   <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
                       <Trash2 size={32} />
                   </div>
@@ -473,8 +479,14 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
       {/* Download Security Modal */}
       {isDownloadModalOpen && (
-          <div className="fixed inset-0 z-[250] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
-              <div className="bg-surface w-full max-w-md rounded-3xl p-8 shadow-2xl border border-border-color relative overflow-hidden animate-zoom-in">
+          <div 
+            className="fixed inset-0 z-[250] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
+            onClick={() => setIsDownloadModalOpen(false)}
+          >
+              <div 
+                className="bg-surface w-full max-w-md rounded-3xl p-8 shadow-2xl border border-border-color relative overflow-hidden animate-zoom-in"
+                onClick={(e) => e.stopPropagation()}
+              >
                   <button 
                       onClick={() => setIsDownloadModalOpen(false)}
                       className="absolute top-4 right-4 text-text-muted hover:text-text-main"
@@ -527,8 +539,14 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
       {/* Report Modal */}
       {isReportModalOpen && (
-          <div className="fixed inset-0 z-[200] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-              <div className="bg-surface w-full max-w-md rounded-2xl p-6 shadow-2xl border border-border-color animate-zoom-in">
+          <div 
+            className="fixed inset-0 z-[200] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+            onClick={() => setIsReportModalOpen(false)}
+          >
+              <div 
+                className="bg-surface w-full max-w-md rounded-2xl p-6 shadow-2xl border border-border-color animate-zoom-in"
+                onClick={(e) => e.stopPropagation()}
+              >
                   <div className="flex justify-between items-center mb-4">
                       <h3 className="text-xl font-bold text-text-main flex items-center gap-2">
                           <AlertTriangle size={24} className="text-red-500" />

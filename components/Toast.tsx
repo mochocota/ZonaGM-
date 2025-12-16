@@ -57,13 +57,14 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <ToastContext.Provider value={{ toast }}>
       {children}
       
-      {/* Toast Container - Bottom Right with stacking effect */}
-      <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none max-w-[380px] w-full px-4 md:px-0">
+      {/* Toast Container - Bottom Right with stacking effect. 
+          Changed w-full to w-auto to prevent covering the screen horizontally. */}
+      <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none w-auto max-w-[90vw] md:max-w-[380px] items-end px-4 md:px-0">
         {toasts.map((t) => (
           <div 
             key={t.id}
             className={`
-                pointer-events-auto relative overflow-hidden
+                pointer-events-auto relative overflow-hidden w-full
                 bg-surface/95 backdrop-blur-xl border border-border-color 
                 shadow-2xl rounded-2xl p-4 flex gap-4 items-start 
                 animate-slide-in-right
@@ -95,7 +96,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             </div>
 
             {/* Content */}
-            <div className="flex-1 min-w-0 py-0.5">
+            <div className="flex-1 min-w-0 py-0.5 text-left">
                 <h4 className="font-bold text-sm text-text-main leading-tight tracking-tight">{t.title}</h4>
                 {t.message && (
                     <p className="text-xs text-text-muted mt-1.5 leading-relaxed font-medium">{t.message}</p>

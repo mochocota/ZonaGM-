@@ -174,8 +174,14 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-      <div className="bg-background w-full max-w-2xl rounded-3xl shadow-2xl border border-border-color flex flex-col max-h-[90vh] relative overflow-hidden animate-slide-in-up">
+    <div 
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in"
+        onClick={onClose} // Click outside to close
+    >
+      <div 
+        className="bg-background w-full max-w-2xl rounded-3xl shadow-2xl border border-border-color flex flex-col max-h-[90vh] relative overflow-hidden animate-slide-in-up"
+        onClick={(e) => e.stopPropagation()} // Prevent close when clicking inside
+      >
         
         {/* Search Modal Overlay */}
         {isSearchOpen && (

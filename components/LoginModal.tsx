@@ -55,8 +55,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin }) => 
   };
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-surface w-full max-w-sm rounded-3xl shadow-2xl border border-border-color p-8 relative animate-zoom-in">
+    <div 
+        className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+        onClick={onClose}
+    >
+      <div 
+        className="bg-surface w-full max-w-sm rounded-3xl shadow-2xl border border-border-color p-8 relative animate-zoom-in"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button 
           onClick={onClose}
           className="absolute top-4 right-4 text-text-muted hover:text-text-main transition-colors"

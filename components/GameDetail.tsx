@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Game, Comment } from '../types';
-import { ArrowLeft, Download, HardDrive, Calendar, Gamepad2, Layers, ShieldCheck, MessageSquare, Send, User, Globe, Star, Pencil, Trash2, Sparkles, Image as ImageIcon, X, AlertTriangle, Crown, Ban, CornerDownRight, ChevronDown, CheckCircle2, Lock, Unlock, Timer, Loader2, ChevronRight, Home } from 'lucide-react';
+import { Download, HardDrive, Calendar, Gamepad2, Layers, ShieldCheck, MessageSquare, Send, User, Globe, Star, Pencil, Trash2, Sparkles, Image as ImageIcon, X, AlertTriangle, Crown, Ban, CornerDownRight, ChevronDown, CheckCircle2, Lock, Unlock, Timer, Loader2, ChevronRight, Home } from 'lucide-react';
 import SEO from './SEO';
 import { db } from '../firebase';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
@@ -674,20 +674,9 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
             <span className="text-text-main font-bold truncate">{game.title}</span>
         </nav>
 
-        <div className="flex items-center justify-between mb-6">
-            {/* Back Button */}
-            <button 
-                onClick={onBack}
-                className="group flex items-center gap-2 text-text-muted hover:text-text-main font-medium transition-colors"
-            >
-                <div className="p-2 rounded-full bg-surface border border-border-color group-hover:border-primary group-hover:bg-primary/10 transition-all">
-                <ArrowLeft size={20} />
-                </div>
-                <span>Regresar</span>
-            </button>
-
-            {/* Admin Actions - ONLY VISIBLE IF LOGGED IN */}
-            {isLoggedIn && (
+        {isLoggedIn && (
+            <div className="flex items-center justify-end mb-6">
+                {/* Admin Actions - ONLY VISIBLE IF LOGGED IN */}
                 <div className="flex gap-2">
                     <button 
                         onClick={() => onEdit(game)}
@@ -704,8 +693,8 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                         <span className="hidden sm:inline">Delete</span>
                     </button>
                 </div>
-            )}
-        </div>
+            </div>
+        )}
 
         <article className="bg-surface rounded-3xl border border-border-color overflow-hidden shadow-soft mb-8">
             {/* Hero Header */}

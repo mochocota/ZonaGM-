@@ -39,7 +39,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Auto dismiss
     setTimeout(() => {
       removeToast(id);
-    }, 6000);
+    }, 5000);
   }, []);
 
   const removeToast = useCallback((id: string) => {
@@ -57,60 +57,59 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <ToastContext.Provider value={{ toast }}>
       {children}
       
-      {/* Toast Container 
-          - Mobile: Fixed at the bottom of the viewport, centered horizontally using Flexbox (no transforms on container).
-          - Desktop: Fixed bottom-right.
+      {/* 
+          TOAST CONTAINER
+          - Position: Fixed at the very bottom of the VIEWPORT (z-index 10000).
+          - Layout: Centered horizontally on mobile, bottom-right on desktop.
+          - Behavior: Floats above all content, no scroll needed.
       */}
-      <div className="fixed bottom-4 left-0 right-0 md:left-auto md:right-6 md:bottom-6 z-[9999] flex flex-col items-center md:items-end gap-3 pointer-events-none px-4 md:px-0">
+      <div className="fixed inset-x-0 bottom-0 p-4 pb-8 md:pb-6 md:right-6 md:left-auto md:w-auto md:max-w-md z-[10000] flex flex-col items-center md:items-end gap-3 pointer-events-none">
         {toasts.map((t) => (
           <div 
             key={t.id}
-            className={`
-                pointer-events-auto relative overflow-hidden w-full max-w-sm
-                bg-surface/95 backdrop-blur-xl border border-border-color 
-                shadow-2xl rounded-2xl p-4 flex gap-4 items-start 
+            className="
+                pointer-events-auto 
+                flex items-center gap-4 
+                w-full max-w-[95vw] md:w-auto md:min-w-[320px]
+                p-4 rounded-2xl
+                bg-[#18181b] text-white
+                shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]
+                border border-white/10
                 animate-slide-in-up
-                transition-all md:hover:translate-x-[-4px]
-            `}
-            style={{
-                boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
-            }}
+            "
           >
-            {/* Left Accent Bar */}
-            <div className={`absolute left-0 top-0 bottom-0 w-1 ${
-                t.type === 'success' ? 'bg-green-500' :
-                t.type === 'error' ? 'bg-red-500' :
-                t.type === 'warning' ? 'bg-orange-500' :
-                'bg-blue-500'
-            }`} />
-
-            {/* Icon */}
-            <div className={`mt-0.5 shrink-0 p-1.5 rounded-full ${
-                t.type === 'success' ? 'bg-green-500/10 text-green-600' :
-                t.type === 'error' ? 'bg-red-500/10 text-red-600' :
-                t.type === 'warning' ? 'bg-orange-500/10 text-orange-600' :
-                'bg-blue-500/10 text-blue-600'
-            }`}>
-                {t.type === 'success' && <CheckCircle2 size={18} strokeWidth={2.5} />}
-                {t.type === 'error' && <AlertCircle size={18} strokeWidth={2.5} />}
-                {t.type === 'warning' && <AlertTriangle size={18} strokeWidth={2.5} />}
-                {t.type === 'info' && <Info size={18} strokeWidth={2.5} />}
+            {/* Icon Box */}
+            <div className={`
+                shrink-0 w-10 h-10 rounded-full flex items-center justify-center
+                ${
+                    t.type === 'success' ? 'bg-green-500 text-black' :
+                    t.type === 'error' ? 'bg-red-500 text-white' :
+                    t.type === 'warning' ? 'bg-yellow-400 text-black' :
+                    'bg-blue-500 text-white'
+                }
+            `}>
+                {t.type === 'success' && <CheckCircle2 size={20} strokeWidth={2.5} />}
+                {t.type === 'error' && <AlertCircle size={20} strokeWidth={2.5} />}
+                {t.type === 'warning' && <AlertTriangle size={20} strokeWidth={2.5} />}
+                {t.type === 'info' && <Info size={20} strokeWidth={2.5} />}
             </div>
 
-            {/* Content */}
-            <div className="flex-1 min-w-0 py-0.5 text-left">
-                <h4 className="font-bold text-sm text-text-main leading-tight tracking-tight">{t.title}</h4>
+            {/* Text Content */}
+            <div className="flex-1 min-w-0">
+                <h4 className="font-bold text-sm md:text-base leading-tight tracking-tight">{t.title}</h4>
                 {t.message && (
-                    <p className="text-xs text-text-muted mt-1.5 leading-relaxed font-medium">{t.message}</p>
+                    <p className="text-xs md:text-sm text-gray-300 mt-1 leading-snug font-medium line-clamp-2">
+                        {t.message}
+                    </p>
                 )}
             </div>
 
-            {/* Close */}
+            {/* Close Button */}
             <button 
                 onClick={() => removeToast(t.id)}
-                className="text-text-muted hover:text-text-main transition-colors shrink-0 p-1.5 hover:bg-black/5 rounded-lg -mr-1"
+                className="shrink-0 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors"
             >
-                <X size={16} />
+                <X size={18} />
             </button>
           </div>
         ))}

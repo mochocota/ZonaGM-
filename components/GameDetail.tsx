@@ -290,9 +290,13 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
       try {
           const gameRef = doc(db, 'games', game.id);
           await updateDoc(gameRef, { comments: newComments });
-      } catch (error) {
+      } catch (error: any) {
           console.error("Error saving comment:", error);
-          setCommentError('Hubo un error al guardar el comentario.');
+          if (error.code === 'permission-denied') {
+             setCommentError('Error de Permisos: Revisa la consola de Firebase -> Firestore -> Reglas.');
+          } else {
+             setCommentError('Hubo un error al guardar el comentario.');
+          }
       }
   };
 
@@ -377,8 +381,11 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
         localStorage.setItem(`rated_${game.id}`, 'true');
         setHasRated(true);
         setRatingMessage('¡Gracias por calificar el juego!');
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error updating rating:", error);
+        if (error.code === 'permission-denied') {
+            setRatingMessage('Error: Permisos insuficientes.');
+        }
     }
 
     // Disable hover

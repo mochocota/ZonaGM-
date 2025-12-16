@@ -91,6 +91,12 @@ const App: React.FC = () => {
            if (updatedSelected) setSelectedGame(updatedSelected);
         }
         setIsLoading(false);
+    }, (error) => {
+        console.error("Error reading games:", error);
+        // If read fails, it's likely rules too
+        if (error.code === 'permission-denied') {
+            alert("Error de Permisos: No se pueden leer los juegos. Verifica las Reglas de Firestore en la consola de Firebase.");
+        }
     });
 
     // Listen to Reports
@@ -101,6 +107,8 @@ const App: React.FC = () => {
             ...doc.data()
         })) as Report[];
         setReports(reportsData);
+    }, (error) => {
+        console.error("Error reading reports:", error);
     });
 
     return () => {
@@ -282,7 +290,11 @@ const App: React.FC = () => {
         }
     } catch (error: any) {
         console.error("Error saving game:", error);
-        alert(`Error al guardar: ${error.message || 'Error desconocido'}`);
+        if (error.code === 'permission-denied') {
+            alert("Error de Permisos: No tienes permiso para escribir en la base de datos. Ve a la consola de Firebase -> Firestore -> Reglas y cambia 'allow write: if false;' por 'allow write: if request.auth != null;'");
+        } else {
+            alert(`Error al guardar: ${error.message || 'Error desconocido'}`);
+        }
     }
   };
 
@@ -296,7 +308,11 @@ const App: React.FC = () => {
         }
     } catch (error: any) {
         console.error("Error deleting game:", error);
-        alert(`Error al eliminar: ${error.message}`);
+        if (error.code === 'permission-denied') {
+            alert("Error de Permisos: Firebase bloqueó la eliminación. Verifica las reglas de seguridad.");
+        } else {
+            alert(`Error al eliminar: ${error.message}`);
+        }
     }
   };
 

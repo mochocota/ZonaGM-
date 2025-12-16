@@ -534,7 +534,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                               
                               <div className="space-y-2">
                                   <h3 className="text-2xl font-bold text-text-main">¡Enlace Listo!</h3>
-                                  <p className="text-text-muted">El archivo ha sido verificado y está listo para descargar.</p>
+                                  <p className="text-text-muted">El archivo está listo para descargar.</p>
                               </div>
 
                               <button 

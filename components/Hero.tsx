@@ -13,7 +13,7 @@ const Hero: React.FC<HeroProps> = ({ searchTerm, setSearchTerm }) => {
           ZonaGM
         </h1>
         <p className="text-text-muted text-lg md:text-xl font-medium max-w-lg mx-auto">
-          Explora nuestra colección de ISOs y ROMs verificados.
+          Explora nuestra colección de ISOs y ROMs.
         </p>
       </div>
     </section>

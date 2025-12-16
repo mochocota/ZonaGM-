@@ -12,8 +12,8 @@ import SitemapView from './components/SitemapView';
 import { SortOption, Game, Report } from './types';
 import { LayoutGrid, List as ListIcon, ChevronDown, Loader2 } from 'lucide-react';
 import { db, auth } from './firebase';
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy, QuerySnapshot, DocumentData } from 'firebase/firestore';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -63,7 +63,7 @@ const App: React.FC = () => {
 
   // Firebase Auth Listener
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
         if (user) {
             setIsLoggedIn(true);
         } else {
@@ -78,7 +78,7 @@ const App: React.FC = () => {
     // Listen to Games
     const gamesCollection = collection(db, 'games');
     const qGames = query(gamesCollection, orderBy('title')); // Default sort
-    const unsubGames = onSnapshot(qGames, (snapshot) => {
+    const unsubGames = onSnapshot(qGames, (snapshot: QuerySnapshot<DocumentData, DocumentData>) => {
         const gamesData = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
@@ -95,7 +95,7 @@ const App: React.FC = () => {
 
     // Listen to Reports
     const reportsCollection = collection(db, 'reports');
-    const unsubReports = onSnapshot(reportsCollection, (snapshot) => {
+    const unsubReports = onSnapshot(reportsCollection, (snapshot: QuerySnapshot<DocumentData, DocumentData>) => {
         const reportsData = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()

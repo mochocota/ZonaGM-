@@ -22,7 +22,7 @@ const SitemapView: React.FC<SitemapViewProps> = ({ games, onSelectGame }) => {
   const sortedConsoles = Object.keys(gamesByConsole).sort();
 
   return (
-    <div className="w-full max-w-[1000px] animate-in fade-in slide-in-from-bottom-4 duration-500 py-8">
+    <div className="w-full max-w-[1000px] animate-slide-in-up duration-500 py-8">
       <div className="bg-surface rounded-3xl border border-border-color p-8 md:p-12 shadow-soft">
         <div className="mb-10 text-center md:text-left">
             <h1 className="text-3xl md:text-5xl font-bold text-text-main mb-4">Mapa del Sitio</h1>

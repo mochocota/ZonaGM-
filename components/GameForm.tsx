@@ -95,8 +95,8 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
         const firstErrorInput = document.querySelector('[aria-invalid="true"]');
         if (firstErrorInput) {
             firstErrorInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            firstErrorInput.classList.add('animate-pulse');
-            setTimeout(() => firstErrorInput.classList.remove('animate-pulse'), 500);
+            firstErrorInput.classList.add('animate-pulse-slow');
+            setTimeout(() => firstErrorInput.classList.remove('animate-pulse-slow'), 500);
         }
         return;
     }
@@ -174,12 +174,12 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-background w-full max-w-2xl rounded-3xl shadow-2xl border border-border-color flex flex-col max-h-[90vh] relative overflow-hidden">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+      <div className="bg-background w-full max-w-2xl rounded-3xl shadow-2xl border border-border-color flex flex-col max-h-[90vh] relative overflow-hidden animate-slide-in-up">
         
         {/* Search Modal Overlay */}
         {isSearchOpen && (
-             <div className="absolute inset-0 z-50 bg-background flex flex-col animate-in slide-in-from-bottom-5 duration-300">
+             <div className="absolute inset-0 z-50 bg-background flex flex-col animate-slide-in-up">
                 <div className="flex items-center justify-between p-6 border-b border-border-color bg-surface">
                     <h3 className="text-xl font-bold text-text-main">Search IGDB</h3>
                     <button onClick={() => setIsSearchOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-text-muted">

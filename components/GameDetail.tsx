@@ -100,7 +100,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
 
           {/* Inline Reply Form */}
           {isReplying && (
-              <div className="mt-4 p-4 bg-background rounded-xl border border-border-color animate-in fade-in slide-in-from-top-2">
+              <div className="mt-4 p-4 bg-background rounded-xl border border-border-color animate-fade-in">
                   <div className="flex flex-col gap-3">
                        {/* Admin Toggle in Reply */}
                       {isLoggedIn && (
@@ -429,7 +429,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
   };
 
   return (
-    <div className="w-full max-w-[1000px] animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="w-full max-w-[1000px] animate-slide-in-up duration-500">
       
       {/* Dynamic SEO for Game Detail */}
       <SEO 
@@ -441,8 +441,8 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
-          <div className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-              <div className="bg-surface w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-red-200 text-center">
+          <div className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+              <div className="bg-surface w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-red-200 text-center animate-zoom-in">
                   <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
                       <Trash2 size={32} />
                   </div>
@@ -473,8 +473,8 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
       {/* Download Security Modal */}
       {isDownloadModalOpen && (
-          <div className="fixed inset-0 z-[250] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
-              <div className="bg-surface w-full max-w-md rounded-3xl p-8 shadow-2xl border border-border-color relative overflow-hidden">
+          <div className="fixed inset-0 z-[250] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+              <div className="bg-surface w-full max-w-md rounded-3xl p-8 shadow-2xl border border-border-color relative overflow-hidden animate-zoom-in">
                   <button 
                       onClick={() => setIsDownloadModalOpen(false)}
                       className="absolute top-4 right-4 text-text-muted hover:text-text-main"
@@ -486,7 +486,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                       {!isDownloadReady ? (
                           <>
                               <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center relative">
-                                  <Lock size={40} className="text-primary animate-pulse" />
+                                  <Lock size={40} className="text-primary animate-pulse-fast" />
                                   <div className="absolute inset-0 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
                               </div>
                               
@@ -502,7 +502,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                           </>
                       ) : (
                           <>
-                               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center animate-in zoom-in duration-300">
+                               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center animate-zoom-in">
                                   <Unlock size={40} className="text-green-600" />
                               </div>
                               
@@ -513,7 +513,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
                               <button 
                                   onClick={handleFinalDownload}
-                                  className="w-full bg-primary hover:bg-primary-hover text-text-main text-lg font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 animate-in slide-in-from-bottom-2"
+                                  className="w-full bg-primary hover:bg-primary-hover text-text-main text-lg font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 animate-slide-in-up"
                               >
                                   <Download size={24} strokeWidth={2.5} />
                                   <span>Ir al Servidor de Descarga</span>
@@ -527,8 +527,8 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
       {/* Report Modal */}
       {isReportModalOpen && (
-          <div className="fixed inset-0 z-[200] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-              <div className="bg-surface w-full max-w-md rounded-2xl p-6 shadow-2xl border border-border-color">
+          <div className="fixed inset-0 z-[200] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+              <div className="bg-surface w-full max-w-md rounded-2xl p-6 shadow-2xl border border-border-color animate-zoom-in">
                   <div className="flex justify-between items-center mb-4">
                       <h3 className="text-xl font-bold text-text-main flex items-center gap-2">
                           <AlertTriangle size={24} className="text-red-500" />
@@ -588,7 +588,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
       {/* Fullscreen Screenshot Modal */}
       {selectedScreenshot && (
         <div 
-            className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+            className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
             onClick={() => setSelectedScreenshot(null)}
         >
             <button 
@@ -600,7 +600,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
             <img 
                 src={selectedScreenshot} 
                 alt="Screenshot Fullscreen" 
-                className="max-w-full max-h-[90vh] object-contain rounded shadow-2xl animate-in zoom-in-95 duration-200"
+                className="max-w-full max-h-[90vh] object-contain rounded shadow-2xl animate-zoom-in"
                 onClick={(e) => e.stopPropagation()} 
             />
         </div>
@@ -828,7 +828,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                 {(game.rating || 0).toFixed(1)} <span className="text-sm text-text-muted font-normal">/ 5.0</span>
               </div>
               {ratingMessage && (
-                  <div className="flex items-center gap-2 text-green-600 font-bold text-sm mt-1 animate-in fade-in slide-in-from-top-1">
+                  <div className="flex items-center gap-2 text-green-600 font-bold text-sm mt-1 animate-fade-in">
                       <CheckCircle2 size={16} />
                       <span>{ratingMessage}</span>
                   </div>
@@ -854,7 +854,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
               </button>
 
               {isCommentsOpen && (
-                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="animate-slide-in-up duration-300">
                     {/* Main Comment Form */}
                     <form onSubmit={handlePostComment} className="bg-background rounded-2xl p-6 border border-border-color mb-8">
                         <div className="flex flex-col gap-4">
@@ -912,7 +912,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                         </div>
 
                         {commentError && (
-                            <div className="p-3 bg-red-50 text-red-600 border border-red-100 rounded-xl text-sm font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
+                            <div className="p-3 bg-red-50 text-red-600 border border-red-100 rounded-xl text-sm font-medium flex items-center gap-2 animate-fade-in">
                                 <Ban size={16} className="shrink-0" />
                                 <span>{commentError}</span>
                             </div>

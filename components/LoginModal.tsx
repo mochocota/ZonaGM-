@@ -55,8 +55,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin }) => 
   };
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-surface w-full max-w-sm rounded-3xl shadow-2xl border border-border-color p-8 relative">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div className="bg-surface w-full max-w-sm rounded-3xl shadow-2xl border border-border-color p-8 relative animate-zoom-in">
         <button 
           onClick={onClose}
           className="absolute top-4 right-4 text-text-muted hover:text-text-main transition-colors"
@@ -108,7 +108,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin }) => 
           </div>
 
           {error && (
-            <div className="p-3 bg-red-50 text-red-600 text-sm rounded-xl font-medium text-center border border-red-100">
+            <div className="p-3 bg-red-50 text-red-600 text-sm rounded-xl font-medium text-center border border-red-100 animate-fade-in">
               {error}
             </div>
           )}

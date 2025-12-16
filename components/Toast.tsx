@@ -59,14 +59,14 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       
       {/* Toast Container - Bottom Right with stacking effect */}
       <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none max-w-[380px] w-full px-4 md:px-0">
-        {toasts.map((t, index) => (
+        {toasts.map((t) => (
           <div 
             key={t.id}
             className={`
                 pointer-events-auto relative overflow-hidden
                 bg-surface/95 backdrop-blur-xl border border-border-color 
                 shadow-2xl rounded-2xl p-4 flex gap-4 items-start 
-                animate-in slide-in-from-right-full fade-in duration-500
+                animate-slide-in-right
                 transition-all hover:translate-x-[-4px]
             `}
             style={{

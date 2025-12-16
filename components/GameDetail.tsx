@@ -603,24 +603,32 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
           </div>
       )}
 
-      {/* Fullscreen Screenshot Modal */}
+      {/* Fullscreen Screenshot Modal - IMPROVED MOBILE */}
       {selectedScreenshot && (
         <div 
-            className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+            className="fixed inset-0 z-[5000] bg-black/98 flex items-center justify-center animate-fade-in"
             onClick={() => setSelectedScreenshot(null)}
+            style={{ touchAction: 'none' }} // Prevent scrolling body underneath
         >
             <button 
                 onClick={() => setSelectedScreenshot(null)}
-                className="absolute top-6 right-6 p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all"
+                className="absolute top-4 right-4 z-[5010] p-3 text-white bg-white/10 rounded-full hover:bg-white/20 transition-all backdrop-blur-md"
             >
-                <X size={32} />
+                <X size={24} />
             </button>
-            <img 
-                src={selectedScreenshot} 
-                alt="Screenshot Fullscreen" 
-                className="max-w-full max-h-[90vh] object-contain rounded shadow-2xl animate-zoom-in"
-                onClick={(e) => e.stopPropagation()} 
-            />
+            
+            <div className="w-full h-full p-2 flex items-center justify-center">
+                <img 
+                    src={selectedScreenshot} 
+                    alt="Screenshot Fullscreen" 
+                    className="max-w-full max-h-full object-contain rounded-md shadow-2xl animate-zoom-in"
+                    onClick={(e) => e.stopPropagation()} 
+                />
+            </div>
+            
+            <p className="absolute bottom-8 text-white/50 text-xs font-bold uppercase tracking-widest animate-pulse">
+                Click anywhere to close
+            </p>
         </div>
       )}
 

@@ -58,46 +58,47 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {children}
       
       {/* 
-          TOAST CONTAINER
-          - Position: Fixed at the TOP of the VIEWPORT (z-index 10000).
-          - Layout: Centered horizontally.
-          - Behavior: Floats above all content (Header), no scroll needed.
+          TOAST CONTAINER - FIXED BOTTOM
+          - z-index: 99999 (Highest possible)
+          - bottom-4: Safe distance from bottom edge
+          - pointer-events-none: Allows clicking through the container area
       */}
-      <div className="fixed inset-x-0 top-0 p-4 z-[10000] flex flex-col items-center gap-3 pointer-events-none">
+      <div className="fixed inset-x-0 bottom-4 z-[99999] flex flex-col items-center justify-end gap-3 pointer-events-none px-4">
         {toasts.map((t) => (
           <div 
             key={t.id}
             className="
                 pointer-events-auto 
-                relative 
                 flex items-center gap-3 
-                w-full max-w-[90vw] md:max-w-md
-                bg-[#18181b] text-white 
-                border-l-4 
-                px-4 py-3 rounded-r-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]
-                animate-slide-in-down
+                w-full max-w-sm
+                bg-[#09090b] text-white 
+                border border-white/10
+                p-3 rounded-2xl 
+                shadow-[0_8px_30px_rgb(0,0,0,0.5)]
+                animate-slide-in-up
             "
-            style={{
-                borderLeftColor: 
-                    t.type === 'success' ? '#22c55e' : // Green 500
-                    t.type === 'error' ? '#ef4444' :   // Red 500
-                    t.type === 'warning' ? '#eab308' : // Yellow 500
-                    '#3b82f6'                          // Blue 500
-            }}
           >
-            {/* Icon */}
-            <div className="shrink-0">
-               {t.type === 'success' && <CheckCircle2 size={20} className="text-green-500" />}
-               {t.type === 'error' && <AlertCircle size={20} className="text-red-500" />}
-               {t.type === 'warning' && <AlertTriangle size={20} className="text-yellow-500" />}
-               {t.type === 'info' && <Info size={20} className="text-blue-500" />}
+            {/* Icon Circle */}
+            <div className={`
+                shrink-0 w-10 h-10 rounded-full flex items-center justify-center
+                ${
+                    t.type === 'success' ? 'bg-green-500 text-black' :
+                    t.type === 'error' ? 'bg-red-500 text-white' :
+                    t.type === 'warning' ? 'bg-yellow-400 text-black' :
+                    'bg-blue-500 text-white'
+                }
+            `}>
+               {t.type === 'success' && <CheckCircle2 size={20} strokeWidth={2.5} />}
+               {t.type === 'error' && <AlertCircle size={20} strokeWidth={2.5} />}
+               {t.type === 'warning' && <AlertTriangle size={20} strokeWidth={2.5} />}
+               {t.type === 'info' && <Info size={20} strokeWidth={2.5} />}
             </div>
 
             {/* Text Content */}
             <div className="flex-1 min-w-0">
-                <h4 className="font-bold text-sm leading-tight">{t.title}</h4>
+                <h4 className="font-bold text-sm text-white leading-tight">{t.title}</h4>
                 {t.message && (
-                    <p className="text-xs text-gray-300 mt-0.5 leading-snug font-medium line-clamp-2">
+                    <p className="text-xs text-gray-400 mt-0.5 leading-snug font-medium line-clamp-2">
                         {t.message}
                     </p>
                 )}
@@ -106,9 +107,9 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             {/* Close Button */}
             <button 
                 onClick={() => removeToast(t.id)}
-                className="shrink-0 p-1.5 text-gray-500 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+                className="shrink-0 p-2 text-gray-500 hover:text-white hover:bg-white/10 rounded-full transition-colors"
             >
-                <X size={16} />
+                <X size={18} />
             </button>
           </div>
         ))}

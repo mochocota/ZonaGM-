@@ -1,21 +1,23 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import GameList from './components/GameList';
-import GameDetail from './components/GameDetail';
 import Footer from './components/Footer';
-import GameForm from './components/GameForm';
-import AdminPanel from './components/AdminPanel';
-import LoginModal from './components/LoginModal';
-import AdBlockDetector from './components/AdBlockDetector';
 import SEO from './components/SEO';
-import SitemapView from './components/SitemapView';
+import AdBlockDetector from './components/AdBlockDetector';
 import { SortOption, Game, Report } from './types';
 import { LayoutGrid, List as ListIcon, ChevronDown, Loader2 } from 'lucide-react';
 import { db, auth } from './firebase';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy, QuerySnapshot, DocumentData } from 'firebase/firestore';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { useToast } from './components/Toast';
+
+// Lazy Load heavy or conditional components for better initial load performance
+const GameDetail = React.lazy(() => import('./components/GameDetail'));
+const GameForm = React.lazy(() => import('./components/GameForm'));
+const AdminPanel = React.lazy(() => import('./components/AdminPanel'));
+const LoginModal = React.lazy(() => import('./components/LoginModal'));
+const SitemapView = React.lazy(() => import('./components/SitemapView'));
 
 const ITEMS_PER_PAGE = 20;
 
@@ -30,6 +32,12 @@ const slugify = (text: string) => {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 };
+
+const LoadingSpinner = () => (
+    <div className="flex h-[50vh] w-full items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+    </div>
+);
 
 const App: React.FC = () => {
   // Toast Hook
@@ -454,34 +462,34 @@ const App: React.FC = () => {
   let content;
   
   if (isLoading) {
-      content = (
-          <div className="flex h-[50vh] w-full items-center justify-center">
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          </div>
-      );
+      content = <LoadingSpinner />;
   } else if (selectedGame) {
     content = (
         <div className="flex w-full justify-center pt-8">
-            <GameDetail 
-                game={selectedGame}
-                allGames={games} 
-                onBack={handleBack} 
-                onSelectGame={handleSelectGame}
-                onSelectConsole={handleSelectConsole}
-                onHome={handleHome}
-                onEdit={handleEditGame}
-                onDelete={handleDeleteGame}
-                onReport={handleReportGame}
-                isLoggedIn={isLoggedIn}
-            />
+            <Suspense fallback={<LoadingSpinner />}>
+                <GameDetail 
+                    game={selectedGame}
+                    allGames={games} 
+                    onBack={handleBack} 
+                    onSelectGame={handleSelectGame}
+                    onSelectConsole={handleSelectConsole}
+                    onHome={handleHome}
+                    onEdit={handleEditGame}
+                    onDelete={handleDeleteGame}
+                    onReport={handleReportGame}
+                    isLoggedIn={isLoggedIn}
+                />
+            </Suspense>
         </div>
     );
   } else if (isSitemapOpen) {
       content = (
-          <SitemapView 
-            games={games} 
-            onSelectGame={handleSelectGame} 
-          />
+          <Suspense fallback={<LoadingSpinner />}>
+              <SitemapView 
+                games={games} 
+                onSelectGame={handleSelectGame} 
+              />
+          </Suspense>
       );
   } else {
     content = (
@@ -641,31 +649,32 @@ const App: React.FC = () => {
 
       <Footer onOpenSitemap={handleOpenSitemap} />
 
-      {/* Modals */}
-      <GameForm 
-        isOpen={isFormOpen} 
-        onClose={() => setIsFormOpen(false)} 
-        onSubmit={handleFormSubmit}
-        initialData={editingGame}
-      />
+      {/* Modals - Wrapped in Suspense */}
+      <Suspense fallback={null}>
+          <GameForm 
+            isOpen={isFormOpen} 
+            onClose={() => setIsFormOpen(false)} 
+            onSubmit={handleFormSubmit}
+            initialData={editingGame}
+          />
 
-      <AdminPanel 
-        isOpen={isAdminPanelOpen}
-        onClose={() => setIsAdminPanelOpen(false)}
-        reports={reports}
-        onResolve={handleResolveReport}
-        onDelete={handleDeleteReport}
-        onNavigateToGame={handleNavigateFromAdmin}
-      />
+          <AdminPanel 
+            isOpen={isAdminPanelOpen}
+            onClose={() => setIsAdminPanelOpen(false)}
+            reports={reports}
+            onResolve={handleResolveReport}
+            onDelete={handleDeleteReport}
+            onNavigateToGame={handleNavigateFromAdmin}
+          />
 
-      <LoginModal 
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-        onLogin={(status) => {
-            // This is now handled by onAuthStateChanged, but kept for compatibility with the component props
-            if (status) setIsAdminPanelOpen(true);
-        }}
-      />
+          <LoginModal 
+            isOpen={isLoginModalOpen}
+            onClose={() => setIsLoginModalOpen(false)}
+            onLogin={(status) => {
+                if (status) setIsAdminPanelOpen(true);
+            }}
+          />
+      </Suspense>
 
     </div>
   );

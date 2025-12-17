@@ -29,29 +29,8 @@ const LanguageFlags = ({ languages }: { languages: Game['languages'] }) => (
   </div>
 );
 
-const GameList: React.FC<GameListProps> = ({ games, viewMode, onSelectGame, onSelectConsole }) => {
-  if (games.length === 0) {
-    return (
-      <div className="text-center py-20">
-        <p className="text-xl text-text-muted font-medium">No artifacts found in the archives.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className={`w-full ${viewMode === 'grid' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8' : 'flex flex-col gap-6'}`}>
-      {games.map((game) => (
-        viewMode === 'list' ? (
-          <ListCard key={game.id} game={game} onClick={() => onSelectGame(game)} onSelectConsole={onSelectConsole} />
-        ) : (
-          <GridCard key={game.id} game={game} onClick={() => onSelectGame(game)} onSelectConsole={onSelectConsole} />
-        )
-      ))}
-    </div>
-  );
-};
-
-const ListCard: React.FC<{ game: Game; onClick: () => void; onSelectConsole: (c: string) => void }> = ({ game, onClick, onSelectConsole }) => (
+// Optimize ListCard with memo
+const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: (c: string) => void }>(({ game, onClick, onSelectConsole }) => (
   <article 
     onClick={onClick}
     className="group flex flex-col md:flex-row gap-6 rounded-3xl bg-surface p-5 shadow-soft hover:shadow-hover border border-transparent hover:border-primary/50 transition-all duration-300 cursor-pointer"
@@ -109,9 +88,10 @@ const ListCard: React.FC<{ game: Game; onClick: () => void; onSelectConsole: (c:
       </div>
     </div>
   </article>
-);
+));
 
-const GridCard: React.FC<{ game: Game; onClick: () => void; onSelectConsole: (c: string) => void }> = ({ game, onClick, onSelectConsole }) => (
+// Optimize GridCard with memo and lazy loading
+const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: (c: string) => void }>(({ game, onClick, onSelectConsole }) => (
   <article 
     onClick={onClick}
     className="group flex flex-col bg-surface rounded-3xl border border-border-color hover:border-primary/60 hover:shadow-hover transition-all duration-300 overflow-hidden h-full cursor-pointer"
@@ -120,6 +100,8 @@ const GridCard: React.FC<{ game: Game; onClick: () => void; onSelectConsole: (c:
       <img 
         src={game.imageUrl} 
         alt={game.title} 
+        loading="lazy"
+        decoding="async"
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
@@ -172,6 +154,28 @@ const GridCard: React.FC<{ game: Game; onClick: () => void; onSelectConsole: (c:
       </p>
     </div>
   </article>
-);
+));
 
-export default GameList;
+const GameList: React.FC<GameListProps> = ({ games, viewMode, onSelectGame, onSelectConsole }) => {
+  if (games.length === 0) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-xl text-text-muted font-medium">No artifacts found in the archives.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`w-full ${viewMode === 'grid' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8' : 'flex flex-col gap-6'}`}>
+      {games.map((game) => (
+        viewMode === 'list' ? (
+          <ListCard key={game.id} game={game} onClick={() => onSelectGame(game)} onSelectConsole={onSelectConsole} />
+        ) : (
+          <GridCard key={game.id} game={game} onClick={() => onSelectGame(game)} onSelectConsole={onSelectConsole} />
+        )
+      ))}
+    </div>
+  );
+};
+
+export default React.memo(GameList);

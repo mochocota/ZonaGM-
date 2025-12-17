@@ -24,6 +24,7 @@ const emptyGame: Omit<Game, 'id'> = {
   downloadUrl: '',
   downloads: 0,
   rating: 0,
+  voteCount: 0,
   languages: ['English'],
   comments: []
 };
@@ -147,6 +148,7 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
         publisher: data.publisher,
         console: data.console, // Use whatever string comes back, or user can change it
         rating: data.rating > 0 ? data.rating : prev.rating,
+        voteCount: data.voteCount || 0, // Import vote count
         // Autofill size if empty to prevent validation block (IGDB doesn't provide file size)
         size: prev.size || 'TBD',
         format: prev.format || suggestedFormat
@@ -475,7 +477,7 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
             </div>
             
              {/* Stats (Initial values for edit or create) */}
-             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border-color/50">
+             <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border-color/50">
                 <div className="space-y-2">
                     <label className="text-xs font-bold uppercase text-text-muted">Downloads</label>
                     <input
@@ -494,6 +496,16 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
                     min="0"
                     value={formData.rating}
                     onChange={e => setFormData({ ...formData, rating: parseFloat(e.target.value) || 0 })}
+                    className="w-full bg-surface border border-border-color rounded-xl px-4 py-2 focus:outline-none focus:border-primary"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase text-text-muted">Votes (Count)</label>
+                    <input
+                    type="number"
+                    min="0"
+                    value={formData.voteCount || 0}
+                    onChange={e => setFormData({ ...formData, voteCount: parseInt(e.target.value) || 0 })}
                     className="w-full bg-surface border border-border-color rounded-xl px-4 py-2 focus:outline-none focus:border-primary"
                     />
                 </div>

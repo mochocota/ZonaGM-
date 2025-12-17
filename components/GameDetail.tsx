@@ -213,12 +213,14 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
   // Local state for Optimistic Updates (UI reflects changes immediately even if backend fails)
   const [localComments, setLocalComments] = useState<Comment[]>(game.comments || []);
   const [localRating, setLocalRating] = useState(game.rating || 0);
+  const [localVoteCount, setLocalVoteCount] = useState(game.voteCount || 0);
   
   // Sync local state when props change (e.g. real backend update arrived)
   useEffect(() => {
     setLocalComments(game.comments || []);
     setLocalRating(game.rating || 0);
-  }, [game.comments, game.rating]);
+    setLocalVoteCount(game.voteCount || 0);
+  }, [game.comments, game.rating, game.voteCount]);
 
   // Extract YouTube ID from description automatically
   const youtubeVideoId = useMemo(() => getYoutubeId(game.description), [game.description]);
@@ -427,20 +429,28 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
   const handleRateGame = async (score: number) => {
     if (hasRated) return;
 
-    // Simulate update locally first
+    // Calculate new average based on vote counts
+    const currentCount = localVoteCount;
     const currentRating = localRating;
-    const simulatedNewRating = ((currentRating * 20) + score) / 21; // Simple weighted average
-    const finalRating = parseFloat(simulatedNewRating.toFixed(1));
+    const newCount = currentCount + 1;
+    // Mathematical formula for new average
+    const newRating = ((currentRating * currentCount) + score) / newCount;
+    
+    const finalRating = parseFloat(newRating.toFixed(1));
     
     // Optimistic UI Update
     setLocalRating(finalRating);
+    setLocalVoteCount(newCount);
     setHasRated(true);
     setRatingMessage('¡Gracias por calificar el juego!');
     localStorage.setItem(`rated_${game.id}`, 'true');
     
     try {
         const gameRef = doc(db, 'games', game.id);
-        await updateDoc(gameRef, { rating: finalRating });
+        await updateDoc(gameRef, { 
+            rating: finalRating,
+            voteCount: newCount
+        });
     } catch (error: any) {
         console.warn("Error updating rating:", error);
         if (error.code === 'permission-denied') {
@@ -949,8 +959,9 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                         </button>
                         ))}
                     </div>
-                    <div className="text-2xl font-bold text-text-main flex items-baseline gap-1">
+                    <div className="text-2xl font-bold text-text-main flex items-baseline gap-1.5">
                         {(localRating).toFixed(1)} <span className="text-sm text-text-muted font-normal">/ 5.0</span>
+                        <span className="text-xs text-text-muted font-medium ml-1">• {localVoteCount} votos</span>
                     </div>
                     {ratingMessage && (
                         <div className="flex items-center gap-2 text-green-600 font-bold text-sm mt-1 animate-fade-in">

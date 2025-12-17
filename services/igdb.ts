@@ -34,7 +34,7 @@ export async function searchIGDB(query: string) {
     // We look for name, summary (description), first_release_date (year), cover, involved_companies (publisher), platforms, total_rating, screenshots
     // Limit increased to 50 to help find games that might be buried
     const queryBody = `
-      fields name, summary, first_release_date, cover.url, platforms.name, involved_companies.company.name, total_rating, screenshots.url;
+      fields name, summary, first_release_date, cover.url, platforms.name, involved_companies.company.name, total_rating, total_rating_count, screenshots.url;
       search "${sanitizedQuery}";
       limit 50;
     `;
@@ -90,6 +90,9 @@ export async function searchIGDB(query: string) {
         if (game.total_rating) {
         rating = parseFloat((game.total_rating / 20).toFixed(1));
         }
+
+        // Vote Count
+        let voteCount = game.total_rating_count || 0;
 
         // Console Mapping
         let consoleType = 'Other'; 
@@ -161,7 +164,8 @@ export async function searchIGDB(query: string) {
             screenshots,
             publisher,
             console: consoleType,
-            rating
+            rating,
+            voteCount
         };
     });
 

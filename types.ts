@@ -21,6 +21,7 @@ export interface Game {
   downloadUrl?: string;
   downloads: number;
   rating: number;
+  voteCount?: number; // Added to track number of votes
   languages: ('English' | 'Spanish' | 'Japanese' | 'Multi')[];
   comments?: Comment[];
 }

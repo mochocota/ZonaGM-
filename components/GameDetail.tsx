@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Game, Comment } from '../types';
-import { Download, HardDrive, Calendar, Gamepad2, Layers, ShieldCheck, MessageSquare, Send, User, Globe, Star, Pencil, Trash2, Sparkles, Image as ImageIcon, X, AlertTriangle, Crown, Ban, CornerDownRight, ChevronDown, CheckCircle2, Lock, Unlock, Timer, Loader2, ChevronRight, Home, Share2, Facebook, Twitter } from 'lucide-react';
+import { Download, HardDrive, Calendar, Gamepad2, Layers, ShieldCheck, MessageSquare, Send, User, Globe, Star, Pencil, Trash2, Sparkles, Image as ImageIcon, X, AlertTriangle, Crown, Ban, CornerDownRight, ChevronDown, CheckCircle2, Lock, Unlock, Timer, Loader2, ChevronRight, Home, Share2, Facebook, Twitter, Youtube } from 'lucide-react';
 import SEO from './SEO';
 import { db } from '../firebase';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
@@ -28,6 +28,14 @@ const FORBIDDEN_WORDS = [
     // Insultos (Inglés)
     'fuck', 'shit', 'bitch', 'asshole', 'cunt', 'dick', 'scam'
 ];
+
+// Helper to extract YouTube ID from text
+const getYoutubeId = (text: string) => {
+  if (!text) return null;
+  const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const match = text.match(regex);
+  return match ? match[1] : null;
+};
 
 // Custom SVGs for brands not in standard lucide set or specific styling
 const WhatsAppIcon = () => (
@@ -211,6 +219,9 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
     setLocalComments(game.comments || []);
     setLocalRating(game.rating || 0);
   }, [game.comments, game.rating]);
+
+  // Extract YouTube ID from description automatically
+  const youtubeVideoId = useMemo(() => getYoutubeId(game.description), [game.description]);
 
   // Accordion State
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
@@ -706,7 +717,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                     </button>
                     <button 
                         onClick={() => setIsDeleteModalOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface border border-border-color hover:border-red-500 hover:text-red-500 hover:bg-red-50 transition-all text-sm font-medium"
+                        className="flex-1 sm:flex-none flex items-center gap-2 px-4 py-2 rounded-full bg-surface border border-border-color hover:border-red-500 hover:text-red-500 hover:bg-red-50 transition-all text-sm font-medium"
                     >
                         <Trash2 size={16} />
                         <span className="hidden sm:inline">Delete</span>
@@ -756,11 +767,33 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                         className="w-full h-auto rounded-xl shadow-md border border-border-color hover:scale-105 transition-transform duration-300"
                     />
                     </div>
-                    <p className="text-text-muted leading-relaxed text-lg">
-                    {game.description}
-                    </p>
+                    <div className="flex-1">
+                        <p className="text-text-muted leading-relaxed text-lg whitespace-pre-wrap">
+                        {game.description}
+                        </p>
+                    </div>
                 </div>
                 </section>
+
+                {/* AUTOMATIC YOUTUBE VIDEO SECTION */}
+                {youtubeVideoId && (
+                    <section>
+                        <h3 className="text-xl font-bold text-text-main mb-4 flex items-center gap-2">
+                            <Youtube size={24} className="text-red-600" />
+                            Trailer / Gameplay
+                        </h3>
+                        <div className="rounded-xl overflow-hidden shadow-lg border border-border-color bg-black aspect-video relative group">
+                            <iframe 
+                                className="absolute inset-0 w-full h-full"
+                                src={`https://www.youtube.com/embed/${youtubeVideoId}`} 
+                                title="YouTube video player" 
+                                frameBorder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowFullScreen
+                            ></iframe>
+                        </div>
+                    </section>
+                )}
 
                 {/* Screenshots Section */}
                 {game.screenshots && game.screenshots.length > 0 && (

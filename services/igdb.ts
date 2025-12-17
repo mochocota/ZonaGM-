@@ -71,11 +71,11 @@ export async function searchIGDB(query: string) {
             imageUrl = 'https:' + game.cover.url.replace('t_thumb', 't_cover_big_2x');
         }
 
-        // Screenshots (Convert to 1080p)
+        // Screenshots (Use original quality for best resolution)
         let screenshots: string[] = [];
         if (game.screenshots && game.screenshots.length > 0) {
             screenshots = game.screenshots.map((s: any) => 
-                'https:' + s.url.replace('t_thumb', 't_1080p')
+                'https:' + s.url.replace('t_thumb', 't_original')
             ).slice(0, 4); // Take up to 4 screenshots
         }
 

@@ -29,17 +29,24 @@ const LanguageFlags = ({ languages }: { languages: Game['languages'] }) => (
   </div>
 );
 
-// Optimize ListCard with memo
-const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: (c: string) => void }>(({ game, onClick, onSelectConsole }) => (
+// Optimize ListCard with memo and img tag instead of background-image for LCP
+const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: (c: string) => void; priority: boolean }>(({ game, onClick, onSelectConsole, priority }) => (
   <article 
     onClick={onClick}
-    className="group flex flex-col md:flex-row gap-6 rounded-3xl bg-surface p-5 shadow-soft hover:shadow-hover border border-transparent hover:border-primary/50 transition-all duration-300 cursor-pointer"
+    className="group flex flex-col md:flex-row gap-6 rounded-3xl bg-surface p-5 shadow-soft hover:shadow-hover border border-transparent hover:border-primary/50 transition-all duration-300 cursor-pointer content-visibility-auto contain-content"
   >
     <div className="shrink-0 mx-auto md:mx-0">
-      <div 
-        className="h-[240px] w-[180px] md:h-[220px] md:w-[160px] rounded-2xl bg-gray-200 bg-cover bg-center overflow-hidden relative shadow-inner"
-        style={{ backgroundImage: `url('${game.imageUrl}')` }}
-      >
+      <div className="h-[240px] w-[180px] md:h-[220px] md:w-[160px] rounded-2xl bg-gray-200 overflow-hidden relative shadow-inner">
+        <img 
+            src={game.imageUrl} 
+            alt={game.title}
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
+            width="160"
+            height="220"
+            decoding="async"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
       </div>
     </div>
@@ -90,17 +97,20 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
   </article>
 ));
 
-// Optimize GridCard with memo and lazy loading
-const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: (c: string) => void }>(({ game, onClick, onSelectConsole }) => (
+// Optimize GridCard with memo and lazy loading logic
+const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: (c: string) => void; priority: boolean }>(({ game, onClick, onSelectConsole, priority }) => (
   <article 
     onClick={onClick}
-    className="group flex flex-col bg-surface rounded-3xl border border-border-color hover:border-primary/60 hover:shadow-hover transition-all duration-300 overflow-hidden h-full cursor-pointer"
+    className="group flex flex-col bg-surface rounded-3xl border border-border-color hover:border-primary/60 hover:shadow-hover transition-all duration-300 overflow-hidden h-full cursor-pointer content-visibility-auto contain-content"
   >
     <div className="relative w-full aspect-[3/4] bg-gray-100 overflow-hidden">
       <img 
         src={game.imageUrl} 
         alt={game.title} 
-        loading="lazy"
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
+        width="300" 
+        height="400"
         decoding="async"
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
       />
@@ -167,13 +177,29 @@ const GameList: React.FC<GameListProps> = ({ games, viewMode, onSelectGame, onSe
 
   return (
     <div className={`w-full ${viewMode === 'grid' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8' : 'flex flex-col gap-6'}`}>
-      {games.map((game) => (
-        viewMode === 'list' ? (
-          <ListCard key={game.id} game={game} onClick={() => onSelectGame(game)} onSelectConsole={onSelectConsole} />
+      {games.map((game, index) => {
+        // First 4 items are eager loaded for LCP (Largest Contentful Paint)
+        // Others are lazy loaded to save bandwidth and thread time
+        const isPriority = index < 4;
+
+        return viewMode === 'list' ? (
+          <ListCard 
+            key={game.id} 
+            game={game} 
+            onClick={() => onSelectGame(game)} 
+            onSelectConsole={onSelectConsole}
+            priority={isPriority}
+          />
         ) : (
-          <GridCard key={game.id} game={game} onClick={() => onSelectGame(game)} onSelectConsole={onSelectConsole} />
-        )
-      ))}
+          <GridCard 
+            key={game.id} 
+            game={game} 
+            onClick={() => onSelectGame(game)} 
+            onSelectConsole={onSelectConsole}
+            priority={isPriority}
+          />
+        );
+      })}
     </div>
   );
 };

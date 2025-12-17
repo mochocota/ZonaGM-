@@ -6,39 +6,40 @@ const AdBlockDetector: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // 1. Create a "bait" element that adblockers usually target
-    const bait = document.createElement('div');
-    bait.className = 'adsbox ad-banner pub_300x250';
-    bait.style.cssText = 'position: absolute; top: -1000px; left: -1000px; width: 1px; height: 1px;';
-    bait.innerHTML = '&nbsp;';
-    document.body.appendChild(bait);
+    // Delay execution significantly to allow LCP and hydration to finish first
+    const timer = setTimeout(() => {
+        // 1. Create a "bait" element that adblockers usually target
+        const bait = document.createElement('div');
+        bait.className = 'adsbox ad-banner pub_300x250';
+        bait.style.cssText = 'position: absolute; top: -1000px; left: -1000px; width: 1px; height: 1px;';
+        bait.innerHTML = '&nbsp;';
+        document.body.appendChild(bait);
 
-    // 2. Check if the element was blocked (hidden or had its size reduced to 0)
-    const checkAdBlock = () => {
-      setTimeout(() => {
-        if (
-          bait.offsetParent === null ||
-          bait.offsetHeight === 0 ||
-          bait.offsetLeft === 0 ||
-          bait.offsetTop === 0 ||
-          bait.offsetWidth === 0 ||
-          bait.clientHeight === 0 ||
-          bait.clientWidth === 0 ||
-          window.getComputedStyle(bait).display === 'none'
-        ) {
-          setIsAdBlockDetected(true);
-          setIsOpen(true);
-        }
-        // Cleanup
-        try {
-          document.body.removeChild(bait);
-        } catch (e) {
-          // Ignore if already removed
-        }
-      }, 2000); // Wait a bit for the extension to apply rules
-    };
+        // 2. Check if the element was blocked
+        setTimeout(() => {
+            if (
+            bait.offsetParent === null ||
+            bait.offsetHeight === 0 ||
+            bait.offsetLeft === 0 ||
+            bait.offsetTop === 0 ||
+            bait.offsetWidth === 0 ||
+            bait.clientHeight === 0 ||
+            bait.clientWidth === 0 ||
+            window.getComputedStyle(bait).display === 'none'
+            ) {
+            setIsAdBlockDetected(true);
+            setIsOpen(true);
+            }
+            // Cleanup
+            try {
+            document.body.removeChild(bait);
+            } catch (e) {
+            // Ignore
+            }
+        }, 200); // Short check delay
+    }, 4000); // 4 Seconds delay after mount before even trying
 
-    checkAdBlock();
+    return () => clearTimeout(timer);
   }, []);
 
   if (!isAdBlockDetected || !isOpen) return null;
@@ -47,7 +48,7 @@ const AdBlockDetector: React.FC = () => {
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
       <div className="bg-surface w-full max-w-md rounded-3xl shadow-2xl border border-primary/50 p-6 relative animate-zoom-in">
         
-        {/* Close Button (Optional: Remove this if you want to force them to disable it) */}
+        {/* Close Button */}
         <button 
           onClick={() => setIsOpen(false)}
           className="absolute top-4 right-4 text-text-muted hover:text-text-main transition-colors"

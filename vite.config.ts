@@ -5,6 +5,9 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: 'dist',
+    target: 'esnext', // Use modern JS features which are smaller and faster
+    minify: 'esbuild', // Faster and often better than terser for standard React apps
+    cssMinify: true,
     rollupOptions: {
       output: {
         manualChunks: {

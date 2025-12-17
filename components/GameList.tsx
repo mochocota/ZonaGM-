@@ -44,7 +44,7 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
             fetchPriority={priority ? "high" : "auto"}
             width="160"
             height="220"
-            decoding="async"
+            decoding={priority ? "sync" : "async"} 
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
@@ -111,7 +111,7 @@ const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
         fetchPriority={priority ? "high" : "auto"}
         width="300" 
         height="400"
-        decoding="async"
+        decoding={priority ? "sync" : "async"}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />

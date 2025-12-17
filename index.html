@@ -14,6 +14,25 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Performance: Added display=swap to ensure text is visible immediately while font loads -->
     <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Critical CSS: Paints the background and basic structure immediately without waiting for Tailwind/JS -->
+    <style>
+      body {
+        margin: 0;
+        background-color: #F8F8F5; /* Matches var(--color-background) */
+        color: #1C1C0D; /* Matches var(--color-text-main) */
+        font-family: 'Spline Sans', sans-serif;
+        min-height: 100vh;
+      }
+      /* Dark mode critical css support via js toggle later, but start light for speed if default */
+      @media (prefers-color-scheme: dark) {
+        body {
+           background-color: #09090b;
+           color: #f4f4f5;
+        }
+      }
+    </style>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {

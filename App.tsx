@@ -6,6 +6,7 @@ import Footer from './components/Footer';
 import SEO from './components/SEO';
 import AdBlockDetector from './components/AdBlockDetector';
 import { SortOption, Game, Report } from './types';
+import { GAMES } from './constants'; // Import static data for instant render
 import { LayoutGrid, List as ListIcon, ChevronDown, Loader2 } from 'lucide-react';
 import { db, auth } from './firebase';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy, QuerySnapshot, DocumentData } from 'firebase/firestore';
@@ -44,9 +45,12 @@ const App: React.FC = () => {
   const { toast } = useToast();
 
   // Main Data State
-  const [games, setGames] = useState<Game[]>([]);
+  // PERFORMANCE CRITICAL: Initialize with GAMES (static) instead of empty array.
+  // This ensures LCP happens immediately without waiting for Firebase.
+  const [games, setGames] = useState<Game[]>(GAMES); 
   const [reports, setReports] = useState<Report[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // PERFORMANCE: Start as false because we have static data to show
+  const [isLoading, setIsLoading] = useState(false); 
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('Relevance');
@@ -108,14 +112,17 @@ const App: React.FC = () => {
             id: doc.id,
             ...doc.data()
         })) as Game[];
-        setGames(gamesData);
+        
+        // Only update if we actually got data, otherwise keep static data
+        if (gamesData.length > 0) {
+            setGames(gamesData);
+        }
         
         // Update selected game if it exists to keep it in sync
         if (selectedGame) {
            const updatedSelected = gamesData.find(g => g.id === selectedGame.id);
            if (updatedSelected) setSelectedGame(updatedSelected);
         }
-        setIsLoading(false);
     }, (error) => {
         console.error("Error reading games:", error);
         // If read fails, it's likely rules too
@@ -169,8 +176,6 @@ const App: React.FC = () => {
 
   // Handle URL Params for SEO (Deep Linking)
   useEffect(() => {
-    if (isLoading) return; // Wait for data load
-    
     const handlePopState = () => {
         const params = new URLSearchParams(window.location.search);
         const gameSlug = params.get('game');
@@ -206,7 +211,7 @@ const App: React.FC = () => {
     // Listen for back/forward button
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [games, isLoading]);
+  }, [games]); // Depend on games to retry finding selected game once data loads
 
   // Reset pagination when search or sort changes
   useEffect(() => {
@@ -462,6 +467,7 @@ const App: React.FC = () => {
   let content;
   
   if (isLoading) {
+      // PERFORMANCE: This case is now rare because we init with GAMES
       content = <LoadingSpinner />;
   } else if (selectedGame) {
     content = (

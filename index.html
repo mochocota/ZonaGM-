@@ -6,30 +6,38 @@
     <title>ZonaGM</title>
     <meta name="description" content="Search the Archive for verified ISOs and ROMs. Secure downloads for GameCube, PS2, SNES and more." />
     <meta name="robots" content="index, follow" />
-    
-    <!-- Security: Hide traffic source (Referrer) from external links -->
     <meta name="referrer" content="no-referrer" />
 
+    <!-- Performance: Preconnect to Image Domains -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Performance: Added display=swap to ensure text is visible immediately while font loads -->
+    <link rel="preconnect" href="https://lh3.googleusercontent.com">
+    <link rel="preconnect" href="https://images.igdb.com">
+
     <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Critical CSS: Paints the background and basic structure immediately without waiting for Tailwind/JS -->
+    <!-- Critical CSS -->
     <style>
       body {
         margin: 0;
-        background-color: #F8F8F5; /* Matches var(--color-background) */
-        color: #1C1C0D; /* Matches var(--color-text-main) */
+        background-color: #F8F8F5;
+        color: #1C1C0D;
         font-family: 'Spline Sans', sans-serif;
         min-height: 100vh;
+        /* Performance: Optimize text rendering */
+        text-rendering: optimizeSpeed;
+        -webkit-font-smoothing: antialiased;
       }
-      /* Dark mode critical css support via js toggle later, but start light for speed if default */
       @media (prefers-color-scheme: dark) {
         body {
            background-color: #09090b;
            color: #f4f4f5;
         }
+      }
+      /* Reduce paint cost for scrolling elements */
+      .scroll-gpu {
+        transform: translateZ(0);
+        backface-visibility: hidden;
       }
     </style>
 
@@ -57,33 +65,11 @@
             },
             animation: {
               'fade-in': 'fadeIn 0.3s ease-out forwards',
-              'slide-in-right': 'slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'slide-in-up': 'slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'slide-in-down': 'slideInDown 0.3s ease-out forwards',
               'zoom-in': 'zoomIn 0.2s ease-out forwards',
-              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             },
             keyframes: {
-              fadeIn: {
-                '0%': { opacity: '0' },
-                '100%': { opacity: '1' },
-              },
-              slideInRight: {
-                '0%': { transform: 'translateX(100%)', opacity: '0' },
-                '100%': { transform: 'translateX(0)', opacity: '1' },
-              },
-              slideInUp: {
-                '0%': { transform: 'translateY(20px)', opacity: '0' },
-                '100%': { transform: 'translateY(0)', opacity: '1' },
-              },
-              slideInDown: {
-                '0%': { transform: 'translateY(-10px)', opacity: '0' },
-                '100%': { transform: 'translateY(0)', opacity: '1' },
-              },
-              zoomIn: {
-                '0%': { transform: 'scale(0.95)', opacity: '0' },
-                '100%': { transform: 'scale(1)', opacity: '1' },
-              }
+              fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+              zoomIn: { '0%': { transform: 'scale(0.95)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } }
             }
           },
         },
@@ -91,7 +77,6 @@
     </script>
     <style>
       :root {
-        /* Light Mode Defaults */
         --color-primary: #F9F506;
         --color-primary-hover: #EBE705;
         --color-background: #F8F8F5;
@@ -99,50 +84,23 @@
         --color-text-main: #1C1C0D;
         --color-text-muted: #5C5C4F;
         --color-border: #E9E8CE;
-        
         --shadow-soft: 0 4px 20px -2px rgba(28, 28, 13, 0.05);
         --shadow-hover: 0 10px 25px -5px rgba(28, 28, 13, 0.1);
       }
-
-      /* Dark Mode Overrides */
       .dark {
         --color-primary: #F9F506;
         --color-primary-hover: #EBE705;
-        --color-background: #09090b; /* Zinc 950 */
-        --color-surface: #18181b;    /* Zinc 900 */
-        --color-text-main: #f4f4f5;  /* Zinc 100 */
-        --color-text-muted: #a1a1aa; /* Zinc 400 */
-        --color-border: #27272a;     /* Zinc 800 */
-
+        --color-background: #09090b;
+        --color-surface: #18181b;
+        --color-text-main: #f4f4f5;
+        --color-text-muted: #a1a1aa;
+        --color-border: #27272a;
         --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
         --shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
       }
-
       body {
         background-color: var(--color-background);
         color: var(--color-text-main);
-        transition: background-color 0.3s ease, color 0.3s ease;
-      }
-      
-      /* Smooth scrollbar */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #D4D4D0;
-        border-radius: 4px;
-      }
-      .dark ::-webkit-scrollbar-thumb {
-        background: #3f3f46;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #BEBEBA;
-      }
-      .dark ::-webkit-scrollbar-thumb:hover {
-        background: #52525b;
       }
     </style>
   <script type="importmap">

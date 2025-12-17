@@ -29,11 +29,11 @@ const LanguageFlags = ({ languages }: { languages: Game['languages'] }) => (
   </div>
 );
 
-// Optimize ListCard with memo and img tag instead of background-image for LCP
+// Optimize ListCard: Removed complex hover effects on image container for mobile perf
 const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: (c: string) => void; priority: boolean }>(({ game, onClick, onSelectConsole, priority }) => (
   <article 
     onClick={onClick}
-    className="group flex flex-col md:flex-row gap-6 rounded-3xl bg-surface p-5 shadow-soft hover:shadow-hover border border-transparent hover:border-primary/50 transition-all duration-300 cursor-pointer content-visibility-auto contain-content"
+    className="group flex flex-col md:flex-row gap-6 rounded-3xl bg-surface p-5 shadow-soft border border-transparent transition-colors duration-200 cursor-pointer content-visibility-auto contain-content"
   >
     <div className="shrink-0 mx-auto md:mx-0">
       <div className="h-[240px] w-[180px] md:h-[220px] md:w-[160px] rounded-2xl bg-gray-200 overflow-hidden relative shadow-inner">
@@ -44,10 +44,10 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
             fetchPriority={priority ? "high" : "auto"}
             width="160"
             height="220"
-            decoding={priority ? "sync" : "async"} 
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            decoding="async"
+            className="w-full h-full object-cover transform-gpu"
         />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+        {/* Removed gradient overlay on list view for cleaner paint */}
       </div>
     </div>
     
@@ -59,7 +59,7 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
                 e.stopPropagation();
                 onSelectConsole(game.console);
             }}
-            className="bg-background border border-border-color text-text-muted px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide hover:border-primary hover:text-primary transition-colors hover:shadow-sm"
+            className="bg-background border border-border-color text-text-muted px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide"
           >
             {game.console}
           </button>
@@ -70,7 +70,7 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
           <LanguageFlags languages={game.languages} />
         </div>
         
-        <h3 className="text-2xl font-bold text-text-main mb-3 group-hover:text-primary-hover transition-colors">
+        <h3 className="text-2xl font-bold text-text-main mb-3">
           {game.title}
         </h3>
         
@@ -97,11 +97,11 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
   </article>
 ));
 
-// Optimize GridCard with memo and lazy loading logic
+// Optimize GridCard: Removed backdrop-blur, added GPU transform, simplified layers
 const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: (c: string) => void; priority: boolean }>(({ game, onClick, onSelectConsole, priority }) => (
   <article 
     onClick={onClick}
-    className="group flex flex-col bg-surface rounded-3xl border border-border-color hover:border-primary/60 hover:shadow-hover transition-all duration-300 overflow-hidden h-full cursor-pointer content-visibility-auto contain-content"
+    className="group flex flex-col bg-surface rounded-3xl border border-border-color overflow-hidden h-full cursor-pointer content-visibility-auto contain-content scroll-gpu"
   >
     <div className="relative w-full aspect-[3/4] bg-gray-100 overflow-hidden">
       <img 
@@ -111,43 +111,40 @@ const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
         fetchPriority={priority ? "high" : "auto"}
         width="300" 
         height="400"
-        decoding={priority ? "sync" : "async"}
-        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+        decoding="async"
+        className="w-full h-full object-cover transform-gpu transition-transform duration-500 group-hover:scale-105" 
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-60" />
       
+      {/* Replaced backdrop-blur with simple semi-transparent bg for high performance */}
       <button 
         onClick={(e) => {
             e.stopPropagation();
             onSelectConsole(game.console);
         }}
-        className="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm text-white border border-white/10 hover:bg-primary hover:text-black transition-colors"
+        className="absolute top-3 left-3 bg-black/70 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider text-white border border-white/10"
       >
         {game.console}
       </button>
       
-      <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg shadow-sm border border-white/10">
+      <div className="absolute top-3 right-3 bg-black/70 px-2 py-1 rounded-lg border border-white/10">
         <LanguageFlags languages={game.languages} />
       </div>
 
-      {/* Stats Overlay on Image (Mobile/Compact) */}
       <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[10px] font-bold text-white/90">
          <div className="flex items-center gap-1.5">
-            <div className="flex items-center gap-1 bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">
+            <div className="flex items-center gap-1 bg-black/60 px-2 py-1 rounded-md">
                 <Download size={12} /> {formatNumber(game.downloads)}
             </div>
-            <div className="flex items-center gap-1 bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">
+            <div className="flex items-center gap-1 bg-black/60 px-2 py-1 rounded-md">
                 <Star size={12} className="fill-primary text-primary" /> {game.rating}
             </div>
-         </div>
-         <div className="flex items-center gap-1 bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">
-            <MessageSquare size={12} /> {game.comments?.length || 0}
          </div>
       </div>
     </div>
     
     <div className="p-4 flex flex-col flex-grow">
-      <h3 className="text-base md:text-lg font-bold text-text-main leading-snug line-clamp-2 mb-2 group-hover:text-primary-hover transition-colors" title={game.title}>
+      <h3 className="text-base md:text-lg font-bold text-text-main leading-snug line-clamp-2 mb-2" title={game.title}>
         {game.title}
       </h3>
       
@@ -158,10 +155,6 @@ const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
         <span className="opacity-50">•</span>
         <span>{game.size}</span>
       </div>
-      
-      <p className="text-text-muted text-xs leading-relaxed line-clamp-3 font-sans opacity-80">
-        {game.description}
-      </p>
     </div>
   </article>
 ));
@@ -178,9 +171,8 @@ const GameList: React.FC<GameListProps> = ({ games, viewMode, onSelectGame, onSe
   return (
     <div className={`w-full ${viewMode === 'grid' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8' : 'flex flex-col gap-6'}`}>
       {games.map((game, index) => {
-        // First 4 items are eager loaded for LCP (Largest Contentful Paint)
-        // Others are lazy loaded to save bandwidth and thread time
-        const isPriority = index < 4;
+        // Priority only for the very first image to avoid clogging bandwidth
+        const isPriority = index === 0;
 
         return viewMode === 'list' ? (
           <ListCard 

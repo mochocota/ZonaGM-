@@ -92,16 +92,65 @@ export async function searchIGDB(query: string) {
         }
 
         // Console Mapping
-        let consoleType = 'GameCube'; // Default fallback
-        if (game.platforms) {
-        const platformNames = game.platforms.map((p: any) => p.name);
+        let consoleType = 'Other'; 
         
-        // Check priority or match specific names
-        if (platformNames.some((p: string) => p.includes('GameCube'))) consoleType = 'GameCube';
-        else if (platformNames.some((p: string) => p.includes('PlayStation 2'))) consoleType = 'PS2';
-        else if (platformNames.some((p: string) => p.includes('Super Nintendo'))) consoleType = 'SNES';
-        else if (platformNames.some((p: string) => p.includes('Nintendo 64'))) consoleType = 'N64';
-        else if (platformNames.some((p: string) => p.includes('Game Boy Advance'))) consoleType = 'GBA';
+        if (game.platforms && game.platforms.length > 0) {
+            const platformNames = game.platforms.map((p: any) => p.name);
+            
+            // Comprehensive Mapping List
+            // Checks checks are partial matches against IGDB names
+            const mappings = [
+                { check: 'Nintendo GameCube', val: 'GameCube' },
+                { check: 'GameCube', val: 'GameCube' },
+                { check: 'PlayStation 5', val: 'PlayStation 5' },
+                { check: 'PlayStation 4', val: 'PlayStation 4' },
+                { check: 'PlayStation 3', val: 'PlayStation 3' },
+                { check: 'PlayStation 2', val: 'PS2' },
+                { check: 'PlayStation Portable', val: 'PSP' },
+                { check: 'PlayStation Vita', val: 'PS Vita' },
+                { check: 'PlayStation', val: 'PS1' }, // Specific check for PS1 (IGDB usually calls it PlayStation)
+                { check: 'PS1', val: 'PS1' },
+                { check: 'Xbox Series', val: 'Xbox Series X/S' },
+                { check: 'Xbox 360', val: 'Xbox 360' },
+                { check: 'Xbox', val: 'Xbox' },
+                { check: 'Wii U', val: 'Wii U' },
+                { check: 'Wii', val: 'Wii' },
+                { check: 'Nintendo Switch', val: 'Nintendo Switch' },
+                { check: 'Switch', val: 'Nintendo Switch' },
+                { check: 'Nintendo 3DS', val: 'Nintendo 3DS' },
+                { check: 'Nintendo DS', val: 'Nintendo DS' },
+                { check: 'Nintendo 64', val: 'N64' },
+                { check: 'Super Nintendo', val: 'SNES' },
+                { check: 'SNES', val: 'SNES' },
+                { check: 'Game Boy Advance', val: 'GBA' },
+                { check: 'GBA', val: 'GBA' },
+                { check: 'Dreamcast', val: 'Dreamcast' },
+                { check: 'Saturn', val: 'Saturn' },
+                { check: 'Genesis', val: 'Sega Genesis' },
+                { check: 'Mega Drive', val: 'Sega Genesis' },
+                { check: 'Nintendo Entertainment System', val: 'NES' },
+                { check: 'NES', val: 'NES' },
+                { check: 'Windows', val: 'PC' },
+                { check: 'PC', val: 'PC' },
+                { check: 'Linux', val: 'PC' },
+                { check: 'Mac', val: 'PC' }
+            ];
+
+            // Scan through priority mappings
+            for (const map of mappings) {
+                if (platformNames.some((name: string) => name.includes(map.check))) {
+                    consoleType = map.val;
+                    break;
+                }
+            }
+
+            // If no match found in our list, use the first platform name provided by IGDB
+            if (consoleType === 'Other') {
+                consoleType = platformNames[0];
+            }
+        } else {
+            // No platforms returned by IGDB
+            consoleType = 'GameCube'; // Only then fallback to GameCube or leave blank
         }
 
         return {

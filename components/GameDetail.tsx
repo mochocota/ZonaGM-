@@ -223,6 +223,14 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
   // Extract YouTube ID from description automatically
   const youtubeVideoId = useMemo(() => getYoutubeId(game.description), [game.description]);
 
+  // Generate a clean description without the YouTube URL
+  const cleanDescription = useMemo(() => {
+      if (!game.description) return '';
+      // Regex detects YouTube URLs to remove them from text display
+      const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)[a-zA-Z0-9_-]{11}/g;
+      return game.description.replace(regex, '').trim();
+  }, [game.description]);
+
   // Accordion State
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   
@@ -769,7 +777,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                     </div>
                     <div className="flex-1">
                         <p className="text-text-muted leading-relaxed text-lg whitespace-pre-wrap">
-                        {game.description}
+                        {cleanDescription}
                         </p>
                     </div>
                 </div>

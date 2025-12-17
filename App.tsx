@@ -50,6 +50,8 @@ const App: React.FC = () => {
   const [reports, setReports] = useState<Report[]>([]);
   // FIX: Start loading as true so we wait for Firebase
   const [isLoading, setIsLoading] = useState(true); 
+  // FIX: Track if initial URL routing has been resolved to prevent content flash
+  const [isRouteResolved, setIsRouteResolved] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('Relevance');
@@ -115,7 +117,7 @@ const App: React.FC = () => {
         })) as Game[];
         
         setGames(gamesData);
-        setIsLoading(false); // Data loaded, hide spinner
+        setIsLoading(false); // Data loaded
         
         // Update selected game if it exists to keep it in sync
         if (selectedGame) {
@@ -175,8 +177,8 @@ const App: React.FC = () => {
 
   // Handle URL Params for SEO (Deep Linking)
   useEffect(() => {
-    // Only run this logic if we have games loaded to find the correct one
-    if (games.length === 0 && !isLoading) return; 
+    // Only run this logic if we have finished loading games
+    if (isLoading) return; 
 
     const handlePopState = () => {
         const params = new URLSearchParams(window.location.search);
@@ -184,33 +186,34 @@ const App: React.FC = () => {
         const gameId = params.get('gameId');
         const view = params.get('view');
         
+        let foundGame = null;
+
         if (gameSlug) {
             // Find by slug (Friendly URL)
-            const found = games.find(g => slugify(g.title) === gameSlug);
-            if (found) {
-                setSelectedGame(found);
-                setIsSitemapOpen(false);
-            }
+            foundGame = games.find(g => slugify(g.title) === gameSlug);
         } else if (gameId) {
             // Find by ID (Legacy Support)
-            const found = games.find(g => g.id === gameId);
-            if (found) {
-                setSelectedGame(found);
-                setIsSitemapOpen(false);
-            }
+            foundGame = games.find(g => g.id === gameId);
+        }
+
+        if (foundGame) {
+            setSelectedGame(foundGame);
+            setIsSitemapOpen(false);
         } else if (view === 'sitemap') {
             setIsSitemapOpen(true);
             setSelectedGame(null);
         } else {
+            // Ensure we are at home state if no params
             setSelectedGame(null);
             setIsSitemapOpen(false);
         }
+
+        // Mark routing as resolved so we can show content
+        setIsRouteResolved(true);
     };
 
     // Check once games are loaded
-    if (games.length > 0) {
-        handlePopState();
-    }
+    handlePopState();
 
     // Listen for back/forward button
     window.addEventListener('popstate', handlePopState);
@@ -470,7 +473,7 @@ const App: React.FC = () => {
   // Render Logic
   let content;
   
-  if (isLoading) {
+  if (isLoading || !isRouteResolved) {
       content = <LoadingSpinner />;
   } else if (selectedGame) {
     content = (

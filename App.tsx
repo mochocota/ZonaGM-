@@ -6,7 +6,7 @@ import Footer from './components/Footer';
 import SEO from './components/SEO';
 import AdBlockDetector from './components/AdBlockDetector';
 import { SortOption, Game, Report } from './types';
-import { GAMES } from './constants'; // Import static data for instant render
+import { GAMES } from './constants'; 
 import { LayoutGrid, List as ListIcon, ChevronDown, Loader2 } from 'lucide-react';
 import { db, auth } from './firebase';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy, QuerySnapshot, DocumentData } from 'firebase/firestore';
@@ -45,12 +45,11 @@ const App: React.FC = () => {
   const { toast } = useToast();
 
   // Main Data State
-  // PERFORMANCE CRITICAL: Initialize with GAMES (static) instead of empty array.
-  // This ensures LCP happens immediately without waiting for Firebase.
-  const [games, setGames] = useState<Game[]>(GAMES); 
+  // FIX: Start empty and loading to ensure no ghost posts appear
+  const [games, setGames] = useState<Game[]>([]); 
   const [reports, setReports] = useState<Report[]>([]);
-  // PERFORMANCE: Start as false because we have static data to show
-  const [isLoading, setIsLoading] = useState(false); 
+  // FIX: Start loading as true so we wait for Firebase
+  const [isLoading, setIsLoading] = useState(true); 
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('Relevance');
@@ -104,6 +103,8 @@ const App: React.FC = () => {
 
   // Firebase Data Listeners
   useEffect(() => {
+    setIsLoading(true); // Ensure loader shows when mounting/remounting
+    
     // Listen to Games
     const gamesCollection = collection(db, 'games');
     const qGames = query(gamesCollection, orderBy('title')); // Default sort
@@ -113,10 +114,8 @@ const App: React.FC = () => {
             ...doc.data()
         })) as Game[];
         
-        // Only update if we actually got data, otherwise keep static data
-        if (gamesData.length > 0) {
-            setGames(gamesData);
-        }
+        setGames(gamesData);
+        setIsLoading(false); // Data loaded, hide spinner
         
         // Update selected game if it exists to keep it in sync
         if (selectedGame) {
@@ -125,7 +124,7 @@ const App: React.FC = () => {
         }
     }, (error) => {
         console.error("Error reading games:", error);
-        // If read fails, it's likely rules too
+        setIsLoading(false); // Hide spinner even on error
         if (error.code === 'permission-denied') {
             toast.error("Error de Lectura", "No tienes permisos para ver los juegos. Verifica las reglas de Firebase.");
         }
@@ -148,7 +147,7 @@ const App: React.FC = () => {
         unsubGames();
         unsubReports();
     };
-  }, [selectedGame]);
+  }, []); // Removed selectedGame dependency to prevent unnecessary re-subscriptions
 
   const toggleTheme = () => {
       if (isDarkMode) {
@@ -176,6 +175,9 @@ const App: React.FC = () => {
 
   // Handle URL Params for SEO (Deep Linking)
   useEffect(() => {
+    // Only run this logic if we have games loaded to find the correct one
+    if (games.length === 0 && !isLoading) return; 
+
     const handlePopState = () => {
         const params = new URLSearchParams(window.location.search);
         const gameSlug = params.get('game');
@@ -205,13 +207,15 @@ const App: React.FC = () => {
         }
     };
 
-    // Initial check
-    handlePopState();
+    // Check once games are loaded
+    if (games.length > 0) {
+        handlePopState();
+    }
 
     // Listen for back/forward button
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [games]); // Depend on games to retry finding selected game once data loads
+  }, [games, isLoading]); 
 
   // Reset pagination when search or sort changes
   useEffect(() => {
@@ -467,7 +471,6 @@ const App: React.FC = () => {
   let content;
   
   if (isLoading) {
-      // PERFORMANCE: This case is now rare because we init with GAMES
       content = <LoadingSpinner />;
   } else if (selectedGame) {
     content = (

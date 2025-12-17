@@ -6,7 +6,8 @@
     <title>ZonaGM</title>
     <meta name="description" content="Search the Archive for verified ISOs and ROMs. Secure downloads for GameCube, PS2, SNES and more." />
     <meta name="robots" content="index, follow" />
-    <meta name="referrer" content="no-referrer" />
+    <!-- FIX: Referrer policy must allow origin for YouTube embeds to work -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
 
     <!-- Performance: Preconnect to Image Domains -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -103,6 +104,7 @@
         color: var(--color-text-main);
       }
     </style>
+  <!-- FIX: Align ImportMap versions to resolve Error 153 and remove unnecessary Vite dev dependencies from browser load -->
   <script type="importmap">
 {
   "imports": {

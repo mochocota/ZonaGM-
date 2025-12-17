@@ -785,9 +785,8 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                         <div className="rounded-xl overflow-hidden shadow-lg border border-border-color bg-black aspect-video relative group">
                             <iframe 
                                 className="absolute inset-0 w-full h-full"
-                                src={`https://www.youtube.com/embed/${youtubeVideoId}`} 
+                                src={`https://www.youtube.com/embed/${youtubeVideoId}?origin=${typeof window !== 'undefined' ? window.location.origin : ''}`} 
                                 title="YouTube video player" 
-                                frameBorder="0" 
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                                 allowFullScreen
                             ></iframe>

@@ -776,7 +776,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                     />
                     </div>
                     <div className="flex-1">
-                        <p className="text-text-muted leading-relaxed text-lg whitespace-pre-wrap">
+                        <p className="text-text-muted leading-relaxed text-lg whitespace-pre-wrap text-justify">
                         {cleanDescription}
                         </p>
                     </div>

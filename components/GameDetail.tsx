@@ -579,7 +579,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                       ) : (
                           <>
                                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center animate-zoom-in">
-                                  <Unlock size={40} className="text-green-600" />
+                                  <Unlock size={40} className="text-green-600 animate-pulse-fast" />
                               </div>
                               
                               <div className="space-y-2">

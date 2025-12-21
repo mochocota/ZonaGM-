@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Game, Comment } from '../types';
-import { Download, HardDrive, Calendar, Gamepad2, Layers, ShieldCheck, MessageSquare, Send, User, Globe, Star, Pencil, Trash2, Sparkles, Image as ImageIcon, X, AlertTriangle, Crown, Ban, CornerDownRight, ChevronDown, CheckCircle2, Lock, Unlock, Timer, Loader2, ChevronRight, Home, Share2, Facebook, Twitter, Youtube } from 'lucide-react';
+import { Download, HardDrive, Calendar, Gamepad2, Layers, ShieldCheck, MessageSquare, Send, User, Globe, Star, Pencil, Trash2, Sparkles, Image as ImageIcon, X, AlertTriangle, Crown, Ban, CornerDownRight, ChevronDown, CheckCircle2, Lock, Unlock, Timer, Loader2, ChevronRight, Home, Share2, Facebook, Twitter, Youtube, MonitorPlay } from 'lucide-react';
 import SEO from './SEO';
 import { db } from '../firebase';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useToast } from './Toast';
+import { CONSOLE_EMULATORS } from '../constants';
 
 interface GameDetailProps {
   game: Game;
@@ -310,6 +311,9 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
     // 3. Combine and take 3
     return [...sameConsole, ...differentConsole].slice(0, 3);
   }, [game, allGames]);
+
+  // Global Emulator Link
+  const emulatorUrl = useMemo(() => CONSOLE_EMULATORS[game.console] || null, [game.console]);
 
   // Helper: Flattened reply logic. Finds the root ancestor and adds the reply to its list.
   const addReplyToTree = (nodes: Comment[], parentId: string, reply: Comment): Comment[] => {
@@ -929,6 +933,24 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                         <AlertTriangle size={14} className="mb-0.5" />
                         <span>Reportar Problema</span>
                     </button>
+
+                    {/* Global Emulator Link - Dynamically computed based on Console */}
+                    {emulatorUrl && (
+                        <div className="pt-2 animate-fade-in">
+                            <a 
+                                href={emulatorUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full bg-surface border border-border-color hover:border-primary-hover hover:bg-primary/5 text-text-main font-bold py-3 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-3 group"
+                            >
+                                <MonitorPlay size={18} className="text-primary group-hover:scale-110 transition-transform" />
+                                <span className="text-sm">Emulador Recomendado</span>
+                            </a>
+                            <p className="text-[10px] text-text-muted text-center mt-2 italic">
+                                Enlace oficial para jugar títulos de {game.console}
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Rating Section */}

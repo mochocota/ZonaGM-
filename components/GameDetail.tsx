@@ -312,8 +312,8 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
     return [...sameConsole, ...differentConsole].slice(0, 3);
   }, [game, allGames]);
 
-  // Global Emulator Link(s)
-  const emulatorUrls = useMemo(() => {
+  // Global Emulator Link(s) - Dynamically computed based on Console
+  const emulators = useMemo(() => {
     const raw = CONSOLE_EMULATORS[game.console] || null;
     if (!raw) return [];
     return Array.isArray(raw) ? raw : [raw];
@@ -511,7 +511,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
         url={window.location.href}
       />
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal ... same as before ... */}
       {isDeleteModalOpen && (
           <div 
             className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
@@ -549,7 +549,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
           </div>
       )}
 
-      {/* Download Security Modal */}
+      {/* Download Security Modal ... same as before ... */}
       {isDownloadModalOpen && (
           <div 
             className="fixed inset-0 z-[250] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
@@ -609,7 +609,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
           </div>
       )}
 
-      {/* Report Modal */}
+      {/* Report Modal ... same as before ... */}
       {isReportModalOpen && (
           <div 
             className={`fixed inset-0 z-[200] bg-black/50 backdrop-blur-sm p-4 animate-fade-in ${modalPos ? '' : 'flex items-center justify-center'}`}
@@ -686,7 +686,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
           </div>
       )}
 
-      {/* Fullscreen Screenshot Modal */}
+      {/* Fullscreen Screenshot Modal ... same as before ... */}
       {selectedScreenshot && (
         <div 
             className="fixed inset-0 z-[5000] bg-black/98 flex items-center justify-center animate-fade-in"
@@ -939,18 +939,18 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                     </button>
 
                     {/* Global Emulator Link(s) - Dynamically computed based on Console */}
-                    {emulatorUrls.length > 0 && (
+                    {emulators.length > 0 && (
                         <div className="pt-2 flex flex-col gap-2 animate-fade-in">
-                            {emulatorUrls.map((url, index) => (
+                            {emulators.map((emu, index) => (
                                 <a 
                                     key={index}
-                                    href={url}
+                                    href={emu.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-3 group"
                                 >
                                     <MonitorPlay size={18} className="text-white group-hover:scale-110 transition-transform" />
-                                    <span className="text-sm">Emulador Recomendado {emulatorUrls.length > 1 ? index + 1 : ''}</span>
+                                    <span className="text-sm">{emu.name}</span>
                                 </a>
                             ))}
                             <p className="text-[10px] text-text-muted text-center mt-2 italic">
@@ -960,7 +960,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                     )}
                 </div>
 
-                {/* Rating Section */}
+                {/* Rating Section ... same as before ... */}
                 <div className="w-full bg-background rounded-2xl p-4 border border-border-color flex flex-col items-center justify-center gap-2">
                     <span className="text-xs font-bold text-text-muted uppercase tracking-wide">
                         {hasRated ? 'Tu Calificación' : 'Calificar juego'}
@@ -1000,7 +1000,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                     )}
                 </div>
 
-                {/* Social Share Section */}
+                {/* Social Share Section ... same as before ... */}
                 <div className="w-full bg-background rounded-2xl p-4 border border-border-color flex flex-col items-center justify-center gap-3">
                     <span className="text-xs font-bold text-text-muted uppercase tracking-wide flex items-center gap-1">
                         <Share2 size={12} />
@@ -1032,7 +1032,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
             </div>
             </div>
 
-            {/* Comments Section & Recommendations */}
+            {/* Comments Section & Recommendations ... same as before ... */}
             <div className="px-6 pb-6 md:px-10 md:pb-10">
                 <section className="pt-8 border-t border-border-color">
                 <button 
@@ -1126,7 +1126,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                             </div>
                         </form>
 
-                        {/* Comments Tree */}
+                        {/* Comments Tree Tree */}
                         <div className="space-y-4 mb-10">
                             {localComments.length > 0 ? (
                             localComments.map((comment) => (
@@ -1162,7 +1162,6 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                         <Sparkles size={20} className="text-primary" />
                         Te pudiera interesar
                     </h3>
-                    {/* 3 cols on mobile, 4 cols on md/lg */}
                     <div className="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
                         {relatedGames.map(related => (
                             <div 
@@ -1185,11 +1184,6 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                                 </h4>
                             </div>
                         ))}
-                        {relatedGames.length === 0 && (
-                            <div className="col-span-full text-center py-4 text-text-muted text-sm italic">
-                                No related games found.
-                            </div>
-                        )}
                     </div>
                 </section>
             </div>

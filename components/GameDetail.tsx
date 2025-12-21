@@ -312,8 +312,12 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
     return [...sameConsole, ...differentConsole].slice(0, 3);
   }, [game, allGames]);
 
-  // Global Emulator Link
-  const emulatorUrl = useMemo(() => CONSOLE_EMULATORS[game.console] || null, [game.console]);
+  // Global Emulator Link(s)
+  const emulatorUrls = useMemo(() => {
+    const raw = CONSOLE_EMULATORS[game.console] || null;
+    if (!raw) return [];
+    return Array.isArray(raw) ? raw : [raw];
+  }, [game.console]);
 
   // Helper: Flattened reply logic. Finds the root ancestor and adds the reply to its list.
   const addReplyToTree = (nodes: Comment[], parentId: string, reply: Comment): Comment[] => {
@@ -934,20 +938,23 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                         <span>Reportar Problema</span>
                     </button>
 
-                    {/* Global Emulator Link - Dynamically computed based on Console */}
-                    {emulatorUrl && (
-                        <div className="pt-2 animate-fade-in">
-                            <a 
-                                href={emulatorUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full bg-surface border border-border-color hover:border-primary-hover hover:bg-primary/5 text-text-main font-bold py-3 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-3 group"
-                            >
-                                <MonitorPlay size={18} className="text-primary group-hover:scale-110 transition-transform" />
-                                <span className="text-sm">Emulador Recomendado</span>
-                            </a>
+                    {/* Global Emulator Link(s) - Dynamically computed based on Console */}
+                    {emulatorUrls.length > 0 && (
+                        <div className="pt-2 flex flex-col gap-2 animate-fade-in">
+                            {emulatorUrls.map((url, index) => (
+                                <a 
+                                    key={index}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-3 group"
+                                >
+                                    <MonitorPlay size={18} className="text-white group-hover:scale-110 transition-transform" />
+                                    <span className="text-sm">Emulador Recomendado {emulatorUrls.length > 1 ? index + 1 : ''}</span>
+                                </a>
+                            ))}
                             <p className="text-[10px] text-text-muted text-center mt-2 italic">
-                                Enlace oficial para jugar títulos de {game.console}
+                                Enlace(s) oficial(es) para jugar títulos de {game.console}
                             </p>
                         </div>
                     )}

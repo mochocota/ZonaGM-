@@ -5,7 +5,7 @@ export const GAMES: Game[] = [];
 
 // Mapping of consoles to their recommended emulator download pages
 // This allows global links per console across the entire site
-export const CONSOLE_EMULATORS: Record<string, string> = {
+export const CONSOLE_EMULATORS: Record<string, string | string[]> = {
   'Nintendo Switch': 'https://ryujinx.org/download',
   'PlayStation 5': 'https://rpcs3.net/', // PS5 emulation is experimental, mapping to common interest
   'PlayStation 4': 'https://shadps4.net/',
@@ -14,7 +14,10 @@ export const CONSOLE_EMULATORS: Record<string, string> = {
   'Xbox 360': 'https://xenia.jp/download/',
   'Wii U': 'https://cemu.info/',
   'Wii': 'https://dolphin-emu.org/download/',
-  'Nintendo 3DS': 'https://citra-emu.org/download/',
+  'Nintendo 3DS': [
+    'https://github.com/weihuoya/citra/releases',
+    'https://azahar-emu.org/pages/download/'
+  ],
   'PlayStation 2': 'https://pcsx2.net/downloads/',
   'PS2': 'https://pcsx2.net/downloads/',
   'GameCube': 'https://dolphin-emu.org/download/',

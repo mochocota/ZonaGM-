@@ -76,7 +76,7 @@ const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary text-black group-hover:scale-105 transition-transform duration-200">
             <Save size={18} className="md:w-5 md:h-5" strokeWidth={2.5} />
           </div>
-          <h1 className="text-lg md:text-xl font-bold tracking-tight truncate max-w-[120px] md:max-w-none animate-zona-colors">ZonaGM</h1>
+          <h1 className="text-lg md:text-xl font-bold tracking-tight truncate max-w-[120px] md:max-w-none">ZonaGM</h1>
         </div>
 
         {/* Desktop Nav */}

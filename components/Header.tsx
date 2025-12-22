@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, Save, Search, PlusCircle, ShieldAlert, LogIn, LogOut, ChevronDown, Moon, Sun } from 'lucide-react';
+import { Menu, X, Save, Search, PlusCircle, ShieldAlert, LogIn, LogOut, ChevronDown, Moon, Sun, User } from 'lucide-react';
 
 interface HeaderProps {
   searchTerm: string;
@@ -174,7 +174,7 @@ const Header: React.FC<HeaderProps> = ({
                     </button>
                 ) : (
                     <button onClick={onOpenLogin} className="text-xs font-bold text-primary-hover hover:text-text-main flex items-center gap-1 bg-surface border border-border-color px-3 py-1.5 rounded-full">
-                        <LogIn size={14} /> Login
+                        <User size={14} /> Login
                     </button>
                 )}
             </div>
@@ -187,7 +187,7 @@ const Header: React.FC<HeaderProps> = ({
                   className="p-2 rounded-full text-text-main hover:bg-gray-100/50 transition-colors"
                   aria-label={isLoggedIn ? "Logout" : "Login"}
               >
-                  {isLoggedIn ? <LogOut size={18} /> : <LogIn size={18} />}
+                  {isLoggedIn ? <LogOut size={18} /> : <User size={18} />}
               </button>
 
               <button 

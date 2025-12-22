@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, Save, Search, PlusCircle, ShieldAlert, LogIn, LogOut, ChevronDown, Moon, Sun, User } from 'lucide-react';
+import { Menu, X, Save, Search, PlusCircle, ShieldAlert, LogOut, ChevronDown, Moon, Sun, User } from 'lucide-react';
 
 interface HeaderProps {
   searchTerm: string;

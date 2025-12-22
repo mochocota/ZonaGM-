@@ -1179,7 +1179,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                 <section className="pt-8 border-t border-border-color">
                     <h3 className="text-xl font-bold text-text-main mb-6 flex items-center gap-2">
                         <Sparkles size={20} className="text-primary" />
-                        Te pudiera interesar (Más de {game.console})
+                        Te pudiera interesar
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                         {relatedGames.map(related => (

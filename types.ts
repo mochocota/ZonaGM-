@@ -36,4 +36,4 @@ export interface Report {
   status: 'Pending' | 'Resolved';
 }
 
-export type SortOption = 'Relevance' | 'Date' | 'Popularity';
+export type SortOption = 'Alphabetically' | 'Date' | 'Popularity';

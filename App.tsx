@@ -54,7 +54,7 @@ const App: React.FC = () => {
   const [isRouteResolved, setIsRouteResolved] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<SortOption>('Relevance');
+  const [sortBy, setSortBy] = useState<SortOption>('Alphabetically');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
   
   // Navigation State
@@ -227,7 +227,7 @@ const App: React.FC = () => {
 
   // Filter and Sort logic
   const filteredGames = useMemo(() => {
-    let result = games;
+    let result = [...games];
 
     // 1. Filter by Console if selected
     if (selectedConsole) {
@@ -248,8 +248,9 @@ const App: React.FC = () => {
       result.sort((a, b) => b.downloads - a.downloads);
     } else if (sortBy === 'Date') {
       result.sort((a, b) => parseInt(b.year) - parseInt(a.year));
+    } else if (sortBy === 'Alphabetically') {
+      result.sort((a, b) => a.title.localeCompare(b.title));
     }
-    // Relevance is default (as is order in constants/array)
 
     return result;
   }, [games, searchTerm, sortBy, selectedConsole]);
@@ -537,7 +538,7 @@ const App: React.FC = () => {
                       onChange={(e) => setSortBy(e.target.value as SortOption)}
                       className="appearance-none bg-transparent pl-2 pr-6 font-bold text-text-main focus:outline-none cursor-pointer"
                     >
-                      <option value="Relevance">Relevancia</option>
+                      <option value="Alphabetically">Alfabéticamente</option>
                       <option value="Date">Fecha</option>
                       <option value="Popularity">Popularidad</option>
                     </select>

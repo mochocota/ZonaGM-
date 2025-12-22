@@ -504,14 +504,17 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
   // Improved Share Links with title + console + partial desc where possible
   const shareTitle = `${game.title} (${game.console} - ${game.year})`;
   const shareUrl = window.location.href;
-  const shareDescription = cleanDescription.substring(0, 100) + '...';
+  const shareDescription = cleanDescription.substring(0, 160) + '...';
+  
+  // Custom message for sharing
+  const fullShareText = `🎮 Mira este juego en ZonaGM: ${shareTitle}. ${shareDescription}`;
 
   return (
     <>
       {/* Dynamic SEO for Game Detail */}
       <SEO 
-        title={`Download ${game.title} (${game.year}) - ${game.console} ISO/ROM`}
-        description={`Descarga ${game.title} para ${game.console}. Archivo verificado, formato ${game.format}, tamaño ${game.size}. Publicado por ${game.publisher}.`}
+        title={`Descargar ${game.title} (${game.year}) - ${game.console} ISO/ROM`}
+        description={`Descarga segura de ${game.title} para ${game.console}. Formato ${game.format}, tamaño ${game.size}. Publicado por ${game.publisher}. ${cleanDescription.substring(0, 120)}...`}
         image={game.imageUrl}
         url={shareUrl}
       />
@@ -1003,19 +1006,49 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                         Compartir
                     </span>
                     <div className="flex items-center justify-center gap-2 w-full">
-                        <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-[#1877F2]/10 text-[#1877F2] hover:bg-[#1877F2] hover:text-white transition-all">
+                        <a 
+                            href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="p-2 rounded-full bg-[#1877F2]/10 text-[#1877F2] hover:bg-[#1877F2] hover:text-white transition-all"
+                            title="Compartir en Facebook"
+                        >
                             <Facebook size={20} />
                         </a>
-                        <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent('Descarga ' + shareTitle)}&url=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-black/5 text-black dark:text-white dark:bg-white/10 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
+                        <a 
+                            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(fullShareText)}&url=${encodeURIComponent(shareUrl)}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="p-2 rounded-full bg-black/5 text-black dark:text-white dark:bg-white/10 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
+                            title="Compartir en X (Twitter)"
+                        >
                             <Twitter size={20} />
                         </a>
-                        <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent('Mira este juego: ' + shareTitle + ' - ' + shareUrl)}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white transition-all">
+                        <a 
+                            href={`https://api.whatsapp.com/send?text=${encodeURIComponent(fullShareText + ' ' + shareUrl)}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="p-2 rounded-full bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white transition-all"
+                            title="Enviar por WhatsApp"
+                        >
                             <WhatsAppIcon />
                         </a>
-                        <a href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent('Descarga ' + shareTitle)}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-[#229ED9]/10 text-[#229ED9] hover:bg-[#229ED9] hover:text-white transition-all">
+                        <a 
+                            href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(fullShareText)}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="p-2 rounded-full bg-[#229ED9]/10 text-[#229ED9] hover:bg-[#229ED9] hover:text-white transition-all"
+                            title="Compartir en Telegram"
+                        >
                             <TelegramIcon />
                         </a>
-                        <a href={`https://www.reddit.com/submit?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent('Descarga ' + shareTitle)}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-[#FF4500]/10 text-[#FF4500] hover:bg-[#FF4500] hover:text-white transition-all">
+                        <a 
+                            href={`https://www.reddit.com/submit?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(shareTitle)}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="p-2 rounded-full bg-[#FF4500]/10 text-[#FF4500] hover:bg-[#FF4500] hover:text-white transition-all"
+                            title="Compartir en Reddit"
+                        >
                             <RedditIcon />
                         </a>
                     </div>

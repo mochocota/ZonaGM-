@@ -37,14 +37,22 @@ const SEO: React.FC<SEOProps> = ({ title, description, image, url, type = 'websi
 
     updateMeta('description', description);
     
-    // Open Graph / Facebook / WhatsApp
+    // Open Graph / Facebook / WhatsApp / Telegram
     updateProperty('og:title', title);
     updateProperty('og:description', description);
     updateProperty('og:type', type);
-    if (image) updateProperty('og:image', image);
+    updateProperty('og:site_name', 'ZonaGM');
     if (url) updateProperty('og:url', url);
+    if (image) {
+      updateProperty('og:image', image);
+      updateProperty('og:image:secure_url', image);
+      updateProperty('og:image:type', 'image/jpeg');
+      updateProperty('og:image:width', '1200');
+      updateProperty('og:image:height', '630');
+      updateProperty('og:image:alt', title);
+    }
 
-    // Twitter Cards (X, Telegram, Discord)
+    // Twitter Cards (X, Discord)
     updateMeta('twitter:card', 'summary_large_image');
     updateMeta('twitter:title', title);
     updateMeta('twitter:description', description);

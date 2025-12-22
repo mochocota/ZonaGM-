@@ -950,11 +950,11 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                                     className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-3 group"
                                 >
                                     <MonitorPlay size={18} className="text-white group-hover:scale-110 transition-transform" />
-                                    <span className="text-sm">{emu.name}</span>
+                                    <span className="text-sm">Emulador {emu.name}</span>
                                 </a>
                             ))}
                             <p className="text-[10px] text-text-muted text-center mt-2 italic">
-                                Enlace(s) oficial(es) para jugar títulos de {game.console}
+                                Enlace para descargar el emulador oficial {game.console}
                             </p>
                         </div>
                     )}

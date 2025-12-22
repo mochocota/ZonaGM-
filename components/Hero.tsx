@@ -7,13 +7,13 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ searchTerm, setSearchTerm }) => {
   return (
-    <section className="flex flex-col gap-8 py-12 md:py-16 items-center text-center px-4 w-full">
-      <div className="space-y-4 max-w-2xl">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-text-main">
+    <section className="flex flex-col gap-8 py-16 md:py-24 items-center text-center px-4 w-full">
+      <div className="space-y-4 max-w-4xl">
+        <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter animate-zona-colors select-none">
           ZonaGM
         </h1>
-        <p className="text-text-muted text-lg md:text-xl font-medium max-w-lg mx-auto">
-          Explora nuestra colección de ISOs y ROMs.
+        <p className="text-text-muted text-lg md:text-2xl font-bold max-w-lg mx-auto italic">
+          "Reviviendo los clásicos, píxel a píxel."
         </p>
       </div>
     </section>

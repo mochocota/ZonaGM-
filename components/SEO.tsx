@@ -25,7 +25,7 @@ const SEO: React.FC<SEOProps> = ({ title, description, image, url, type = 'websi
     };
 
     // Helper for OG tags (Facebook/Discord/WhatsApp previews)
-    const updateOg = (property: string, content: string) => {
+    const updateProperty = (property: string, content: string) => {
       let element = document.querySelector(`meta[property="${property}"]`);
       if (!element) {
         element = document.createElement('meta');
@@ -37,12 +37,18 @@ const SEO: React.FC<SEOProps> = ({ title, description, image, url, type = 'websi
 
     updateMeta('description', description);
     
-    // Open Graph / Social
-    updateOg('og:title', title);
-    updateOg('og:description', description);
-    updateOg('og:type', type);
-    if (image) updateOg('og:image', image);
-    if (url) updateOg('og:url', url);
+    // Open Graph / Facebook / WhatsApp
+    updateProperty('og:title', title);
+    updateProperty('og:description', description);
+    updateProperty('og:type', type);
+    if (image) updateProperty('og:image', image);
+    if (url) updateProperty('og:url', url);
+
+    // Twitter Cards (X, Telegram, Discord)
+    updateMeta('twitter:card', 'summary_large_image');
+    updateMeta('twitter:title', title);
+    updateMeta('twitter:description', description);
+    if (image) updateMeta('twitter:image', image);
 
   }, [title, description, image, url, type]);
 

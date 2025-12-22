@@ -8,11 +8,21 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ searchTerm, setSearchTerm }) => {
   return (
-    <section className="relative w-full overflow-hidden rounded-[2.5rem] mt-4 mb-8 py-16 md:py-24 px-6 text-center bg-gradient-to-br from-[#F9F506] via-[#FFD700] to-[#EBE705] bg-[length:400%_400%] animate-gradient-slow shadow-soft border border-black/5">
-      {/* Decorative Blobs for "Elegance" */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute -top-24 -left-24 w-64 h-64 bg-white/30 rounded-full blur-3xl opacity-50" />
-        <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-black/5 rounded-full blur-3xl opacity-30" />
+    <section className="relative w-full overflow-hidden rounded-[2.5rem] mt-4 mb-8 py-16 md:py-24 px-6 text-center bg-[#F9F506] shadow-soft border border-black/5">
+      
+      {/* Animated Mesh Gradient Background Elements */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Amber Blob */}
+        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#FFD700] rounded-full mix-blend-multiply filter blur-[80px] opacity-70 animate-blob-drift" />
+        
+        {/* Bright Yellow Blob */}
+        <div className="absolute top-[20%] right-[-5%] w-[50%] h-[50%] bg-[#F9F506] rounded-full mix-blend-screen filter blur-[60px] opacity-80 animate-blob-drift animation-delay-2000" style={{ animationDirection: 'reverse' }} />
+        
+        {/* Golden Blob */}
+        <div className="absolute bottom-[-15%] left-[20%] w-[55%] h-[55%] bg-[#EBE705] rounded-full mix-blend-multiply filter blur-[90px] opacity-60 animate-blob-drift animation-delay-4000" />
+
+        {/* Dynamic Overlay Grain/Noise (Subtle) */}
+        <div className="absolute inset-0 opacity-[0.04] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]" />
       </div>
 
       <div className="relative z-10 space-y-6 max-w-3xl mx-auto">
@@ -23,14 +33,15 @@ const Hero: React.FC<HeroProps> = ({ searchTerm, setSearchTerm }) => {
           </span>
         </div>
 
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-black leading-none drop-shadow-sm">
+        <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-black leading-none drop-shadow-sm">
           ZonaGM
         </h1>
         
-        <div className="space-y-2">
+        <div className="space-y-4">
             <p className="text-black/80 text-lg md:text-2xl font-bold max-w-xl mx-auto leading-tight italic">
               "El refugio definitivo para los clásicos que definieron generaciones."
             </p>
+            <div className="w-24 h-1 bg-black/20 mx-auto rounded-full" />
             <p className="text-black/60 text-sm md:text-base font-medium max-w-lg mx-auto">
               Explora nuestra colección curada de ISOs y ROMs verificadas con los más altos estándares de calidad.
             </p>
@@ -38,7 +49,7 @@ const Hero: React.FC<HeroProps> = ({ searchTerm, setSearchTerm }) => {
       </div>
       
       {/* Sutil scanline effect overlay */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
+      <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
     </section>
   );
 };

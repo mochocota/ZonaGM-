@@ -68,6 +68,7 @@
               'fade-in': 'fadeIn 0.3s ease-out forwards',
               'zoom-in': 'zoomIn 0.2s ease-out forwards',
               'pulse-fast': 'pulseFast 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'gradient-slow': 'gradientMove 15s ease infinite',
             },
             keyframes: {
               fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
@@ -75,6 +76,10 @@
               pulseFast: {
                 '0%, 100%': { opacity: '1', transform: 'scale(1)' },
                 '50%': { opacity: '.7', transform: 'scale(1.05)' },
+              },
+              gradientMove: {
+                '0%, 100%': { 'background-position': '0% 50%' },
+                '50%': { 'background-position': '100% 50%' },
               }
             }
           },

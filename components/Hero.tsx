@@ -8,13 +8,14 @@ interface HeroProps {
 const BubbleBackground: React.FC = () => {
   // Generamos un array estable de propiedades para las burbujas
   const bubbles = useMemo(() => {
-    return Array.from({ length: 15 }).map((_, i) => ({
+    return Array.from({ length: 30 }).map((_, i) => ({
       id: i,
-      size: Math.random() * 60 + 20, // 20px a 80px
+      // Tamaño base más pequeño (5px a 25px)
+      size: Math.random() * 20 + 5,
       left: Math.random() * 100, // 0% a 100%
-      duration: Math.random() * 10 + 10, // 10s a 20s
-      delay: Math.random() * 5,
-      opacity: Math.random() * 0.2 + 0.05, // 5% a 25%
+      duration: Math.random() * 12 + 15, // Más lento para mayor elegancia
+      delay: Math.random() * 10,
+      opacity: Math.random() * 0.1 + 0.02, // Opacidad muy sutil
     }));
   }, []);
 
@@ -23,17 +24,17 @@ const BubbleBackground: React.FC = () => {
       {bubbles.map((bubble) => (
         <div
           key={bubble.id}
-          className="absolute rounded-full bg-primary"
+          className="bubble absolute rounded-full bg-primary"
           style={{
             width: `${bubble.size}px`,
             height: `${bubble.size}px`,
             left: `${bubble.left}%`,
             bottom: `-100px`,
             opacity: bubble.opacity,
-            filter: 'blur(8px)',
+            filter: 'blur(3px)',
             animation: `float ${bubble.duration}s linear infinite`,
             animationDelay: `${bubble.delay}s`,
-          }}
+          } as React.CSSProperties}
         />
       ))}
       <style>{`
@@ -53,6 +54,14 @@ const BubbleBackground: React.FC = () => {
             opacity: 0;
           }
         }
+        
+        /* Ajuste específico para móviles: burbujas extremadamente sutiles */
+        @media (max-width: 768px) {
+          .bubble {
+            transform: scale(0.2); /* Escala mucho más reducida para móviles */
+            filter: blur(2px);
+          }
+        }
       `}</style>
     </div>
   );
@@ -66,7 +75,8 @@ const Hero: React.FC<HeroProps> = ({ searchTerm, setSearchTerm }) => {
       
       {/* Contenido */}
       <div className="relative z-10 space-y-4 max-w-4xl">
-        <h1 className="text-7xl md:text-9xl lg:text-[10rem] font-black tracking-tighter animate-zona-colors select-none leading-none">
+        {/* Título limpio sin animaciones de color */}
+        <h1 className="text-7xl md:text-9xl lg:text-[10rem] font-black tracking-tighter select-none leading-none text-text-main">
           ZonaGM
         </h1>
         <div className="space-y-2">

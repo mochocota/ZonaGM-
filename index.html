@@ -40,29 +40,6 @@
         transform: translateZ(0);
         backface-visibility: hidden;
       }
-
-      /* Animación de ciclo de color suave para el texto ZonaGM */
-      @keyframes text-color-cycle {
-        0%, 100% { color: #1C1C0D; }
-        25% { color: #D4AF37; } /* Dorado Premium */
-        50% { color: #FF8C00; } /* Ámbar */
-        75% { color: #F9F506; } /* Amarillo Brillante */
-      }
-
-      .animate-zona-colors {
-        animation: text-color-cycle 4s ease-in-out infinite;
-        display: inline-block;
-      }
-
-      /* Ajuste para modo oscuro en la animación */
-      @media (prefers-color-scheme: dark) {
-        @keyframes text-color-cycle {
-          0%, 100% { color: #f4f4f5; }
-          25% { color: #fbbf24; } /* Dorado claro */
-          50% { color: #f59e0b; } /* Ámbar oscuro */
-          75% { color: #F9F506; } /* Amarillo marca */
-        }
-      }
     </style>
 
     <script src="https://cdn.tailwindcss.com"></script>

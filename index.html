@@ -35,30 +35,7 @@
            color: #f4f4f5;
         }
       }
-
-      /* Animación de cambio de colores dinámica para el texto ZonaGM */
-      .animate-text-gradient {
-        background: linear-gradient(
-          to right, 
-          #000000 0%, 
-          #FFD700 20%, 
-          #FF8C00 50%, 
-          #FFD700 80%, 
-          #000000 100%
-        );
-        background-size: 200% auto;
-        color: transparent;
-        -webkit-background-clip: text;
-        background-clip: text;
-        animation: textGradientFlow 3s linear infinite;
-        display: inline-block;
-      }
-
-      @keyframes textGradientFlow {
-        0% { background-position: 0% center; }
-        100% { background-position: 200% center; }
-      }
-
+      /* Reduce paint cost for scrolling elements */
       .scroll-gpu {
         transform: translateZ(0);
         backface-visibility: hidden;
@@ -132,6 +109,7 @@
         color: var(--color-text-main);
       }
     </style>
+  <!-- FIX: Align ImportMap versions to resolve Error 153 and remove unnecessary Vite dev dependencies from browser load -->
   <script type="importmap">
 {
   "imports": {

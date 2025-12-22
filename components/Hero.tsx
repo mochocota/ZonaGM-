@@ -1,5 +1,4 @@
 import React from 'react';
-import { Sparkles } from 'lucide-react';
 
 interface HeroProps {
   searchTerm: string;
@@ -8,37 +7,15 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ searchTerm, setSearchTerm }) => {
   return (
-    <section className="relative w-full overflow-hidden rounded-[2.5rem] mt-4 mb-8 py-20 md:py-32 px-6 text-center bg-gradient-to-br from-[#F9F506] to-[#FFD700] shadow-soft border border-black/5 isolate">
-      
-      {/* Texture Layer */}
-      <div className="absolute inset-0 z-[-1] pointer-events-none opacity-[0.08] mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]" />
-
-      <div className="relative z-10 space-y-8 max-w-4xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-black/10 border border-black/5 backdrop-blur-xl mb-4 animate-fade-in">
-          <Sparkles size={16} className="text-black" />
-          <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-black">
-            The Digital Preservation Vault
-          </span>
-        </div>
-
-        {/* Animated Title - High Contrast Color Shifting */}
-        <h1 className="text-7xl md:text-9xl font-black tracking-tighter leading-none select-none animate-text-gradient drop-shadow-md">
+    <section className="flex flex-col gap-8 py-12 md:py-16 items-center text-center px-4 w-full">
+      <div className="space-y-4 max-w-2xl">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-text-main">
           ZonaGM
         </h1>
-        
-        <div className="space-y-6 max-w-2xl mx-auto">
-            <p className="text-black/80 text-xl md:text-3xl font-bold leading-tight italic tracking-tight">
-              "Reviviendo los clásicos, píxel a píxel."
-            </p>
-            <div className="w-32 h-1.5 bg-black/10 mx-auto rounded-full" />
-            <p className="text-black/60 text-base md:text-lg font-semibold leading-relaxed">
-              Explora una biblioteca curada de ISOs y ROMs verificadas. Calidad garantizada para entusiastas de la emulación.
-            </p>
-        </div>
+        <p className="text-text-muted text-lg md:text-xl font-medium max-w-lg mx-auto">
+          Explora nuestra colección de ISOs y ROMs.
+        </p>
       </div>
-      
-      {/* Subtlest Scanline effect */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
     </section>
   );
 };

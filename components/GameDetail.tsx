@@ -299,7 +299,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
     };
   }, [isDownloadModalOpen, downloadTimer]);
 
-  // Recommendations Logic
+  // Recommendations Logic - Adjusted to take 4 games
   const relatedGames = useMemo(() => {
     // 1. Filter out current game
     const otherGames = allGames.filter(g => g.id !== game.id);
@@ -308,8 +308,8 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
     const sameConsole = otherGames.filter(g => g.console === game.console);
     const differentConsole = otherGames.filter(g => g.console !== game.console);
     
-    // 3. Combine and take 3
-    return [...sameConsole, ...differentConsole].slice(0, 3);
+    // 3. Combine and take 4
+    return [...sameConsole, ...differentConsole].slice(0, 4);
   }, [game, allGames]);
 
   // Global Emulator Link(s) - Dynamically computed based on Console
@@ -511,7 +511,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
         url={window.location.href}
       />
 
-      {/* Delete Confirmation Modal ... same as before ... */}
+      {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
           <div 
             className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
@@ -549,7 +549,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
           </div>
       )}
 
-      {/* Download Security Modal ... same as before ... */}
+      {/* Download Security Modal */}
       {isDownloadModalOpen && (
           <div 
             className="fixed inset-0 z-[250] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
@@ -609,7 +609,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
           </div>
       )}
 
-      {/* Report Modal ... same as before ... */}
+      {/* Report Modal */}
       {isReportModalOpen && (
           <div 
             className={`fixed inset-0 z-[200] bg-black/50 backdrop-blur-sm p-4 animate-fade-in ${modalPos ? '' : 'flex items-center justify-center'}`}
@@ -686,12 +686,12 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
           </div>
       )}
 
-      {/* Fullscreen Screenshot Modal ... same as before ... */}
+      {/* Fullscreen Screenshot Modal */}
       {selectedScreenshot && (
         <div 
             className="fixed inset-0 z-[5000] bg-black/98 flex items-center justify-center animate-fade-in"
             onClick={() => setSelectedScreenshot(null)}
-            style={{ touchAction: 'none' }} // Prevent scrolling body underneath
+            style={{ touchAction: 'none' }} 
         >
             <button 
                 onClick={() => setSelectedScreenshot(null)}
@@ -732,7 +732,6 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
         {isLoggedIn && (
             <div className="flex items-center justify-end mb-6">
-                {/* Admin Actions - ONLY VISIBLE IF LOGGED IN */}
                 <div className="flex gap-2">
                     <button 
                         onClick={() => onEdit(game)}
@@ -781,7 +780,6 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-6 md:p-10">
-            {/* Main Content */}
             <div className="md:col-span-2 space-y-8">
                 <section>
                 <h2 className="text-2xl font-bold text-text-main mb-6">Sobre este juego</h2>
@@ -801,7 +799,6 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                 </div>
                 </section>
 
-                {/* AUTOMATIC YOUTUBE VIDEO SECTION */}
                 {youtubeVideoId && (
                     <section>
                         <h3 className="text-xl font-bold text-text-main mb-4 flex items-center gap-2">
@@ -820,7 +817,6 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                     </section>
                 )}
 
-                {/* Screenshots Section */}
                 {game.screenshots && game.screenshots.length > 0 && (
                     <section>
                         <h3 className="text-xl font-bold text-text-main mb-4 flex items-center gap-2">
@@ -851,7 +847,6 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                 )}
             </div>
 
-            {/* Sidebar / Stats */}
             <div className="md:col-span-1 space-y-6">
                 <div className="bg-background rounded-2xl p-6 border border-border-color space-y-4">
                 <h3 className="font-bold text-text-main text-lg mb-2">Información del archivo</h3>
@@ -920,7 +915,6 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                     <span>{game.downloadUrl ? 'Descargar' : 'No Disponible'}</span>
                     </button>
                     
-                    {/* Report Button - Opens Internal Modal */}
                     <button 
                         ref={reportBtnRef}
                         onClick={() => {
@@ -938,7 +932,6 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                         <span>Reportar Problema</span>
                     </button>
 
-                    {/* Global Emulator Link(s) - Dynamically computed based on Console */}
                     {emulators.length > 0 && (
                         <div className="pt-2 flex flex-col gap-2 animate-fade-in">
                             {emulators.map((emu, index) => (
@@ -960,7 +953,6 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                     )}
                 </div>
 
-                {/* Rating Section ... same as before ... */}
                 <div className="w-full bg-background rounded-2xl p-4 border border-border-color flex flex-col items-center justify-center gap-2">
                     <span className="text-xs font-bold text-text-muted uppercase tracking-wide">
                         {hasRated ? 'Tu Calificación' : 'Calificar juego'}
@@ -1000,30 +992,24 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                     )}
                 </div>
 
-                {/* Social Share Section ... same as before ... */}
                 <div className="w-full bg-background rounded-2xl p-4 border border-border-color flex flex-col items-center justify-center gap-3">
                     <span className="text-xs font-bold text-text-muted uppercase tracking-wide flex items-center gap-1">
                         <Share2 size={12} />
                         Compartir
                     </span>
                     <div className="flex items-center justify-center gap-2 w-full">
-                        {/* Facebook */}
                         <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-[#1877F2]/10 text-[#1877F2] hover:bg-[#1877F2] hover:text-white transition-all">
                             <Facebook size={20} />
                         </a>
-                        {/* Twitter */}
                         <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(game.title)}&url=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-black/5 text-black dark:text-white dark:bg-white/10 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
                             <Twitter size={20} />
                         </a>
-                        {/* WhatsApp */}
                         <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(game.title + ' ' + window.location.href)}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white transition-all">
                             <WhatsAppIcon />
                         </a>
-                        {/* Telegram */}
                         <a href={`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(game.title)}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-[#229ED9]/10 text-[#229ED9] hover:bg-[#229ED9] hover:text-white transition-all">
                             <TelegramIcon />
                         </a>
-                        {/* Reddit */}
                         <a href={`https://www.reddit.com/submit?url=${encodeURIComponent(window.location.href)}&title=${encodeURIComponent(game.title)}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-[#FF4500]/10 text-[#FF4500] hover:bg-[#FF4500] hover:text-white transition-all">
                             <RedditIcon />
                         </a>
@@ -1032,7 +1018,6 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
             </div>
             </div>
 
-            {/* Comments Section & Recommendations ... same as before ... */}
             <div className="px-6 pb-6 md:px-10 md:pb-10">
                 <section className="pt-8 border-t border-border-color">
                 <button 
@@ -1050,11 +1035,9 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
                 {isCommentsOpen && (
                     <div className="animate-slide-in-up duration-300">
-                        {/* Main Comment Form */}
                         <form onSubmit={handlePostComment} className="bg-background rounded-2xl p-6 border border-border-color mb-8">
                             <div className="flex flex-col gap-4">
                             
-                            {/* Admin Toggle - ONLY IF LOGGED IN */}
                             {isLoggedIn && (
                                 <div className="flex items-center gap-2">
                                     <input 
@@ -1126,7 +1109,6 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                             </div>
                         </form>
 
-                        {/* Comments Tree Tree */}
                         <div className="space-y-4 mb-10">
                             {localComments.length > 0 ? (
                             localComments.map((comment) => (
@@ -1156,13 +1138,13 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                 )}
                 </section>
 
-                {/* Recommendations Section */}
+                {/* Recommendations Section - Adjusted to show 4 items nicely */}
                 <section className="pt-8 border-t border-border-color">
                     <h3 className="text-xl font-bold text-text-main mb-6 flex items-center gap-2">
                         <Sparkles size={20} className="text-primary" />
                         Te pudiera interesar
                     </h3>
-                    <div className="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                         {relatedGames.map(related => (
                             <div 
                                 key={related.id} 

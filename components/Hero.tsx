@@ -69,21 +69,21 @@ const BubbleBackground: React.FC = () => {
 
 const Hero: React.FC<HeroProps> = ({ searchTerm, setSearchTerm }) => {
   return (
-    <section className="relative flex flex-col gap-8 py-24 md:py-32 items-center text-center px-4 w-full overflow-hidden">
+    <section className="relative flex flex-col gap-4 py-12 md:py-16 items-center text-center px-4 w-full overflow-hidden">
       {/* Fondo de Burbujas */}
       <BubbleBackground />
       
       {/* Contenido */}
-      <div className="relative z-10 space-y-4 max-w-4xl">
-        {/* Título limpio sin animaciones de color */}
-        <h1 className="text-7xl md:text-9xl lg:text-[10rem] font-black tracking-tighter select-none leading-none text-text-main">
+      <div className="relative z-10 space-y-2 max-w-4xl">
+        {/* Título ajustado para un diseño más compacto */}
+        <h1 className="text-6xl md:text-8xl lg:text-[7rem] font-black tracking-tighter select-none leading-none text-text-main">
           ZonaGM
         </h1>
-        <div className="space-y-2">
-          <p className="text-text-muted text-xl md:text-3xl font-bold max-w-lg mx-auto italic opacity-90">
+        <div className="space-y-1">
+          <p className="text-text-muted text-lg md:text-2xl font-bold max-w-lg mx-auto italic opacity-90">
             "Reviviendo los clásicos, píxel a píxel."
           </p>
-          <div className="h-1 w-24 bg-primary mx-auto rounded-full mt-4" />
+          <div className="h-1 w-16 bg-primary mx-auto rounded-full mt-2" />
         </div>
       </div>
     </section>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Game } from '../types';
-import { X, Save, Upload, Download, Search, Loader2, Gamepad2, Globe, AlertCircle, Image as ImageIcon } from 'lucide-react';
+import { X, Save, Upload, Download, Search, Loader2, Gamepad2, Globe, AlertCircle, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import { searchIGDB } from '../services/igdb';
 import { useToast } from './Toast';
 
@@ -174,6 +174,14 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
       }
     });
   };
+
+  const testLink = () => {
+    if (formData.downloadUrl) {
+        window.open(formData.downloadUrl, '_blank');
+    } else {
+        toast.warning("Sin URL", "Ingresa un enlace para probarlo.");
+    }
+  }
 
   return (
     <div 
@@ -438,7 +446,7 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
                 </div>
             )}
 
-            {/* Download URL */}
+            {/* Download URL - Option 1: Shorteners support hint */}
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase text-text-muted">Download URL</label>
               <div className="flex gap-2">
@@ -449,10 +457,22 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
                     value={formData.downloadUrl || ''}
                     onChange={e => setFormData({ ...formData, downloadUrl: e.target.value })}
                     className="w-full bg-surface border border-border-color rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-primary"
-                    placeholder="https://..."
+                    placeholder="https://mega.nz/... o acortador (Adfly, Shink, etc)"
                   />
                 </div>
+                <button 
+                    type="button" 
+                    onClick={testLink}
+                    className="bg-surface border border-border-color hover:bg-gray-50 text-text-muted px-4 rounded-xl flex items-center gap-2 transition-colors font-bold text-sm"
+                    title="Probar Enlace"
+                >
+                    <ExternalLink size={16} />
+                    Test
+                </button>
               </div>
+              <p className="text-[10px] text-text-muted font-bold uppercase tracking-wider pl-1">
+                <span className="text-primary-hover">Tip:</span> Puedes usar enlaces directos o acortadores para monetizar tus descargas.
+              </p>
             </div>
 
             {/* Languages */}

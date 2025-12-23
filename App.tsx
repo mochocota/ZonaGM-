@@ -93,13 +93,14 @@ const App: React.FC = () => {
     return () => { unsubGames(); unsubReports(); };
   }, []);
 
-  // EFECTO DE BÚSQUEDA GLOBAL: Si el usuario busca algo, salimos del detalle del juego
-  useEffect(() => {
-    if (searchTerm.trim() !== '' && selectedGame !== null) {
+  // Manejo manual de la búsqueda para evitar bucles infinitos al seleccionar un juego
+  const handleSetSearchTerm = useCallback((term: string) => {
+    setSearchTerm(term);
+    if (term.trim() !== '' && selectedGame !== null) {
         setSelectedGame(null);
         setCurrentPage(1);
     }
-  }, [searchTerm, selectedGame]);
+  }, [selectedGame]);
 
   useEffect(() => {
     if (isLoading || games.length === 0) return; 
@@ -143,6 +144,7 @@ const App: React.FC = () => {
   const handleSelectGame = useCallback((game: Game) => {
     setSelectedGame(game);
     setIsSitemapOpen(false);
+    setSearchTerm(''); // Limpiamos la búsqueda al entrar para evitar conflictos
     window.scrollTo({ top: 0 });
     window.history.pushState({ gameId: game.id }, '', `?game=${slugify(game.title)}`);
   }, []);
@@ -177,7 +179,7 @@ const App: React.FC = () => {
       <SEO title="ZonaGM | ROMs e ISOs Verificadas" description="El mejor archivo de juegos clásicos." />
 
       <Header 
-        searchTerm={searchTerm} setSearchTerm={setSearchTerm} 
+        searchTerm={searchTerm} setSearchTerm={handleSetSearchTerm} 
         onAddGame={() => setIsFormOpen(true)} onHome={handleHome}
         onOpenAdmin={() => setIsAdminPanelOpen(true)}
         pendingReportsCount={reports.filter(r => r.status === 'Pending').length}
@@ -210,7 +212,7 @@ const App: React.FC = () => {
             </Suspense>
         ) : (
             <div className="flex w-full flex-col gap-2">
-                <Hero searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+                <Hero searchTerm={searchTerm} setSearchTerm={handleSetSearchTerm} />
                 
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-border-color pb-4 mt-2 gap-4 min-h-[48px]">
                   <h3 className="text-lg font-bold text-text-main">
@@ -241,7 +243,7 @@ const App: React.FC = () => {
                     <div className="flex items-center justify-center gap-2 py-12">
                         {[...Array(totalPages)].map((_, i) => (
                             <button 
-                                key={i} onClick={() => { setCurrentPage(i + 1); window.scrollTo({ top: 300 }); }}
+                                key={i} onClick={() => { setCurrentPage(i + 1); window.scrollTo({ top: 0 }); }}
                                 className={`w-9 h-9 rounded-full font-bold text-sm transition-all duration-200 ${currentPage === i + 1 ? 'bg-primary text-black shadow-md scale-110' : 'text-text-muted hover:bg-surface border border-transparent hover:border-border-color'}`}
                             >
                                 {i + 1}

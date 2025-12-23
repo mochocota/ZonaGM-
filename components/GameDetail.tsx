@@ -419,7 +419,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
       {isDeleteModalOpen && (
           <div className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in" onClick={() => setIsDeleteModalOpen(false)}>
-              <div className="bg-surface w-full max-sm rounded-2xl p-6 shadow-2xl border border-red-200 text-center animate-zoom-in" onClick={(e) => e.stopPropagation()}>
+              <div className="bg-surface w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-red-200 text-center animate-zoom-in" onClick={(e) => e.stopPropagation()}>
                   <Trash2 size={32} className="mx-auto mb-4 text-red-600" />
                   <h3 className="text-xl font-bold text-text-main mb-2">¿Eliminar Juego?</h3>
                   <p className="text-text-muted mb-6">Esta acción es irreversible.</p>

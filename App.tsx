@@ -187,6 +187,15 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0 });
   }, []);
 
+  const handleOpenSitemap = useCallback(() => {
+    setIsSitemapOpen(true);
+    setSelectedGameId(null);
+    setIsSearchOpen(false);
+    setSearchTerm('');
+    window.history.pushState({}, '', '/');
+    window.scrollTo({ top: 0 });
+  }, []);
+
   const handleGameSubmit = async (gameData: Game) => {
     try {
         if (editingGame) {
@@ -330,7 +339,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      <Footer onOpenSitemap={() => setIsSitemapOpen(true)} />
+      <Footer onOpenSitemap={handleOpenSitemap} />
 
       <Suspense fallback={null}>
           {isFormOpen && (

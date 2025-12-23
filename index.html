@@ -7,19 +7,19 @@
     <title>ZonaGM | Repositorio de Juegos</title>
     <meta name="description" content="Archivo verificado de ROMs e ISOs para consolas clásicas. Descargas seguras y rápidas." />
     
-    <!-- Resource Hints -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://images.igdb.com">
     <link rel="preconnect" href="https://esm.sh">
 
-    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
       :root {
         --color-primary: #F9F506;
         --color-background: #F8F8F5;
         --color-text-main: #1C1C0D;
+        --header-height: 64px;
       }
       .dark {
         --color-background: #09090b;
@@ -32,13 +32,28 @@
         font-family: 'Spline Sans', sans-serif;
         min-height: 100vh;
         overflow-x: hidden;
+        text-rendering: optimizeSpeed;
       }
-      /* Skeleton Animation */
+      
+      /* Reducción de CLS: Reservar espacio para el Header */
+      header { min-height: var(--header-height); }
+      
+      /* Optimización de Animaciones (GPU) */
+      .will-change-transform { will-change: transform; }
+      
       @keyframes pulse {
         0%, 100% { opacity: 1; }
         50% { opacity: .5; }
       }
       .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+      
+      /* Estilos Críticos para evitar saltos en el Hero */
+      .hero-section { min-height: 160px; contain: layout; }
+      @media (min-width: 768px) { .hero-section { min-height: 280px; } }
+
+      /* Forzar aspect ratio en imágenes para evitar CLS */
+      .game-card-img { aspect-ratio: 3/4; background: #e5e7eb; }
+      .dark .game-card-img { background: #27272a; }
     </style>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -49,9 +64,8 @@
           extend: {
             fontFamily: { sans: ['Spline Sans', 'sans-serif'] },
             colors: {
-              primary: '#F9F506', 
-              'primary-hover': '#EBE705',
-              background: 'var(--color-background)', 
+              primary: '#F9F506',
+              background: 'var(--color-background)',
               surface: 'var(--color-surface)',
               'text-main': 'var(--color-text-main)',
               'text-muted': 'var(--color-text-muted)',
@@ -62,16 +76,8 @@
       }
     </script>
     <style>
-      :root {
-        --color-surface: #FFFFFF;
-        --color-text-muted: #5C5C4F;
-        --color-border: #E9E8CE;
-      }
-      .dark {
-        --color-surface: #18181b;
-        --color-text-muted: #a1a1aa;
-        --color-border: #27272a;
-      }
+      :root { --color-surface: #FFFFFF; --color-text-muted: #5C5C4F; --color-border: #E9E8CE; }
+      .dark { --color-surface: #18181b; --color-text-muted: #a1a1aa; --color-border: #27272a; }
     </style>
   <script type="importmap">
 {

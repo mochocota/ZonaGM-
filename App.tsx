@@ -54,7 +54,10 @@ const App: React.FC = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('Alphabetically');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
-  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  
+  // Guardamos solo el ID del juego seleccionado para que siempre esté sincronizado con la lista global
+  const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
+  
   const [isSitemapOpen, setIsSitemapOpen] = useState(false);
   const [selectedConsole, setSelectedConsole] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -64,6 +67,11 @@ const App: React.FC = () => {
   const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Derivamos el objeto de juego actual de la lista maestra
+  const selectedGame = useMemo(() => 
+    games.find(g => g.id === selectedGameId) || null
+  , [games, selectedGameId]);
 
   useLayoutEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -96,11 +104,11 @@ const App: React.FC = () => {
 
   const handleSetSearchTerm = useCallback((term: string) => {
     setSearchTerm(term);
-    if (term.trim() !== '' && selectedGame !== null) {
-        setSelectedGame(null);
+    if (term.trim() !== '' && selectedGameId !== null) {
+        setSelectedGameId(null);
         setCurrentPage(1);
     }
-  }, [selectedGame]);
+  }, [selectedGameId]);
 
   useEffect(() => {
     if (isLoading || games.length === 0) return; 
@@ -112,11 +120,11 @@ const App: React.FC = () => {
         if (gameSlug) {
             const found = games.find(g => slugify(g.title) === gameSlug);
             if (found) {
-                setSelectedGame(found);
+                setSelectedGameId(found.id);
                 setIsSearchOpen(false);
             }
         } else {
-            setSelectedGame(null);
+            setSelectedGameId(null);
         }
     };
 
@@ -146,7 +154,7 @@ const App: React.FC = () => {
   [filteredGames, currentPage]);
 
   const handleSelectGame = useCallback((game: Game) => {
-    setSelectedGame(game);
+    setSelectedGameId(game.id);
     setIsSitemapOpen(false);
     setIsSearchOpen(false);
     setSearchTerm('');
@@ -155,12 +163,11 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectGameById = useCallback((gameId: string): void => {
-    const game = games.find(g => g.id === gameId);
-    if (game) handleSelectGame(game);
-  }, [games, handleSelectGame]);
+    setSelectedGameId(gameId);
+  }, []);
 
   const handleHome = useCallback(() => {
-    setSelectedGame(null);
+    setSelectedGameId(null);
     setIsSitemapOpen(false);
     setIsSearchOpen(false);
     setSearchTerm('');
@@ -172,7 +179,7 @@ const App: React.FC = () => {
 
   const handleSelectConsole = useCallback((console: string | null) => {
     setSelectedConsole(console);
-    setSelectedGame(null);
+    setSelectedGameId(null);
     setIsSitemapOpen(false);
     setIsSearchOpen(false);
     setSearchTerm('');
@@ -261,7 +268,7 @@ const App: React.FC = () => {
         ) : selectedGame ? (
             <Suspense fallback={<div className="py-20 animate-pulse text-text-muted">Cargando detalles...</div>}>
                 <GameDetail 
-                    game={selectedGame} allGames={games} onBack={() => setSelectedGame(null)} 
+                    game={selectedGame} allGames={games} onBack={() => setSelectedGameId(null)} 
                     onSelectGame={handleSelectGame} onSelectConsole={handleSelectConsole}
                     onHome={handleHome} onEdit={(g) => { setEditingGame(g); setIsFormOpen(true); }} 
                     onDelete={handleGameDelete} 

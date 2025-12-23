@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Menu, X, Save, Search, PlusCircle, ShieldAlert, LogOut, ChevronDown, Moon, Sun, User } from 'lucide-react';
 
@@ -69,7 +70,7 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background/90 backdrop-blur-md border-b border-border-color transition-all">
+    <header className="relative z-50 w-full bg-background/90 backdrop-blur-md border-b border-border-color transition-all">
       <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2 md:gap-3 cursor-pointer group shrink-0" onClick={() => { onSelectConsole(null); onHome(); }}>

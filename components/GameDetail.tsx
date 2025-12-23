@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Game, Comment } from '../types';
 import { Download, HardDrive, Calendar, Gamepad2, Layers, ShieldCheck, MessageSquare, Send, User, Globe, Star, Pencil, Trash2, Sparkles, Image as ImageIcon, X, AlertTriangle, Crown, Ban, CornerDownRight, ChevronDown, CheckCircle2, Lock, Unlock, Timer, Loader2, ChevronRight, Home, Share2, Facebook, Twitter, Youtube, MonitorPlay } from 'lucide-react';
@@ -696,17 +697,10 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
       {/* Fullscreen Screenshot Modal */}
       {selectedScreenshot && (
         <div 
-            className="fixed inset-0 z-[5000] bg-black/98 flex items-center justify-center animate-fade-in"
+            className="fixed inset-0 z-[5000] bg-black/98 flex items-center justify-center animate-fade-in cursor-zoom-out"
             onClick={() => setSelectedScreenshot(null)}
             style={{ touchAction: 'none' }} 
         >
-            <button 
-                onClick={() => setSelectedScreenshot(null)}
-                className="absolute top-4 right-4 z-[5010] p-3 text-white bg-white/10 rounded-full hover:bg-white/20 transition-all backdrop-blur-md"
-            >
-                <X size={24} />
-            </button>
-            
             <div className="w-full h-full p-2 flex items-center justify-center">
                 <img 
                     src={selectedScreenshot} 
@@ -716,8 +710,8 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                 />
             </div>
             
-            <p className="absolute bottom-8 text-white/50 text-xs font-bold uppercase tracking-widest animate-pulse">
-                Click anywhere to close
+            <p className="absolute bottom-8 text-white/50 text-xs font-bold uppercase tracking-widest animate-pulse pointer-events-none">
+                Haz clic afuera para cerrar
             </p>
         </div>
       )}

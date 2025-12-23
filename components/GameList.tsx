@@ -29,9 +29,9 @@ const LanguageFlags = ({ languages }: { languages: Game['languages'] }) => {
   };
 
   return (
-    <div className="flex gap-1 bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-lg border border-white/10 shadow-sm">
+    <div className="flex gap-1 bg-black/50 backdrop-blur-md px-2 py-1 rounded-lg border border-white/20 shadow-lg">
       {languages.map(lang => (
-        <span key={lang} className="text-[12px]" title={lang}>
+        <span key={lang} className="text-[15px] leading-none" title={lang}>
           {getFlag(lang)}
         </span>
       ))}

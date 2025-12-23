@@ -29,9 +29,9 @@ const LanguageFlags = ({ languages }: { languages: Game['languages'] }) => {
   };
 
   return (
-    <div className="flex gap-1 bg-black/50 backdrop-blur-md px-2 py-1 rounded-lg border border-white/20 shadow-lg">
+    <div className="flex gap-1 items-center">
       {languages.map(lang => (
-        <span key={lang} className="text-[15px] leading-none" title={lang}>
+        <span key={lang} className="text-[17px] leading-none drop-shadow-sm" title={lang}>
           {getFlag(lang)}
         </span>
       ))}
@@ -64,23 +64,25 @@ const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
       >
         {game.console}
       </button>
-
-      {/* Language Flags Top Right */}
-      <div className="absolute top-3 right-3">
-        <LanguageFlags languages={game.languages} />
-      </div>
     </div>
     
     <div className="p-4 flex flex-col flex-grow">
-      <h3 className="text-base font-bold text-text-main leading-snug line-clamp-2 mb-2 group-hover:text-primary-hover transition-colors">{game.title}</h3>
+      <h3 className="text-base font-bold text-text-main leading-snug line-clamp-2 mb-3 group-hover:text-primary-hover transition-colors">{game.title}</h3>
+      
+      {/* Information Footer: Downloads, Rating, Flags */}
       <div className="flex items-center justify-between text-[11px] text-text-muted mt-auto font-medium">
-        <div className="flex items-center gap-2">
-            <span>{game.year}</span>
-            <span className="opacity-30">•</span>
-            <span className="flex items-center gap-0.5"><Star size={10} className="fill-primary text-primary" /> {game.rating || '0.0'}</span>
+        <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+                <Download size={12} className="text-primary" /> 
+                <span className="opacity-80">{formatNumber(game.downloads)}</span>
+            </div>
+            <div className="flex items-center gap-1">
+                <Star size={12} className="fill-primary text-primary" /> 
+                <span className="opacity-80">{game.rating || '0.0'}</span>
+            </div>
         </div>
-        <div className="flex items-center gap-1 opacity-70">
-            <Download size={10} /> {formatNumber(game.downloads)}
+        <div className="shrink-0">
+            <LanguageFlags languages={game.languages} />
         </div>
       </div>
     </div>
@@ -103,10 +105,6 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
           decoding="async"
           className="w-full h-full object-cover transition-transform group-hover:scale-105"
       />
-      {/* Language Flags Top Right (List View) */}
-      <div className="absolute top-2 right-2">
-        <LanguageFlags languages={game.languages} />
-      </div>
     </div>
     
     <div className="flex flex-1 flex-col justify-between py-1">
@@ -124,12 +122,19 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
         <h3 className="text-2xl font-bold text-text-main mb-2 group-hover:text-primary-hover transition-colors">{game.title}</h3>
         <p className="text-text-muted text-sm leading-relaxed line-clamp-2 max-w-2xl">{game.description}</p>
       </div>
-      <div className="mt-4 flex items-center gap-6 text-xs font-bold text-text-muted">
-         <div className="flex items-center gap-1.5 bg-background px-3 py-1.5 rounded-full border border-border-color">
-            <Download size={14} className="text-primary" /> <span>{formatNumber(game.downloads)}</span>
+      
+      {/* Information Row: Downloads, Rating, Flags */}
+      <div className="mt-4 flex items-center gap-4">
+         <div className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-xl border border-border-color text-xs font-bold text-text-muted">
+            <Download size={16} className="text-primary" /> 
+            <span>{formatNumber(game.downloads)}</span>
          </div>
-         <div className="flex items-center gap-1.5 bg-background px-3 py-1.5 rounded-full border border-border-color">
-            <Star size={14} className="fill-primary text-primary" /> <span>{game.rating || '0.0'}</span>
+         <div className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-xl border border-border-color text-xs font-bold text-text-muted">
+            <Star size={16} className="fill-primary text-primary" /> 
+            <span>{game.rating || '0.0'}</span>
+         </div>
+         <div className="ml-auto">
+            <LanguageFlags languages={game.languages} />
          </div>
       </div>
     </div>
@@ -142,7 +147,7 @@ const GameList: React.FC<GameListProps> = ({ games, viewMode, onSelectGame, onSe
   return (
     <div className={`w-full ${viewMode === 'grid' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8' : 'flex flex-col gap-6'}`}>
       {games.map((game, index) => {
-        const isLCP = index === 0; // La primera imagen es la más importante para el LCP
+        const isLCP = index === 0;
         return viewMode === 'list' ? (
           <ListCard key={game.id} game={game} onClick={() => onSelectGame(game)} onSelectConsole={onSelectConsole} isLCP={isLCP} />
         ) : (

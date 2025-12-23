@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { Report, Game } from '../types';
-import { X, CheckCircle, Trash2, ExternalLink, ShieldAlert, DownloadCloud, Loader2, Plus, AlertCircle, CheckCircle2, ListFilter } from 'lucide-react';
-import { scrapeAN1Game } from '../services/scraper';
+import { X, CheckCircle, Trash2, ExternalLink, ShieldAlert, DownloadCloud, Loader2, Plus, AlertCircle, CheckCircle2, ListFilter, Globe } from 'lucide-react';
+import { scrapeGameMetadata } from '../services/scraper';
 import { searchIGDB } from '../services/igdb';
 import { db } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
@@ -57,8 +57,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         setImportingList(prev => prev.map((item, idx) => idx === i ? { ...item, status: 'loading' } : item));
         
         try {
-            // 1. Scraping de Meta y Descripción (Texto solamente)
-            const scrapedData = await scrapeAN1Game(initialList[i].url);
+            // 1. Scraping Universal de Meta y Descripción (Texto solamente)
+            const scrapedData = await scrapeGameMetadata(initialList[i].url);
             
             // 2. Buscar Imágenes y Screenshots en IGDB usando el título extraído
             let imageUrl = '';
@@ -80,7 +80,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 size: scrapedData.size,
                 year: scrapedData.year,
                 publisher: scrapedData.publisher,
-                console: 'Android',
+                console: 'Android', // Por defecto Android, el usuario puede editarlo luego
                 format: 'APK',
                 imageUrl: imageUrl || 'https://via.placeholder.com/600x800?text=No+Image',
                 screenshots: screenshots,
@@ -102,7 +102,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     }
 
     setIsProcessing(false);
-    toast.success("Completado", "Proceso de importación finalizado.");
+    toast.success("Completado", "Proceso de importación masiva finalizado.");
   };
 
   return (
@@ -142,7 +142,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     onClick={() => setActiveTab('importer')}
                     className={`pb-3 text-sm font-bold border-b-2 transition-all ${activeTab === 'importer' ? 'border-primary text-text-main' : 'border-transparent text-text-muted hover:text-text-main'}`}
                 >
-                    Importador Masivo
+                    Importador Universal
                 </button>
             </div>
         </div>
@@ -188,17 +188,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             <div className="space-y-6">
                 <div className="bg-surface border border-border-color rounded-2xl p-6 shadow-sm">
                     <h3 className="text-lg font-bold text-text-main mb-2 flex items-center gap-2">
-                        <DownloadCloud className="text-primary" />
-                        Scraping Masivo (AN1.com)
+                        <Globe className="text-primary" />
+                        Scraping Universal de Contenido
                     </h3>
                     <p className="text-sm text-text-muted mb-4">
-                        Pega una lista de URLs de AN1.com. El sistema extraerá el <b>Título y Descripción</b>, y buscará automáticamente las <b>Imágenes</b> en IGDB.
+                        Pega una lista de URLs de cualquier sitio web de juegos. El sistema extraerá automáticamente el <b>Título y Descripción</b>, y buscará los visuales en IGDB.
                     </p>
                     
                     <textarea 
                         value={urlsText}
                         onChange={(e) => setUrlsText(e.target.value)}
-                        placeholder="https://an1.com/juego-1.html&#10;https://an1.com/juego-2.html"
+                        placeholder="https://an1.com/juego.html&#10;https://cdromance.org/juego.html&#10;..."
                         rows={8}
                         disabled={isProcessing}
                         className="w-full bg-background border border-border-color rounded-xl px-4 py-3 text-text-main focus:outline-none focus:border-primary resize-none font-mono text-xs leading-relaxed"
@@ -209,20 +209,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         disabled={isProcessing || !urlsText.trim()}
                         className="mt-4 w-full bg-primary hover:bg-primary-hover text-black font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-3 transition-all disabled:opacity-50"
                     >
-                        {isProcessing ? <Loader2 size={24} className="animate-spin" /> : <Plus size={24} />}
-                        <span>{isProcessing ? 'Procesando Archivos...' : 'Comenzar Importación Masiva'}</span>
+                        {isProcessing ? <Loader2 size={24} className="animate-spin" /> : <DownloadCloud size={24} />}
+                        <span>{isProcessing ? 'Procesando Enlaces...' : 'Comenzar Importación Universal'}</span>
                     </button>
                 </div>
 
                 {importingList.length > 0 && (
                     <div className="bg-surface border border-border-color rounded-2xl p-6 shadow-sm">
-                        <h4 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-4">Registro de Procesamiento</h4>
+                        <h4 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-4">Estado de los Enlaces</h4>
                         <div className="space-y-2">
                             {importingList.map((item, idx) => (
                                 <div key={idx} className="flex items-center justify-between p-3 bg-background rounded-lg border border-border-color/50 text-xs">
                                     <div className="flex flex-col gap-1 truncate max-w-[70%]">
                                         <span className="truncate text-text-muted font-mono">{item.url}</span>
-                                        {item.title && <span className="font-bold text-text-main">{item.title}</span>}
+                                        {item.title && <span className="font-bold text-text-main truncate">{item.title}</span>}
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">
                                         {item.status === 'loading' && <Loader2 size={16} className="animate-spin text-primary" />}

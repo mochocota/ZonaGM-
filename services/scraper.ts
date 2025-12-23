@@ -11,9 +11,10 @@ export interface ScrapedData {
 }
 
 /**
- * Extrae metadatos básicos (solo texto) de una página de AN1.com
+ * Scraper universal que extrae metadatos de cualquier URL
+ * Prioriza selectores comunes y etiquetas Meta (OpenGraph, Twitter Cards)
  */
-export async function scrapeAN1Game(url: string): Promise<ScrapedData> {
+export async function scrapeGameMetadata(url: string): Promise<ScrapedData> {
   try {
     const proxyUrl = `${CORS_PROXY}${encodeURIComponent(url)}`;
     const response = await fetch(proxyUrl);
@@ -23,43 +24,47 @@ export async function scrapeAN1Game(url: string): Promise<ScrapedData> {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
 
-    // Selectores específicos de AN1
-    const title = doc.querySelector('h1[itemprop="name"]')?.textContent?.trim() || 
-                  doc.querySelector('.title')?.textContent?.trim() || 
-                  "Nuevo Juego";
-    
-    // Extraer descripción (evitando scripts o html pesado)
-    const descEl = doc.querySelector('div[itemprop="description"]') || doc.querySelector('.article');
-    const description = descEl?.textContent?.trim() || "";
-    
-    // Metadatos adicionales de la tabla de info de AN1
-    const infoItems = Array.from(doc.querySelectorAll('.item-spec'));
-    let size = 'Varia';
-    let year = new Date().getFullYear().toString();
-    let publisher = 'Android';
-    let version = 'Latest';
+    // --- EXTRACCIÓN DE TÍTULO ---
+    const title = 
+      doc.querySelector('meta[property="og:title"]')?.getAttribute('content') ||
+      doc.querySelector('meta[name="twitter:title"]')?.getAttribute('content') ||
+      doc.querySelector('h1[itemprop="name"]')?.textContent?.trim() || 
+      doc.querySelector('h1')?.textContent?.trim() ||
+      doc.title?.split('|')[0]?.split('-')[0]?.trim() ||
+      "Nuevo Juego";
 
-    infoItems.forEach(item => {
-        const text = item.textContent?.toLowerCase() || '';
-        if (text.includes('version')) version = item.querySelector('.spec-val')?.textContent?.trim() || version;
-        if (text.includes('size')) size = item.querySelector('.spec-val')?.textContent?.trim() || size;
-        if (text.includes('updated')) {
-            const dateStr = item.querySelector('.spec-val')?.textContent?.trim() || '';
-            const yearMatch = dateStr.match(/\d{4}/);
-            if (yearMatch) year = yearMatch[0];
-        }
-    });
+    // --- EXTRACCIÓN DE DESCRIPCIÓN ---
+    const description = 
+      doc.querySelector('meta[property="og:description"]')?.getAttribute('content') ||
+      doc.querySelector('meta[name="twitter:description"]')?.getAttribute('content') ||
+      doc.querySelector('meta[name="description"]')?.getAttribute('content') ||
+      doc.querySelector('div[itemprop="description"]')?.textContent?.trim() ||
+      doc.querySelector('.article')?.textContent?.trim() ||
+      doc.querySelector('p')?.textContent?.trim() || "";
+
+    // --- EXTRACCIÓN DE METADATOS (Regex sobre el HTML crudo como fallback) ---
+    // Tamaño: busca patrones como 1.5 GB, 500 MB, etc.
+    const sizeMatch = html.match(/(\d+(?:\.\d+)?\s*(?:GB|MB|gb|mb|Gb|Mb))/i);
+    const size = sizeMatch ? sizeMatch[0] : 'Varia';
+
+    // Año: busca años razonables (1990-2029)
+    const yearMatch = html.match(/(?:19|20)[0-2][0-9]/);
+    const year = yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
+
+    // Editor / Fuente
+    const domain = new URL(url).hostname.replace('www.', '');
+    const publisher = domain.charAt(0).toUpperCase() + domain.slice(1);
 
     return {
-      title,
-      description: description.substring(0, 1500), // Límite razonable
+      title: title.substring(0, 100),
+      description: description.substring(0, 2000),
       size,
       year,
-      publisher: 'AN1.com',
-      version
+      publisher,
+      version: 'Latest'
     };
   } catch (error) {
-    console.error('Error scrapeando:', error);
+    console.error('Error en el scraper universal:', error);
     throw error;
   }
 }

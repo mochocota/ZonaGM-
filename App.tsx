@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -6,14 +7,12 @@ import Footer from './components/Footer';
 import SEO from './components/SEO';
 import AdBlockDetector from './components/AdBlockDetector';
 import { SortOption, Game, Report } from './types';
-import { GAMES } from './constants'; 
 import { LayoutGrid, List as ListIcon, ChevronDown, Loader2 } from 'lucide-react';
 import { db, auth } from './firebase';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy, QuerySnapshot, DocumentData } from 'firebase/firestore';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { useToast } from './components/Toast';
 
-// Lazy Load heavy or conditional components for better initial load performance
 const GameDetail = React.lazy(() => import('./components/GameDetail'));
 const GameForm = React.lazy(() => import('./components/GameForm'));
 const AdminPanel = React.lazy(() => import('./components/AdminPanel'));
@@ -22,419 +21,116 @@ const SitemapView = React.lazy(() => import('./components/SitemapView'));
 
 const ITEMS_PER_PAGE = 20;
 
-// Helper for SEO Friendly URLs
 const slugify = (text: string) => {
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+  return text.toString().toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 };
 
-const LoadingSpinner = () => (
-    <div className="flex h-[50vh] w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+const SkeletonGrid = () => (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 w-full">
+        {[...Array(8)].map((_, i) => (
+            <div key={i} className="animate-pulse bg-surface border border-border-color rounded-3xl overflow-hidden aspect-[3/4.5] flex flex-col">
+                <div className="bg-gray-200 dark:bg-zinc-800 flex-1" />
+                <div className="p-4 space-y-2">
+                    <div className="h-4 bg-gray-200 dark:bg-zinc-800 rounded w-3/4" />
+                    <div className="h-3 bg-gray-200 dark:bg-zinc-800 rounded w-1/2" />
+                </div>
+            </div>
+        ))}
     </div>
 );
 
 const App: React.FC = () => {
-  // Toast Hook
   const { toast } = useToast();
-
-  // Main Data State
-  // FIX: Start empty and loading to ensure no ghost posts appear
   const [games, setGames] = useState<Game[]>([]); 
   const [reports, setReports] = useState<Report[]>([]);
-  // FIX: Start loading as true so we wait for Firebase
   const [isLoading, setIsLoading] = useState(true); 
-  // FIX: Track if initial URL routing has been resolved to prevent content flash
   const [isRouteResolved, setIsRouteResolved] = useState(false);
-
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('Alphabetically');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
-  
-  // Navigation State
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [isSitemapOpen, setIsSitemapOpen] = useState(false);
   const [selectedConsole, setSelectedConsole] = useState<string | null>(null);
-  
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-
-  // Auth State
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-
-  // Form State
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingGame, setEditingGame] = useState<Game | null>(null);
-
-  // Admin Panel State
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
-
-  // Theme State
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Initialize Theme
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
         setIsDarkMode(true);
         document.documentElement.classList.add('dark');
-    } else {
-        setIsDarkMode(false);
-        document.documentElement.classList.remove('dark');
     }
   }, []);
 
-  // Firebase Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
-        if (user) {
-            setIsLoggedIn(true);
-        } else {
-            setIsLoggedIn(false);
-        }
+        setIsLoggedIn(!!user);
     });
     return () => unsubscribe();
   }, []);
 
-  // Firebase Data Listeners
   useEffect(() => {
-    setIsLoading(true); // Ensure loader shows when mounting/remounting
-    
-    // Listen to Games
     const gamesCollection = collection(db, 'games');
-    const qGames = query(gamesCollection, orderBy('title')); // Default sort
+    const qGames = query(gamesCollection, orderBy('title')); 
     const unsubGames = onSnapshot(qGames, (snapshot: QuerySnapshot<DocumentData, DocumentData>) => {
-        const gamesData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        })) as Game[];
-        
+        const gamesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Game[];
         setGames(gamesData);
-        setIsLoading(false); // Data loaded
-        
-        // Update selected game if it exists to keep it in sync
-        if (selectedGame) {
-           const updatedSelected = gamesData.find(g => g.id === selectedGame.id);
-           if (updatedSelected) setSelectedGame(updatedSelected);
-        }
-    }, (error) => {
-        console.error("Error reading games:", error);
-        setIsLoading(false); // Hide spinner even on error
-        if (error.code === 'permission-denied') {
-            toast.error("Error de Lectura", "No tienes permisos para ver los juegos. Verifica las reglas de Firebase.");
-        }
+        setIsLoading(false);
     });
-
-    // Listen to Reports
-    const reportsCollection = collection(db, 'reports');
-    const unsubReports = onSnapshot(reportsCollection, (snapshot: QuerySnapshot<DocumentData, DocumentData>) => {
-        const reportsData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        })) as Report[];
-        setReports(reportsData);
-    }, (error) => {
-        // Silent fail for reports if not admin, usually expected
-        console.error("Error reading reports:", error);
+    const unsubReports = onSnapshot(collection(db, 'reports'), (snapshot) => {
+        setReports(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Report[]);
     });
+    return () => { unsubGames(); unsubReports(); };
+  }, []);
 
-    return () => {
-        unsubGames();
-        unsubReports();
-    };
-  }, []); // Removed selectedGame dependency to prevent unnecessary re-subscriptions
-
-  const toggleTheme = () => {
-      if (isDarkMode) {
-          document.documentElement.classList.remove('dark');
-          localStorage.setItem('theme', 'light');
-          setIsDarkMode(false);
-      } else {
-          document.documentElement.classList.add('dark');
-          localStorage.setItem('theme', 'dark');
-          setIsDarkMode(true);
-      }
-  };
-
-  const handleLogout = async () => {
-      await signOut(auth);
-      setIsAdminPanelOpen(false);
-      toast.info("Sesión cerrada", "Has salido del panel de administración.");
-  };
-
-  // Derive unique consoles for the menu
-  const uniqueConsoles = useMemo(() => {
-    const allConsoles = games.map(g => g.console);
-    return Array.from(new Set(allConsoles)).sort();
-  }, [games]);
-
-  // Handle URL Params for SEO (Deep Linking)
   useEffect(() => {
-    // Only run this logic if we have finished loading games
     if (isLoading) return; 
-
     const handlePopState = () => {
         const params = new URLSearchParams(window.location.search);
         const gameSlug = params.get('game');
-        const gameId = params.get('gameId');
         const view = params.get('view');
-        
-        let foundGame = null;
-
         if (gameSlug) {
-            // Find by slug (Friendly URL)
-            foundGame = games.find(g => slugify(g.title) === gameSlug);
-        } else if (gameId) {
-            // Find by ID (Legacy Support)
-            foundGame = games.find(g => g.id === gameId);
-        }
-
-        if (foundGame) {
-            setSelectedGame(foundGame);
-            setIsSitemapOpen(false);
+            const found = games.find(g => slugify(g.title) === gameSlug);
+            if (found) setSelectedGame(found);
         } else if (view === 'sitemap') {
             setIsSitemapOpen(true);
-            setSelectedGame(null);
         } else {
-            // Ensure we are at home state if no params
             setSelectedGame(null);
             setIsSitemapOpen(false);
         }
-
-        // Mark routing as resolved so we can show content
         setIsRouteResolved(true);
     };
-
-    // Check once games are loaded
     handlePopState();
-
-    // Listen for back/forward button
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, [games, isLoading]); 
 
-  // Reset pagination when search or sort changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, sortBy, selectedConsole]);
-
-  // Filter and Sort logic
   const filteredGames = useMemo(() => {
     let result = [...games];
-
-    // 1. Filter by Console if selected
-    if (selectedConsole) {
-        result = result.filter(g => g.console === selectedConsole);
-    }
-
-    // 2. Filter by Search Term
+    if (selectedConsole) result = result.filter(g => g.console === selectedConsole);
     if (searchTerm) {
         const lowerTerm = searchTerm.toLowerCase();
-        result = result.filter(game => 
-            game.title.toLowerCase().includes(lowerTerm) ||
-            game.console.toLowerCase().includes(lowerTerm)
-        );
+        result = result.filter(game => game.title.toLowerCase().includes(lowerTerm));
     }
-
-    // 3. Sort
-    if (sortBy === 'Popularity') {
-      result.sort((a, b) => b.downloads - a.downloads);
-    } else if (sortBy === 'Date') {
-      result.sort((a, b) => parseInt(b.year) - parseInt(a.year));
-    } else if (sortBy === 'Alphabetically') {
-      result.sort((a, b) => a.title.localeCompare(b.title));
-    }
-
+    if (sortBy === 'Popularity') result.sort((a, b) => b.downloads - a.downloads);
+    else if (sortBy === 'Date') result.sort((a, b) => parseInt(b.year) - parseInt(a.year));
+    else if (sortBy === 'Alphabetically') result.sort((a, b) => a.title.localeCompare(b.title));
     return result;
   }, [games, searchTerm, sortBy, selectedConsole]);
 
-  // Pagination Logic
   const totalPages = Math.ceil(filteredGames.length / ITEMS_PER_PAGE);
-  const currentGames = filteredGames.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE, 
-    currentPage * ITEMS_PER_PAGE
-  );
+  const currentGames = filteredGames.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
-  // Helper to generate page numbers
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-    
-    if (totalPages <= maxVisiblePages) {
-        for (let i = 1; i <= totalPages; i++) pages.push(i);
-    } else {
-        // Always show first, last, and pages around current
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-        
-        if (endPage - startPage < maxVisiblePages - 1) {
-            startPage = Math.max(1, endPage - maxVisiblePages + 1);
-        }
-
-        for (let i = startPage; i <= endPage; i++) {
-            pages.push(i);
-        }
-    }
-    return pages;
-  };
-
-  // CRUD Handlers (Firestore)
-  const handleAddGame = () => {
-    setEditingGame(null);
-    setIsFormOpen(true);
-  };
-
-  const handleEditGame = (game: Game) => {
-    setEditingGame(game);
-    setIsFormOpen(true);
-  };
-
-  const handleFormSubmit = async (gameData: Game): Promise<boolean> => {
-    try {
-        // Sanitize data to remove undefined values which Firestore throws error on
-        const sanitize = (obj: any): any => {
-            return JSON.parse(JSON.stringify(obj));
-        };
-
-        if (editingGame) {
-            // Update existing in Firestore
-            const gameRef = doc(db, 'games', gameData.id);
-            const { id, ...dataToUpdate } = gameData;
-            await updateDoc(gameRef, sanitize(dataToUpdate));
-            
-            if (selectedGame && selectedGame.id === gameData.id) {
-                setSelectedGame(gameData);
-            }
-            toast.success("Juego Actualizado", `"${gameData.title}" se ha guardado correctamente.`);
-        } else {
-            // Create new in Firestore
-            const { id, ...newGameData } = gameData; 
-            
-            // Ensure essential arrays exist if they were lost
-            const payload = {
-                ...newGameData,
-                comments: newGameData.comments || [],
-                screenshots: newGameData.screenshots || [],
-                languages: newGameData.languages || ['English'],
-                downloads: newGameData.downloads || 0,
-                rating: newGameData.rating || 0
-            };
-
-            await addDoc(collection(db, 'games'), sanitize(payload));
-            toast.success("Juego Creado", `"${gameData.title}" se ha añadido al archivo.`);
-        }
-        return true;
-    } catch (error: any) {
-        console.error("Error saving game:", error);
-        
-        // Robust error checking for permissions
-        const isPermissionError = 
-            error.code === 'permission-denied' || 
-            (error.message && error.message.toLowerCase().includes('permission')) ||
-            (error.message && error.message.toLowerCase().includes('insufficient'));
-
-        if (isPermissionError) {
-            toast.error("Permiso Denegado", "Revisa: 1. Reglas Firestore 2. Dominios Autorizados en Auth (Vercel debe estar en la lista).");
-        } else {
-            toast.error("Error al guardar", error.message || 'Error desconocido');
-        }
-        return false;
-    }
-  };
-
-  const handleDeleteGame = async (id: string) => {
-    try {
-        await deleteDoc(doc(db, 'games', id));
-        if (selectedGame && selectedGame.id === id) {
-            setSelectedGame(null);
-            // Clean URL
-            window.history.pushState({}, '', window.location.pathname);
-        }
-        toast.success("Juego Eliminado", "El archivo ha sido borrado permanentemente.");
-    } catch (error: any) {
-        console.error("Error deleting game:", error);
-        if (error.code === 'permission-denied') {
-            toast.error("Error de Permisos", "Firebase bloqueó la eliminación.");
-        } else {
-            toast.error("Error al eliminar", error.message);
-        }
-    }
-  };
-
-  // Reports Logic (Firestore)
-  const handleReportGame = async (gameId: string, title: string, reason: string, description: string) => {
-    try {
-        await addDoc(collection(db, 'reports'), {
-            gameId,
-            gameTitle: title,
-            reason,
-            description,
-            date: new Date().toLocaleDateString('es-ES'),
-            status: 'Pending'
-        });
-        toast.success("Reporte Enviado", "Gracias por ayudarnos a mantener el archivo.");
-    } catch (error) {
-        console.error("Error sending report:", error);
-        toast.error("Error", "No se pudo enviar el reporte.");
-    }
-  };
-
-  const handleResolveReport = async (id: string) => {
-      try {
-          await updateDoc(doc(db, 'reports', id), { status: 'Resolved' });
-          toast.success("Reporte Resuelto", "El estado ha sido actualizado.");
-      } catch (error) {
-          toast.error("Error", "No se pudo actualizar el reporte.");
-      }
-  };
-
-  const handleDeleteReport = async (id: string) => {
-      try {
-          await deleteDoc(doc(db, 'reports', id));
-          toast.success("Reporte Eliminado", "Se ha borrado del panel.");
-      } catch (error) {
-          toast.error("Error", "No se pudo eliminar el reporte.");
-      }
-  };
-
-  // Search & Navigation
-  const handleSearch = (term: string) => {
-    setSearchTerm(term);
-    if (term) {
-      setSelectedGame(null); 
-      setIsSitemapOpen(false);
-      window.history.pushState({}, '', window.location.pathname);
-    }
-  };
-
-  const handleSelectConsole = (consoleName: string | null) => {
-      setSelectedConsole(consoleName);
-      setSearchTerm(''); // Clear search to show only this console's games
-      setSelectedGame(null);
-      setIsSitemapOpen(false);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      window.history.pushState({}, '', window.location.pathname);
-  };
-
-  const handleBack = () => {
-    setSelectedGame(null);
+  const handleSelectGame = (game: Game) => {
+    setSelectedGame(game);
     setIsSitemapOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    window.history.pushState({}, '', window.location.pathname);
+    window.history.pushState({ gameId: game.id }, '', `?game=${slugify(game.title)}`);
   };
 
   const handleHome = () => {
@@ -442,253 +138,98 @@ const App: React.FC = () => {
     setIsSitemapOpen(false);
     setSearchTerm('');
     setSelectedConsole(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    window.history.pushState({}, '', window.location.pathname);
+    window.history.pushState({}, '', '/');
   };
 
-  const handleSelectGame = (game: Game) => {
-    setSelectedGame(game);
-    setIsSitemapOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    
-    // Update URL with Friendly Slug
-    const slug = slugify(game.title);
-    const newUrl = `?game=${slug}`;
-    window.history.pushState({ gameId: game.id }, '', newUrl);
-  };
+  return (
+    <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden font-sans bg-background text-text-main">
+      <AdBlockDetector />
+      <SEO title="ZonaGM | ROMs e ISOs Verificadas" description="El mejor archivo de juegos clásicos." />
 
-  const handleOpenSitemap = () => {
-    setIsSitemapOpen(true);
-    setSelectedGame(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    window.history.pushState({ sitemap: true }, '', '?view=sitemap');
-  }
+      <Header 
+        searchTerm={searchTerm} setSearchTerm={setSearchTerm} 
+        onAddGame={() => setIsFormOpen(true)} onHome={handleHome}
+        onOpenAdmin={() => setIsAdminPanelOpen(true)}
+        pendingReportsCount={reports.filter(r => r.status === 'Pending').length}
+        isLoggedIn={isLoggedIn} onOpenLogin={() => setIsLoginModalOpen(true)}
+        onLogout={() => signOut(auth)} consoles={useMemo(() => Array.from(new Set(games.map(g => g.console))).sort(), [games])}
+        selectedConsole={selectedConsole} onSelectConsole={setSelectedConsole}
+        isDarkMode={isDarkMode} toggleTheme={() => {
+            const next = !isDarkMode;
+            setIsDarkMode(next);
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', next ? 'dark' : 'light');
+        }}
+      />
 
-  const handleNavigateFromAdmin = (gameId: string) => {
-      const game = games.find(g => g.id === gameId);
-      if (game) {
-          handleSelectGame(game);
-      }
-  };
-
-  // Render Logic
-  let content;
-  
-  if (isLoading || !isRouteResolved) {
-      content = <LoadingSpinner />;
-  } else if (selectedGame) {
-    content = (
-        <div className="flex w-full justify-center pt-8">
-            <Suspense fallback={<LoadingSpinner />}>
+      <main className="flex-1 flex flex-col items-center px-4 md:px-6 w-full max-w-[1200px] mx-auto z-10 pb-16">
+        {selectedGame ? (
+            <Suspense fallback={<div className="py-20 animate-pulse text-text-muted">Cargando detalles...</div>}>
                 <GameDetail 
-                    game={selectedGame}
-                    allGames={games} 
-                    onBack={handleBack} 
-                    onSelectGame={handleSelectGame}
-                    onSelectConsole={handleSelectConsole}
-                    onHome={handleHome}
-                    onEdit={handleEditGame}
-                    onDelete={handleDeleteGame}
-                    onReport={handleReportGame}
-                    isLoggedIn={isLoggedIn}
+                    game={selectedGame} allGames={games} onBack={() => setSelectedGame(null)} 
+                    onSelectGame={handleSelectGame} onSelectConsole={setSelectedConsole}
+                    onHome={handleHome} onEdit={setEditingGame} onDelete={() => {}} 
+                    onReport={() => {}} isLoggedIn={isLoggedIn}
                 />
             </Suspense>
-        </div>
-    );
-  } else if (isSitemapOpen) {
-      content = (
-          <Suspense fallback={<LoadingSpinner />}>
-              <SitemapView 
-                games={games} 
-                onSelectGame={handleSelectGame} 
-              />
-          </Suspense>
-      );
-  } else {
-    content = (
-        <div className="flex w-full max-w-[1000px] flex-col gap-2">
-            
-            {!searchTerm && !selectedConsole && (
-                <Hero searchTerm={searchTerm} setSearchTerm={handleSearch} />
-            )}
-
-            {/* Controls Bar */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-border-color pb-4 mt-2 gap-4">
-              <h3 className="text-lg font-bold text-text-main flex items-center gap-2">
-                {selectedConsole && (
-                    <span className="bg-primary text-black px-3 py-1 rounded-full text-sm font-bold uppercase">
-                        {selectedConsole}
-                    </span>
-                )}
-                <span>
-                    {searchTerm 
-                        ? `${filteredGames.length} resultados para '${searchTerm}'` 
-                        : (selectedConsole ? `${filteredGames.length} títulos disponibles` : 'Archivos Recientes')
-                    }
-                </span>
-              </h3>
-              
-              <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                {/* Sort Dropdown */}
-                <div className="flex items-center gap-2 text-sm text-text-muted relative group">
-                  <span className="font-medium">Ordenar por:</span>
-                  <div className="relative">
+        ) : isSitemapOpen ? (
+            <Suspense fallback={<SkeletonGrid />}>
+                <SitemapView games={games} onSelectGame={handleSelectGame} />
+            </Suspense>
+        ) : (
+            <div className="flex w-full max-w-[1000px] flex-col gap-2">
+                <Hero searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+                
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-border-color pb-4 mt-2 gap-4">
+                  <h3 className="text-lg font-bold text-text-main">
+                    {selectedConsole ? `${selectedConsole} - ` : ''} 
+                    {isLoading ? 'Sincronizando Archivo...' : `${filteredGames.length} títulos disponibles`}
+                  </h3>
+                  <div className="flex items-center gap-4">
                     <select 
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as SortOption)}
-                      className="appearance-none bg-transparent pl-2 pr-6 font-bold text-text-main focus:outline-none cursor-pointer"
+                      value={sortBy} onChange={(e) => setSortBy(e.target.value as SortOption)}
+                      className="bg-transparent font-bold text-sm text-text-main focus:outline-none cursor-pointer"
                     >
                       <option value="Alphabetically">Alfabéticamente</option>
                       <option value="Date">Fecha</option>
                       <option value="Popularity">Popularidad</option>
                     </select>
-                    <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-text-main" />
+                    <div className="flex items-center bg-surface border border-border-color rounded-lg p-1 gap-1">
+                      <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md ${viewMode === 'list' ? 'bg-background' : 'text-text-muted'}`}><ListIcon size={18} /></button>
+                      <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md ${viewMode === 'grid' ? 'bg-background' : 'text-text-muted'}`}><LayoutGrid size={18} /></button>
+                    </div>
                   </div>
                 </div>
 
-                {/* View Toggle */}
-                <div className="flex items-center bg-surface border border-border-color rounded-lg p-1 gap-1">
-                  <button 
-                    onClick={() => setViewMode('list')}
-                    className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-background text-text-main shadow-sm' : 'text-text-muted hover:text-text-main'}`}
-                    aria-label="List View"
-                  >
-                    <ListIcon size={18} />
-                  </button>
-                  <button 
-                    onClick={() => setViewMode('grid')}
-                    className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-background text-text-main shadow-sm' : 'text-text-muted hover:text-text-main'}`}
-                    aria-label="Grid View"
-                  >
-                    <LayoutGrid size={18} />
-                  </button>
+                <div className="mt-6">
+                    {isLoading ? <SkeletonGrid /> : (
+                        <GameList games={currentGames} viewMode={viewMode} onSelectGame={handleSelectGame} onSelectConsole={setSelectedConsole} />
+                    )}
                 </div>
-              </div>
+
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 py-12">
+                        {[...Array(totalPages)].map((_, i) => (
+                            <button 
+                                key={i} onClick={() => setCurrentPage(i + 1)}
+                                className={`w-8 h-8 rounded-full font-bold text-xs ${currentPage === i + 1 ? 'bg-primary text-black' : 'text-text-muted hover:bg-gray-100'}`}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
-
-            {/* Results */}
-            <div className="mt-6">
-              <GameList 
-                games={currentGames} 
-                viewMode={viewMode} 
-                onSelectGame={handleSelectGame}
-                onSelectConsole={handleSelectConsole}
-              />
-            </div>
-
-            {/* Functional Pagination */}
-            {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-4 py-12 mt-4">
-                <button 
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={`flex h-10 items-center justify-center rounded-full bg-surface border border-border-color px-6 text-sm font-medium transition-colors ${
-                        currentPage === 1 
-                        ? 'opacity-50 cursor-not-allowed text-text-muted' 
-                        : 'text-text-main hover:border-primary hover:text-primary hover:bg-surface'
-                    }`}
-                >
-                    Anterior
-                </button>
-                
-                <div className="flex items-center gap-2 text-sm font-medium text-text-muted">
-                    {getPageNumbers().map(pageNum => (
-                        <button
-                            key={pageNum}
-                            onClick={() => handlePageChange(pageNum)}
-                            className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
-                                currentPage === pageNum 
-                                ? 'bg-primary text-black font-bold shadow-sm' 
-                                : 'hover:bg-gray-200 cursor-pointer text-text-muted'
-                            }`}
-                        >
-                            {pageNum}
-                        </button>
-                    ))}
-                </div>
-
-                <button 
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={`flex h-10 items-center justify-center rounded-full bg-surface border border-border-color px-6 text-sm font-bold transition-colors ${
-                        currentPage === totalPages 
-                        ? 'opacity-50 cursor-not-allowed text-text-muted font-medium' 
-                        : 'text-text-main hover:border-primary hover:text-primary hover:bg-surface'
-                    }`}
-                >
-                    Siguiente
-                </button>
-                </div>
-            )}
-
-          </div>
-    );
-  }
-
-  return (
-    <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden font-sans bg-background text-text-main">
-      <AdBlockDetector />
-      
-      {/* Default SEO for Home */}
-      {!selectedGame && (
-          <SEO 
-            title="ZonaGM | Download Verified ROMs & ISOs"
-            description="The best archive for verified game ROMs and ISOs. Download games for GameCube, PS2, SNES, GBA and more. Safe, fast, and organized."
-            image="https://zonagm.com/og-image.jpg" // Placeholder
-            url={window.location.href}
-          />
-      )}
-
-      <Header 
-        searchTerm={searchTerm} 
-        setSearchTerm={handleSearch} 
-        onAddGame={handleAddGame}
-        onHome={handleHome}
-        onOpenAdmin={isLoggedIn ? () => setIsAdminPanelOpen(true) : () => setIsLoginModalOpen(true)}
-        pendingReportsCount={reports.filter(r => r.status === 'Pending').length}
-        isLoggedIn={isLoggedIn}
-        onOpenLogin={() => setIsLoginModalOpen(true)}
-        onLogout={handleLogout}
-        consoles={uniqueConsoles}
-        selectedConsole={selectedConsole}
-        onSelectConsole={handleSelectConsole}
-        isDarkMode={isDarkMode}
-        toggleTheme={toggleTheme}
-      />
-
-      <main className="flex-1 flex flex-col items-center px-4 md:px-6 w-full max-w-[1200px] mx-auto z-10 pb-16">
-        {content}
+        )}
       </main>
 
-      <Footer onOpenSitemap={handleOpenSitemap} />
+      <Footer onOpenSitemap={() => setIsSitemapOpen(true)} />
 
-      {/* Modals - Wrapped in Suspense */}
       <Suspense fallback={null}>
-          <GameForm 
-            isOpen={isFormOpen} 
-            onClose={() => setIsFormOpen(false)} 
-            onSubmit={handleFormSubmit}
-            initialData={editingGame}
-          />
-
-          <AdminPanel 
-            isOpen={isAdminPanelOpen}
-            onClose={() => setIsAdminPanelOpen(false)}
-            reports={reports}
-            onResolve={handleResolveReport}
-            onDelete={handleDeleteReport}
-            onNavigateToGame={handleNavigateFromAdmin}
-          />
-
-          <LoginModal 
-            isOpen={isLoginModalOpen}
-            onClose={() => setIsLoginModalOpen(false)}
-            onLogin={(status) => {
-                if (status) setIsAdminPanelOpen(true);
-            }}
-          />
+          <GameForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} onSubmit={async (g) => true} initialData={editingGame} />
+          <AdminPanel isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} reports={reports} onResolve={() => {}} onDelete={() => {}} onNavigateToGame={handleSelectGame} />
+          <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} onLogin={() => {}} />
       </Suspense>
-
     </div>
   );
 };

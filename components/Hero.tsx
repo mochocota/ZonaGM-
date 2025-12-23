@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 
 interface HeroProps {
@@ -6,16 +7,14 @@ interface HeroProps {
 }
 
 const BubbleBackground: React.FC = () => {
-  // Generamos un array estable de propiedades para las burbujas
   const bubbles = useMemo(() => {
-    return Array.from({ length: 30 }).map((_, i) => ({
+    return Array.from({ length: 15 }).map((_, i) => ({
       id: i,
-      // Tamaño base más pequeño (5px a 25px)
-      size: Math.random() * 20 + 5,
-      left: Math.random() * 100, // 0% a 100%
-      duration: Math.random() * 12 + 15, // Más lento para mayor elegancia
-      delay: Math.random() * 10,
-      opacity: Math.random() * 0.1 + 0.02, // Opacidad muy sutil
+      size: Math.random() * 15 + 5,
+      left: Math.random() * 100,
+      duration: Math.random() * 10 + 20,
+      delay: Math.random() * 5,
+      opacity: 0.03,
     }));
   }, []);
 
@@ -24,14 +23,13 @@ const BubbleBackground: React.FC = () => {
       {bubbles.map((bubble) => (
         <div
           key={bubble.id}
-          className="bubble absolute rounded-full bg-primary"
+          className="absolute rounded-full bg-primary"
           style={{
             width: `${bubble.size}px`,
             height: `${bubble.size}px`,
             left: `${bubble.left}%`,
-            bottom: `-100px`,
+            bottom: `-20px`,
             opacity: bubble.opacity,
-            filter: 'blur(3px)',
             animation: `float ${bubble.duration}s linear infinite`,
             animationDelay: `${bubble.delay}s`,
           } as React.CSSProperties}
@@ -39,28 +37,10 @@ const BubbleBackground: React.FC = () => {
       ))}
       <style>{`
         @keyframes float {
-          0% {
-            transform: translateY(0) translateX(0);
-            opacity: 0;
-          }
-          10% {
-            opacity: var(--tw-opacity);
-          }
-          90% {
-            opacity: var(--tw-opacity);
-          }
-          100% {
-            transform: translateY(-120vh) translateX(40px);
-            opacity: 0;
-          }
-        }
-        
-        /* Ajuste específico para móviles: burbujas extremadamente sutiles */
-        @media (max-width: 768px) {
-          .bubble {
-            transform: scale(0.2); /* Escala mucho más reducida para móviles */
-            filter: blur(2px);
-          }
+          0% { transform: translateY(0); opacity: 0; }
+          10% { opacity: 0.03; }
+          90% { opacity: 0.03; }
+          100% { transform: translateY(-100vh); opacity: 0; }
         }
       `}</style>
     </div>
@@ -69,22 +49,16 @@ const BubbleBackground: React.FC = () => {
 
 const Hero: React.FC<HeroProps> = ({ searchTerm, setSearchTerm }) => {
   return (
-    <section className="relative flex flex-col gap-4 py-12 md:py-16 items-center text-center px-4 w-full overflow-hidden">
-      {/* Fondo de Burbujas */}
+    <section className="relative flex flex-col gap-4 py-8 md:py-16 items-center text-center px-4 w-full overflow-hidden min-h-[160px] md:min-h-[280px] justify-center">
       <BubbleBackground />
-      
-      {/* Contenido */}
       <div className="relative z-10 space-y-2 max-w-4xl">
-        {/* Título ajustado para un diseño más compacto */}
-        <h1 className="text-6xl md:text-8xl lg:text-[7rem] font-black tracking-tighter select-none leading-none text-text-main">
+        <h1 className="text-5xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-none text-text-main drop-shadow-sm">
           ZonaGM
         </h1>
-        <div className="space-y-1">
-          <p className="text-text-muted text-lg md:text-2xl font-bold max-w-lg mx-auto italic opacity-90">
-            "Reviviendo los clásicos, píxel a píxel."
-          </p>
-          <div className="h-1 w-16 bg-primary mx-auto rounded-full mt-2" />
-        </div>
+        <p className="text-text-muted text-base md:text-xl font-bold italic opacity-80">
+          "Reviviendo los clásicos, píxel a píxel."
+        </p>
+        <div className="h-1 w-12 bg-primary mx-auto rounded-full mt-2" />
       </div>
     </section>
   );

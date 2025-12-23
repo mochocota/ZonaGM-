@@ -9,7 +9,7 @@ import AdBlockDetector from './components/AdBlockDetector';
 import { SortOption, Game, Report } from './types';
 import { LayoutGrid, List as ListIcon } from 'lucide-react';
 import { db, auth } from './firebase';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, addDoc, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { useToast } from './components/Toast';
 
@@ -94,7 +94,6 @@ const App: React.FC = () => {
     return () => { unsubGames(); unsubReports(); };
   }, []);
 
-  // Manejo de búsqueda: si hay búsqueda, reseteamos el juego seleccionado para mostrar resultados globales
   const handleSetSearchTerm = useCallback((term: string) => {
     setSearchTerm(term);
     if (term.trim() !== '' && selectedGame !== null) {
@@ -128,20 +127,15 @@ const App: React.FC = () => {
 
   const filteredGames = useMemo(() => {
     let result = [...games];
-    
-    // BÚSQUEDA GLOBAL: Si hay un término de búsqueda, ignoramos el filtro de consola
     if (searchTerm.trim()) {
         const lowerTerm = searchTerm.toLowerCase();
         result = result.filter(game => game.title.toLowerCase().includes(lowerTerm));
     } else if (selectedConsole) {
-        // Solo aplicamos consola si NO se está buscando
         result = result.filter(g => g.console === selectedConsole);
     }
-
     if (sortBy === 'Popularity') result.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
     else if (sortBy === 'Date') result.sort((a, b) => parseInt(b.year || '0') - parseInt(a.year || '0'));
     else if (sortBy === 'Alphabetically') result.sort((a, b) => a.title.localeCompare(b.title));
-    
     return result;
   }, [games, searchTerm, sortBy, selectedConsole]);
 
@@ -154,8 +148,8 @@ const App: React.FC = () => {
   const handleSelectGame = useCallback((game: Game) => {
     setSelectedGame(game);
     setIsSitemapOpen(false);
-    setIsSearchOpen(false); // Cerramos el buscador al entrar al post
-    setSearchTerm(''); // Limpiamos el término para que al volver la lista esté limpia
+    setIsSearchOpen(false);
+    setSearchTerm('');
     window.scrollTo({ top: 0 });
     window.history.pushState({ gameId: game.id }, '', `?game=${slugify(game.title)}`);
   }, []);
@@ -186,6 +180,56 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0 });
   }, []);
 
+  const handleGameSubmit = async (gameData: Game) => {
+    try {
+        if (editingGame) {
+            const gameRef = doc(db, 'games', editingGame.id);
+            const { id, ...data } = gameData;
+            await updateDoc(gameRef, data);
+            toast.success("Actualizado", "El juego se ha modificado correctamente.");
+        } else {
+            const { id, ...data } = gameData;
+            await addDoc(collection(db, 'games'), data);
+            toast.success("Creado", "El juego se ha añadido al repositorio.");
+        }
+        setEditingGame(null);
+        setIsFormOpen(false);
+        return true;
+    } catch (error) {
+        console.error("Error saving game:", error);
+        toast.error("Error", "No se pudo guardar la información en la base de datos.");
+        return false;
+    }
+  };
+
+  const handleGameDelete = async (gameId: string) => {
+    try {
+        await deleteDoc(doc(db, 'games', gameId));
+        toast.success("Eliminado", "El juego ha sido borrado.");
+        handleHome();
+    } catch (error) {
+        toast.error("Error", "No se pudo eliminar el juego.");
+    }
+  };
+
+  const handleResolveReport = async (reportId: string) => {
+    try {
+        await updateDoc(doc(db, 'reports', reportId), { status: 'Resolved' });
+        toast.success("Reporte Resuelto", "El estado ha sido actualizado.");
+    } catch (e) {
+        toast.error("Error", "No se pudo actualizar el reporte.");
+    }
+  };
+
+  const handleDeleteReport = async (reportId: string) => {
+    try {
+        await deleteDoc(doc(db, 'reports', reportId));
+        toast.info("Reporte Borrado");
+    } catch (e) {
+        toast.error("Error", "No se pudo borrar el reporte.");
+    }
+  };
+
   return (
     <div className="relative flex min-h-screen w-full flex-col bg-background text-text-main">
       <AdBlockDetector />
@@ -196,7 +240,8 @@ const App: React.FC = () => {
         setSearchTerm={handleSetSearchTerm} 
         isSearchOpen={isSearchOpen}
         setIsSearchOpen={setIsSearchOpen}
-        onAddGame={() => setIsFormOpen(true)} onHome={handleHome}
+        onAddGame={() => { setEditingGame(null); setIsFormOpen(true); }} 
+        onHome={handleHome}
         onOpenAdmin={() => setIsAdminPanelOpen(true)}
         pendingReportsCount={reports.filter(r => r.status === 'Pending').length}
         isLoggedIn={isLoggedIn} onOpenLogin={() => setIsLoginModalOpen(true)}
@@ -218,8 +263,16 @@ const App: React.FC = () => {
                 <GameDetail 
                     game={selectedGame} allGames={games} onBack={() => setSelectedGame(null)} 
                     onSelectGame={handleSelectGame} onSelectConsole={handleSelectConsole}
-                    onHome={handleHome} onEdit={setEditingGame} onDelete={() => {}} 
-                    onReport={() => {}} isLoggedIn={isLoggedIn}
+                    onHome={handleHome} onEdit={(g) => { setEditingGame(g); setIsFormOpen(true); }} 
+                    onDelete={handleGameDelete} 
+                    onReport={async (id, title, reason, desc) => {
+                        await addDoc(collection(db, 'reports'), {
+                            gameId: id, gameTitle: title, reason, description: desc,
+                            date: new Date().toLocaleString(), status: 'Pending'
+                        });
+                        toast.success("Reporte Enviado", "Gracias por ayudarnos a mejorar.");
+                    }} 
+                    isLoggedIn={isLoggedIn}
                 />
             </Suspense>
         ) : isSitemapOpen ? (
@@ -273,14 +326,21 @@ const App: React.FC = () => {
       <Footer onOpenSitemap={() => setIsSitemapOpen(true)} />
 
       <Suspense fallback={null}>
-          {isFormOpen && <GameForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} onSubmit={async () => true} initialData={editingGame} />}
+          {isFormOpen && (
+            <GameForm 
+                isOpen={isFormOpen} 
+                onClose={() => { setIsFormOpen(false); setEditingGame(null); }} 
+                onSubmit={handleGameSubmit} 
+                initialData={editingGame} 
+            />
+          )}
           {isAdminPanelOpen && (
             <AdminPanel 
               isOpen={isAdminPanelOpen} 
               onClose={() => setIsAdminPanelOpen(false)} 
               reports={reports} 
-              onResolve={() => {}} 
-              onDelete={() => {}} 
+              onResolve={handleResolveReport} 
+              onDelete={handleDeleteReport} 
               onNavigateToGame={handleSelectGameById} 
             />
           )}

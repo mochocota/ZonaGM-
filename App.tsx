@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, Suspense, useCallback, useLayoutEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -25,11 +24,10 @@ const slugify = (text: string) => {
   return text.toString().toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 };
 
-// SkeletonGrid ahora incluye el Hero para evitar CLS de 0.912
 const SkeletonGrid = () => (
     <div className="w-full flex flex-col items-center">
-        <div className="w-full hero-placeholder" /> {/* Espacio reservado para el Hero */}
-        <div className="w-full max-w-[1000px] mt-8">
+        <div className="w-full hero-placeholder" />
+        <div className="w-full max-w-[1000px] mt-8 px-4">
             <div className="h-8 w-48 bg-gray-200 dark:bg-zinc-800 rounded animate-pulse mb-6" />
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 w-full">
                 {[...Array(8)].map((_, i) => (
@@ -127,6 +125,8 @@ const App: React.FC = () => {
     return result;
   }, [games, searchTerm, sortBy, selectedConsole]);
 
+  const totalPages = Math.ceil(filteredGames.length / ITEMS_PER_PAGE);
+
   const currentGames = useMemo(() => 
     filteredGames.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE),
   [filteredGames, currentPage]);
@@ -138,7 +138,6 @@ const App: React.FC = () => {
     window.history.pushState({ gameId: game.id }, '', `?game=${slugify(game.title)}`);
   }, []);
 
-  // TIPADO EXPLÍCITO para evitar error TS2322 en Vercel
   const handleSelectGameById = useCallback((gameId: string): void => {
     const game = games.find(g => g.id === gameId);
     if (game) handleSelectGame(game);
@@ -149,7 +148,16 @@ const App: React.FC = () => {
     setIsSitemapOpen(false);
     setSearchTerm('');
     setSelectedConsole(null);
+    setCurrentPage(1);
     window.history.pushState({}, '', '/');
+  }, []);
+
+  const handleSelectConsole = useCallback((console: string | null) => {
+    setSelectedConsole(console);
+    setSelectedGame(null);
+    setIsSitemapOpen(false);
+    setCurrentPage(1);
+    window.scrollTo({ top: 300 });
   }, []);
 
   return (
@@ -164,7 +172,7 @@ const App: React.FC = () => {
         pendingReportsCount={reports.filter(r => r.status === 'Pending').length}
         isLoggedIn={isLoggedIn} onOpenLogin={() => setIsLoginModalOpen(true)}
         onLogout={() => signOut(auth)} consoles={useMemo(() => Array.from(new Set(games.map(g => g.console))).sort(), [games.length])}
-        selectedConsole={selectedConsole} onSelectConsole={setSelectedConsole}
+        selectedConsole={selectedConsole} onSelectConsole={handleSelectConsole}
         isDarkMode={isDarkMode} toggleTheme={() => {
             const next = !isDarkMode;
             setIsDarkMode(next);
@@ -180,7 +188,7 @@ const App: React.FC = () => {
             <Suspense fallback={<div className="py-20 animate-pulse text-text-muted">Cargando detalles...</div>}>
                 <GameDetail 
                     game={selectedGame} allGames={games} onBack={() => setSelectedGame(null)} 
-                    onSelectGame={handleSelectGame} onSelectConsole={setSelectedConsole}
+                    onSelectGame={handleSelectGame} onSelectConsole={handleSelectConsole}
                     onHome={handleHome} onEdit={setEditingGame} onDelete={() => {}} 
                     onReport={() => {}} isLoggedIn={isLoggedIn}
                 />
@@ -214,16 +222,16 @@ const App: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="min-h-[800px]">
-                    <GameList games={currentGames} viewMode={viewMode} onSelectGame={handleSelectGame} onSelectConsole={setSelectedConsole} />
+                <div className="min-h-[800px] mt-6">
+                    <GameList games={currentGames} viewMode={viewMode} onSelectGame={handleSelectGame} onSelectConsole={handleSelectConsole} />
                 </div>
 
-                {filteredGames.length > ITEMS_PER_PAGE && (
+                {totalPages > 1 && (
                     <div className="flex items-center justify-center gap-2 py-12">
-                        {[...Array(Math.ceil(filteredGames.length / ITEMS_PER_PAGE))].map((_, i) => (
+                        {[...Array(totalPages)].map((_, i) => (
                             <button 
                                 key={i} onClick={() => { setCurrentPage(i + 1); window.scrollTo({ top: 300 }); }}
-                                className={`w-9 h-9 rounded-full font-bold text-sm transition-colors ${currentPage === i + 1 ? 'bg-primary text-black' : 'text-text-muted hover:bg-surface border border-transparent hover:border-border-color'}`}
+                                className={`w-9 h-9 rounded-full font-bold text-sm transition-all duration-200 ${currentPage === i + 1 ? 'bg-primary text-black shadow-md scale-110' : 'text-text-muted hover:bg-surface border border-transparent hover:border-border-color'}`}
                             >
                                 {i + 1}
                             </button>

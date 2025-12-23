@@ -4,6 +4,8 @@ import { Menu, X, Save, Search, PlusCircle, ShieldAlert, LogOut, ChevronDown, Mo
 interface HeaderProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
+  isSearchOpen: boolean;
+  setIsSearchOpen: (isOpen: boolean) => void;
   onAddGame: () => void;
   onHome: () => void;
   onOpenAdmin: () => void;
@@ -21,6 +23,8 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ 
     searchTerm, 
     setSearchTerm, 
+    isSearchOpen,
+    setIsSearchOpen,
     onAddGame, 
     onHome, 
     onOpenAdmin, 
@@ -35,7 +39,6 @@ const Header: React.FC<HeaderProps> = ({
     toggleTheme
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   
   // Console Dropdown State
   const [isConsoleMenuOpen, setIsConsoleMenuOpen] = useState(false);
@@ -66,13 +69,14 @@ const Header: React.FC<HeaderProps> = ({
       onSelectConsole(c);
       setIsConsoleMenuOpen(false);
       setIsMobileMenuOpen(false);
+      setIsSearchOpen(false);
   };
 
   return (
     <header className="relative z-50 w-full bg-background border-b border-border-color transition-all">
       <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-2 md:gap-3 cursor-pointer group shrink-0" onClick={() => { onSelectConsole(null); onHome(); }}>
+        <div className="flex items-center gap-2 md:gap-3 cursor-pointer group shrink-0" onClick={() => { onSelectConsole(null); onHome(); setIsSearchOpen(false); }}>
           <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary text-black group-hover:scale-105 transition-transform duration-200">
             <Save size={18} className="md:w-5 md:h-5" strokeWidth={2.5} />
           </div>
@@ -82,7 +86,7 @@ const Header: React.FC<HeaderProps> = ({
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">
           <button 
-            onClick={() => { onSelectConsole(null); onHome(); }} 
+            onClick={() => { onSelectConsole(null); onHome(); setIsSearchOpen(false); }} 
             className={`text-sm font-medium transition-colors ${!selectedConsole ? 'text-primary-hover font-bold' : 'text-text-main hover:text-text-muted'}`}
           >
             Home
@@ -242,6 +246,7 @@ const Header: React.FC<HeaderProps> = ({
                 onSelectConsole(null);
                 onHome();
                 setIsMobileMenuOpen(false);
+                setIsSearchOpen(false);
             }} 
             className={`text-lg font-medium text-left ${!selectedConsole ? 'text-primary-hover font-bold' : 'text-text-main'}`}
           >

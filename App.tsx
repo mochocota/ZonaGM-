@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, Suspense, useCallback, useLayoutEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -51,6 +50,7 @@ const App: React.FC = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [isLoading, setIsLoading] = useState(true); 
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('Alphabetically');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
@@ -111,7 +111,10 @@ const App: React.FC = () => {
         
         if (gameSlug) {
             const found = games.find(g => slugify(g.title) === gameSlug);
-            if (found) setSelectedGame(found);
+            if (found) {
+                setSelectedGame(found);
+                setIsSearchOpen(false);
+            }
         } else {
             setSelectedGame(null);
         }
@@ -144,6 +147,7 @@ const App: React.FC = () => {
   const handleSelectGame = useCallback((game: Game) => {
     setSelectedGame(game);
     setIsSitemapOpen(false);
+    setIsSearchOpen(false); // Cerramos la búsqueda al entrar
     setSearchTerm(''); // Limpiamos la búsqueda al entrar para evitar conflictos
     window.scrollTo({ top: 0 });
     window.history.pushState({ gameId: game.id }, '', `?game=${slugify(game.title)}`);
@@ -157,6 +161,7 @@ const App: React.FC = () => {
   const handleHome = useCallback(() => {
     setSelectedGame(null);
     setIsSitemapOpen(false);
+    setIsSearchOpen(false);
     setSearchTerm('');
     setSelectedConsole(null);
     setCurrentPage(1);
@@ -168,6 +173,7 @@ const App: React.FC = () => {
     setSelectedConsole(console);
     setSelectedGame(null);
     setIsSitemapOpen(false);
+    setIsSearchOpen(false);
     setSearchTerm('');
     setCurrentPage(1);
     window.scrollTo({ top: 0 });
@@ -179,7 +185,10 @@ const App: React.FC = () => {
       <SEO title="ZonaGM | ROMs e ISOs Verificadas" description="El mejor archivo de juegos clásicos." />
 
       <Header 
-        searchTerm={searchTerm} setSearchTerm={handleSetSearchTerm} 
+        searchTerm={searchTerm} 
+        setSearchTerm={handleSetSearchTerm} 
+        isSearchOpen={isSearchOpen}
+        setIsSearchOpen={setIsSearchOpen}
         onAddGame={() => setIsFormOpen(true)} onHome={handleHome}
         onOpenAdmin={() => setIsAdminPanelOpen(true)}
         pendingReportsCount={reports.filter(r => r.status === 'Pending').length}

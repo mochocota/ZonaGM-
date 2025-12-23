@@ -31,9 +31,9 @@ export async function scrapeAN1Game(url: string): Promise<ScrapedGame> {
                   doc.querySelector('.title')?.textContent?.trim() || 
                   "Nuevo Juego Android";
     
-    const description = doc.querySelector('div[itemprop="description"]')?.[Object.getOwnPropertySymbols(doc.querySelector('div[itemprop="description"]'))[0]]?.textContent?.trim() ||
-                        doc.querySelector('div[itemprop="description"]')?.textContent?.trim() ||
-                        doc.querySelector('.article')?.textContent?.trim() || "";
+    // Simplificado para evitar errores de TS con símbolos
+    const descEl = doc.querySelector('div[itemprop="description"]') || doc.querySelector('.article');
+    const description = descEl?.textContent?.trim() || "";
                         
     let imageUrl = doc.querySelector('img[itemprop="image"]')?.getAttribute('src') || 
                    doc.querySelector('.post-thumb img')?.getAttribute('src') || "";

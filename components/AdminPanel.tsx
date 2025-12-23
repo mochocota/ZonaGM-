@@ -196,7 +196,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                                     <div className="flex items-center gap-2 shrink-0 ml-4">
                                         {item.status === 'loading' && <Loader2 size={16} className="animate-spin text-primary" />}
                                         {item.status === 'success' && <CheckCircle2 size={16} className="text-green-500" />}
-                                        {item.status === 'error' && <AlertCircle size={16} className="text-red-500" title={item.error} />}
+                                        {item.status === 'error' && (
+                                            <span title={item.error} className="cursor-help">
+                                                <AlertCircle size={16} className="text-red-500" />
+                                            </span>
+                                        )}
                                         <span className={`font-bold capitalize ${
                                             item.status === 'success' ? 'text-green-600' : 
                                             item.status === 'error' ? 'text-red-600' : 'text-text-muted'

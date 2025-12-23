@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect, Suspense, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, Suspense, useCallback, useLayoutEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import GameList from './components/GameList';
@@ -7,9 +7,9 @@ import Footer from './components/Footer';
 import SEO from './components/SEO';
 import AdBlockDetector from './components/AdBlockDetector';
 import { SortOption, Game, Report } from './types';
-import { LayoutGrid, List as ListIcon, Loader2 } from 'lucide-react';
+import { LayoutGrid, List as ListIcon } from 'lucide-react';
 import { db, auth } from './firebase';
-import { collection, onSnapshot, query, orderBy, QuerySnapshot, DocumentData } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { useToast } from './components/Toast';
 
@@ -26,11 +26,11 @@ const slugify = (text: string) => {
 };
 
 const SkeletonGrid = () => (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 w-full">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 w-full mt-6">
         {[...Array(8)].map((_, i) => (
-            <div key={i} className="bg-surface border border-border-color rounded-3xl overflow-hidden flex flex-col">
+            <div key={i} className="bg-surface border border-border-color rounded-3xl overflow-hidden flex flex-col aspect-[3/4.8]">
                 <div className="aspect-[3/4] bg-gray-200 dark:bg-zinc-800 animate-pulse" />
-                <div className="p-4 space-y-2">
+                <div className="p-4 space-y-2 flex-1">
                     <div className="h-5 bg-gray-200 dark:bg-zinc-800 rounded w-3/4 animate-pulse" />
                     <div className="h-4 bg-gray-200 dark:bg-zinc-800 rounded w-1/2 animate-pulse" />
                 </div>
@@ -58,9 +58,10 @@ const App: React.FC = () => {
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
         setIsDarkMode(true);
         document.documentElement.classList.add('dark');
     }
@@ -86,7 +87,6 @@ const App: React.FC = () => {
     return () => { unsubGames(); unsubReports(); };
   }, []);
 
-  // Optimización de Rutas para reducir TBT
   useEffect(() => {
     if (isLoading || games.length === 0) return; 
     
@@ -124,7 +124,6 @@ const App: React.FC = () => {
     return result;
   }, [games, searchTerm, sortBy, selectedConsole]);
 
-  const totalPages = Math.ceil(filteredGames.length / ITEMS_PER_PAGE);
   const currentGames = useMemo(() => 
     filteredGames.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE),
   [filteredGames, currentPage]);
@@ -145,7 +144,7 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-background text-text-main will-change-transform">
+    <div className="relative flex min-h-screen w-full flex-col bg-background text-text-main">
       <AdBlockDetector />
       <SEO title="ZonaGM | ROMs e ISOs Verificadas" description="El mejor archivo de juegos clásicos." />
 
@@ -165,7 +164,7 @@ const App: React.FC = () => {
         }}
       />
 
-      <main className="flex-1 flex flex-col items-center px-4 md:px-6 w-full max-w-[1200px] mx-auto pb-16">
+      <main className="flex-1 flex flex-col items-center px-4 md:px-6 w-full max-w-[1200px] mx-auto pb-16 min-h-[600px]">
         {selectedGame ? (
             <Suspense fallback={<div className="py-20 animate-pulse text-text-muted">Cargando detalles...</div>}>
                 <GameDetail 
@@ -183,13 +182,11 @@ const App: React.FC = () => {
             <div className="flex w-full max-w-[1000px] flex-col gap-2">
                 <Hero searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
                 
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-border-color pb-4 mt-2 gap-4">
-                  <div className="min-h-[28px]">
-                    <h3 className="text-lg font-bold text-text-main">
-                        {selectedConsole ? `${selectedConsole} - ` : ''} 
-                        {isLoading ? 'Sincronizando...' : `${filteredGames.length} títulos`}
-                    </h3>
-                  </div>
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-border-color pb-4 mt-2 gap-4 min-h-[48px]">
+                  <h3 className="text-lg font-bold text-text-main">
+                      {selectedConsole ? `${selectedConsole} - ` : ''} 
+                      {isLoading ? 'Sincronizando...' : `${filteredGames.length} títulos`}
+                  </h3>
                   <div className="flex items-center gap-4">
                     <select 
                       value={sortBy} onChange={(e) => setSortBy(e.target.value as SortOption)}
@@ -206,15 +203,15 @@ const App: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="mt-6 min-h-[600px]">
+                <div className="min-h-[800px]">
                     {isLoading ? <SkeletonGrid /> : (
                         <GameList games={currentGames} viewMode={viewMode} onSelectGame={handleSelectGame} onSelectConsole={setSelectedConsole} />
                     )}
                 </div>
 
-                {totalPages > 1 && (
+                {filteredGames.length > ITEMS_PER_PAGE && (
                     <div className="flex items-center justify-center gap-2 py-12">
-                        {[...Array(totalPages)].map((_, i) => (
+                        {[...Array(Math.ceil(filteredGames.length / ITEMS_PER_PAGE))].map((_, i) => (
                             <button 
                                 key={i} onClick={() => { setCurrentPage(i + 1); window.scrollTo({ top: 300 }); }}
                                 className={`w-9 h-9 rounded-full font-bold text-sm transition-colors ${currentPage === i + 1 ? 'bg-primary text-black' : 'text-text-muted hover:bg-surface border border-transparent hover:border-border-color'}`}

@@ -19,11 +19,16 @@
         --color-primary: #F9F506;
         --color-background: #F8F8F5;
         --color-text-main: #1C1C0D;
-        --header-height: 64px;
+        --header-height: 72px;
+        --hero-height-mobile: 196px;
+        --hero-height-desktop: 340px;
+        --filter-bar-height: 64px;
       }
       .dark {
         --color-background: #09090b;
         --color-text-main: #f4f4f5;
+        --color-surface: #18181b;
+        --color-border: #27272a;
       }
       body {
         margin: 0;
@@ -35,25 +40,38 @@
         text-rendering: optimizeSpeed;
       }
       
-      /* Reducción de CLS: Reservar espacio para el Header */
-      header { min-height: var(--header-height); }
+      /* PREVENCIÓN DE CLS: Reserva estricta de espacio */
+      header { height: var(--header-height); background: var(--color-background); }
+      .hero-placeholder { height: var(--hero-height-mobile); width: 100%; }
+      .filter-placeholder { height: var(--filter-bar-height); border-bottom: 1px solid rgba(0,0,0,0.05); }
       
-      /* Optimización de Animaciones (GPU) */
-      .will-change-transform { will-change: transform; }
-      
-      @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: .5; }
+      @media (min-width: 768px) {
+        .hero-placeholder { height: var(--hero-height-desktop); }
       }
-      .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
       
-      /* Estilos Críticos para evitar saltos en el Hero */
-      .hero-section { min-height: 160px; contain: layout; }
-      @media (min-width: 768px) { .hero-section { min-height: 280px; } }
+      .main-content-skeleton {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 1rem;
+      }
+      .grid-skeleton {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+      @media (min-width: 768px) {
+        .grid-skeleton { grid-template-columns: repeat(4, 1fr); gap: 2rem; }
+      }
+      .card-stub {
+        aspect-ratio: 3/4.8; /* Ajustado para incluir el espacio del texto */
+        background: rgba(0,0,0,0.05);
+        border-radius: 1.5rem;
+      }
+      .dark .card-stub { background: rgba(255,255,255,0.05); }
 
-      /* Forzar aspect ratio en imágenes para evitar CLS */
-      .game-card-img { aspect-ratio: 3/4; background: #e5e7eb; }
-      .dark .game-card-img { background: #27272a; }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+      .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
     </style>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -99,7 +117,19 @@
 </script>
 </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <header></header>
+      <div class="hero-placeholder"></div>
+      <div class="main-content-skeleton">
+        <div class="filter-placeholder"></div>
+        <div class="grid-skeleton animate-pulse">
+          <div class="card-stub"></div>
+          <div class="card-stub"></div>
+          <div class="card-stub"></div>
+          <div class="card-stub"></div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>

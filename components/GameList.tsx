@@ -15,6 +15,30 @@ const formatNumber = (num: number): string => {
   return num?.toString() || '0';
 };
 
+const LanguageFlags = ({ languages }: { languages: Game['languages'] }) => {
+  if (!languages || languages.length === 0) return null;
+  
+  const getFlag = (lang: string) => {
+    switch (lang) {
+      case 'English': return '🇺🇸';
+      case 'Spanish': return '🇪🇸';
+      case 'Japanese': return '🇯🇵';
+      case 'Multi': return '🌐';
+      default: return '🌐';
+    }
+  };
+
+  return (
+    <div className="flex gap-1 bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-lg border border-white/10 shadow-sm">
+      {languages.map(lang => (
+        <span key={lang} className="text-[12px]" title={lang}>
+          {getFlag(lang)}
+        </span>
+      ))}
+    </div>
+  );
+};
+
 const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: (c: string) => void; isLCP: boolean }>(({ game, onClick, onSelectConsole, isLCP }) => (
   <article 
     onClick={onClick}
@@ -32,12 +56,19 @@ const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-60" />
+      
+      {/* Console Tag Top Left */}
       <button 
         onClick={(e) => { e.stopPropagation(); onSelectConsole(game.console); }}
         className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider text-white border border-white/10"
       >
         {game.console}
       </button>
+
+      {/* Language Flags Top Right */}
+      <div className="absolute top-3 right-3">
+        <LanguageFlags languages={game.languages} />
+      </div>
     </div>
     
     <div className="p-4 flex flex-col flex-grow">
@@ -72,6 +103,10 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
           decoding="async"
           className="w-full h-full object-cover transition-transform group-hover:scale-105"
       />
+      {/* Language Flags Top Right (List View) */}
+      <div className="absolute top-2 right-2">
+        <LanguageFlags languages={game.languages} />
+      </div>
     </div>
     
     <div className="flex flex-1 flex-col justify-between py-1">

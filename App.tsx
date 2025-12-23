@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, Suspense, useCallback, useLayoutEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -93,7 +94,7 @@ const App: React.FC = () => {
     return () => { unsubGames(); unsubReports(); };
   }, []);
 
-  // Manejo manual de la búsqueda para evitar bucles infinitos al seleccionar un juego
+  // Manejo de búsqueda: si hay búsqueda, reseteamos el juego seleccionado para mostrar resultados globales
   const handleSetSearchTerm = useCallback((term: string) => {
     setSearchTerm(term);
     if (term.trim() !== '' && selectedGame !== null) {
@@ -127,14 +128,20 @@ const App: React.FC = () => {
 
   const filteredGames = useMemo(() => {
     let result = [...games];
-    if (selectedConsole) result = result.filter(g => g.console === selectedConsole);
-    if (searchTerm) {
+    
+    // BÚSQUEDA GLOBAL: Si hay un término de búsqueda, ignoramos el filtro de consola
+    if (searchTerm.trim()) {
         const lowerTerm = searchTerm.toLowerCase();
         result = result.filter(game => game.title.toLowerCase().includes(lowerTerm));
+    } else if (selectedConsole) {
+        // Solo aplicamos consola si NO se está buscando
+        result = result.filter(g => g.console === selectedConsole);
     }
+
     if (sortBy === 'Popularity') result.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
     else if (sortBy === 'Date') result.sort((a, b) => parseInt(b.year || '0') - parseInt(a.year || '0'));
     else if (sortBy === 'Alphabetically') result.sort((a, b) => a.title.localeCompare(b.title));
+    
     return result;
   }, [games, searchTerm, sortBy, selectedConsole]);
 
@@ -147,8 +154,8 @@ const App: React.FC = () => {
   const handleSelectGame = useCallback((game: Game) => {
     setSelectedGame(game);
     setIsSitemapOpen(false);
-    setIsSearchOpen(false); // Cerramos la búsqueda al entrar
-    setSearchTerm(''); // Limpiamos la búsqueda al entrar para evitar conflictos
+    setIsSearchOpen(false); // Cerramos el buscador al entrar al post
+    setSearchTerm(''); // Limpiamos el término para que al volver la lista esté limpia
     window.scrollTo({ top: 0 });
     window.history.pushState({ gameId: game.id }, '', `?game=${slugify(game.title)}`);
   }, []);
@@ -225,8 +232,7 @@ const App: React.FC = () => {
                 
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-border-color pb-4 mt-2 gap-4 min-h-[48px]">
                   <h3 className="text-lg font-bold text-text-main">
-                      {selectedConsole ? `${selectedConsole} - ` : ''} 
-                      {`${filteredGames.length} títulos`}
+                      {searchTerm.trim() ? `Buscando "${searchTerm}"` : (selectedConsole ? `${selectedConsole} - ` : '') + `${filteredGames.length} títulos`}
                   </h3>
                   <div className="flex items-center gap-4">
                     <select 
@@ -252,7 +258,7 @@ const App: React.FC = () => {
                     <div className="flex items-center justify-center gap-2 py-12">
                         {[...Array(totalPages)].map((_, i) => (
                             <button 
-                                key={i} onClick={() => { setCurrentPage(i + 1); window.scrollTo({ top: 0 }); }}
+                                key={i} onClick={() => { setCurrentPage(i + 1); window.scrollTo({ top: 300 }); }}
                                 className={`w-9 h-9 rounded-full font-bold text-sm transition-all duration-200 ${currentPage === i + 1 ? 'bg-primary text-black shadow-md scale-110' : 'text-text-muted hover:bg-surface border border-transparent hover:border-border-color'}`}
                             >
                                 {i + 1}

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Game, Comment } from '../types';
 import { Download, HardDrive, Calendar, Gamepad2, Layers, ShieldCheck, MessageSquare, Send, User, Globe, Star, Pencil, Trash2, Sparkles, Image as ImageIcon, X, AlertTriangle, Crown, Ban, CornerDownRight, ChevronDown, CheckCircle2, Lock, Unlock, Timer, Loader2, ChevronRight, Home, Share2, Facebook, Twitter, Youtube, MonitorPlay } from 'lucide-react';
@@ -418,7 +419,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
       {isDeleteModalOpen && (
           <div className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in" onClick={() => setIsDeleteModalOpen(false)}>
-              <div className="bg-surface w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-red-200 text-center animate-zoom-in" onClick={(e) => e.stopPropagation()}>
+              <div className="bg-surface w-full max-sm rounded-2xl p-6 shadow-2xl border border-red-200 text-center animate-zoom-in" onClick={(e) => e.stopPropagation()}>
                   <Trash2 size={32} className="mx-auto mb-4 text-red-600" />
                   <h3 className="text-xl font-bold text-text-main mb-2">¿Eliminar Juego?</h3>
                   <p className="text-text-muted mb-6">Esta acción es irreversible.</p>
@@ -513,11 +514,17 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
       <div className="w-full max-w-[1000px] animate-slide-in-up duration-500">
         <nav className="flex items-center gap-2 text-sm text-text-muted mb-4 overflow-x-auto whitespace-nowrap px-1">
-            <button onClick={onHome} className="flex items-center gap-1 hover:text-primary-hover transition-colors">
+            <button 
+                onClick={(e) => { e.preventDefault(); onHome(); }} 
+                className="flex items-center gap-1 hover:text-primary-hover transition-colors"
+            >
                 <Home size={14} /> Inicio
             </button>
             <ChevronRight size={14} className="opacity-50" />
-            <button onClick={() => { onSelectConsole(game.console); onBack(); }} className="hover:text-primary-hover transition-colors font-medium">
+            <button 
+                onClick={(e) => { e.preventDefault(); onSelectConsole(game.console); }} 
+                className="hover:text-primary-hover transition-colors font-medium"
+            >
                 {game.console}
             </button>
             <ChevronRight size={14} className="opacity-50" />

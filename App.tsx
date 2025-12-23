@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, Suspense, useCallback, useLayoutEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -92,6 +93,14 @@ const App: React.FC = () => {
     return () => { unsubGames(); unsubReports(); };
   }, []);
 
+  // EFECTO DE BÚSQUEDA GLOBAL: Si el usuario busca algo, salimos del detalle del juego
+  useEffect(() => {
+    if (searchTerm.trim() !== '' && selectedGame !== null) {
+        setSelectedGame(null);
+        setCurrentPage(1);
+    }
+  }, [searchTerm, selectedGame]);
+
   useEffect(() => {
     if (isLoading || games.length === 0) return; 
     
@@ -150,14 +159,16 @@ const App: React.FC = () => {
     setSelectedConsole(null);
     setCurrentPage(1);
     window.history.pushState({}, '', '/');
+    window.scrollTo({ top: 0 });
   }, []);
 
   const handleSelectConsole = useCallback((console: string | null) => {
     setSelectedConsole(console);
     setSelectedGame(null);
     setIsSitemapOpen(false);
+    setSearchTerm('');
     setCurrentPage(1);
-    window.scrollTo({ top: 300 });
+    window.scrollTo({ top: 0 });
   }, []);
 
   return (

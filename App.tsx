@@ -9,7 +9,7 @@ import AdBlockDetector from './components/AdBlockDetector';
 import { SortOption, Game, Report } from './types';
 import { LayoutGrid, List as ListIcon, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { db, auth } from './firebase';
-import { collection, onSnapshot, query, orderBy, addDoc, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, addDoc, updateDoc, doc, deleteDoc, setDoc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { useToast } from './components/Toast';
 
@@ -96,7 +96,8 @@ const App: React.FC = () => {
         if (snapshot.exists()) {
             setHelpContent(snapshot.data() as any);
         } else {
-            setDoc(doc(db, 'settings', 'help'), DEFAULT_HELP_CONTENT);
+            // Inicializar solo si es necesario
+            setDoc(doc(db, 'settings', 'help'), DEFAULT_HELP_CONTENT).catch(e => console.warn("Init help failed:", e));
         }
     });
     return () => { unsubGames(); unsubReports(); unsubHelp(); };
@@ -126,10 +127,13 @@ const App: React.FC = () => {
 
   const handleSaveHelp = async (newContent: typeof DEFAULT_HELP_CONTENT) => {
     try {
-        await setDoc(doc(db, 'settings', 'help'), newContent);
+        // Asegurar que el objeto es plano para evitar errores de Firebase
+        const cleanContent = JSON.parse(JSON.stringify(newContent));
+        await setDoc(doc(db, 'settings', 'help'), cleanContent);
         toast.success("Ayuda Actualizada", "Los cambios se han guardado correctamente.");
-    } catch (e) {
-        toast.error("Error", "No se pudo guardar la configuración.");
+    } catch (e: any) {
+        console.error("Save Help Error:", e);
+        toast.error("Error al Guardar", e.message || "Verifica los permisos en Firebase Console.");
     }
   };
 

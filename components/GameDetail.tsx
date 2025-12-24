@@ -28,9 +28,12 @@ const FORBIDDEN_WORDS = [
     'myrient', 'pendejadas', 'babosadas'
 ];
 
+// Se usa una cadena para evitar errores de escape en el literal de regex durante la compilación
+const YT_REGEX_STR = '(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/(?:[^/\\n\\s]+\\/\\S+\\/|(?:v|e(?:mbed)?)\\/|\\S*?[?&]v=)|youtu\\.be\\/)([a-zA-Z0-9_-]{11})';
+
 const getYoutubeId = (text: string) => {
   if (!text) return null;
-  const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const regex = new RegExp(YT_REGEX_STR);
   const match = text.match(regex);
   return match ? match[1] : null;
 };
@@ -224,8 +227,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
   const cleanDescription = useMemo(() => {
       if (!game.description) return '';
-      // Fixed regex to prevent syntax errors
-      const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/g;
+      const regex = new RegExp(YT_REGEX_STR, 'g');
       return game.description.replace(regex, '').trim();
   }, [game.description]);
 

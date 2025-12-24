@@ -145,7 +145,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
                           </div>
                       )}
                       
-                      {!((isLoggedIn && isAdminComment)) && (
+                      {!(isLoggedIn && isAdminComment) && (
                           <input 
                               type="text" 
                               value={replyName}
@@ -224,7 +224,8 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
   const cleanDescription = useMemo(() => {
       if (!game.description) return '';
-      const regex = /(?:https?:\/\/)??:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/g;
+      // Fixed regex to prevent syntax errors
+      const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/g;
       return game.description.replace(regex, '').trim();
   }, [game.description]);
 

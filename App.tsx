@@ -66,6 +66,15 @@ const App: React.FC = () => {
     games.find(g => g.id === selectedGameId) || null
   , [games, selectedGameId]);
 
+  useLayoutEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        setIsDarkMode(true);
+        document.documentElement.classList.add('dark');
+    }
+  }, []);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
         setIsLoggedIn(!!user);
@@ -157,7 +166,7 @@ const App: React.FC = () => {
   return (
     <div className="relative flex min-h-screen w-full flex-col bg-background text-text-main">
       <AdBlockDetector />
-      <SEO title="ZonaGM | ROMs e ISOs Verificadas" />
+      <SEO title="ZonaGM | ROMs e ISOs Verificadas" description="El mejor archivo de juegos clásicos." />
 
       <Header 
         searchTerm={searchTerm} setSearchTerm={setSearchTerm} 
@@ -228,6 +237,27 @@ const App: React.FC = () => {
       <Footer onOpenSitemap={() => { setIsSitemapOpen(true); setIsHelpOpen(false); setSelectedGameId(null); window.scrollTo(0,0); }} />
 
       <Suspense fallback={null}>
+          {isFormOpen && (
+              <GameForm 
+                  isOpen={isFormOpen} 
+                  onClose={() => { setIsFormOpen(false); setEditingGame(null); }} 
+                  onSubmit={async (gameData) => {
+                      try {
+                          if (editingGame) {
+                              const { id, ...data } = gameData;
+                              await updateDoc(doc(db, 'games', editingGame.id), data);
+                          } else {
+                              const { id, ...data } = gameData;
+                              await addDoc(collection(db, 'games'), data);
+                          }
+                          setIsFormOpen(false);
+                          setEditingGame(null);
+                          return true;
+                      } catch (e) { return false; }
+                  }}
+                  initialData={editingGame}
+              />
+          )}
           {isAdminPanelOpen && (
             <AdminPanel 
               isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} 

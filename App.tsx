@@ -7,9 +7,10 @@ import Footer from './components/Footer';
 import SEO from './components/SEO';
 import AdBlockDetector from './components/AdBlockDetector';
 import { SortOption, Game, Report } from './types';
-import { LayoutGrid, List as ListIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+// Import Loader2 to fix "Cannot find name 'Loader2'" error
+import { LayoutGrid, List as ListIcon, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { db, auth } from './firebase';
-import { collection, onSnapshot, query, orderBy, addDoc, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, addDoc, updateDoc, doc, deleteDoc, getDoc, setDoc } from 'firebase/firestore';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { useToast } from './components/Toast';
 
@@ -18,6 +19,7 @@ const GameForm = React.lazy(() => import('./components/GameForm'));
 const AdminPanel = React.lazy(() => import('./components/AdminPanel'));
 const LoginModal = React.lazy(() => import('./components/LoginModal'));
 const SitemapView = React.lazy(() => import('./components/SitemapView'));
+const HelpView = React.lazy(() => import('./components/HelpView'));
 
 const ITEMS_PER_PAGE = 20;
 
@@ -25,65 +27,22 @@ const slugify = (text: string) => {
   return text.toString().toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 };
 
-const SkeletonGrid = () => (
-    <div className="w-full flex flex-col items-center">
-        <div className="w-full hero-placeholder" />
-        <div className="w-full max-w-[1000px] mt-8 px-4">
-            <div className="h-8 w-48 bg-gray-200 dark:bg-zinc-800 rounded animate-pulse mb-6" />
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 w-full">
-                {[...Array(8)].map((_, i) => (
-                    <div key={i} className="bg-surface border border-border-color rounded-3xl overflow-hidden flex flex-col aspect-[3/4.8]">
-                        <div className="aspect-[3/4] bg-gray-200 dark:bg-zinc-800 animate-pulse" />
-                        <div className="p-4 space-y-2 flex-1">
-                            <div className="h-5 bg-gray-200 dark:bg-zinc-800 rounded w-3/4 animate-pulse" />
-                            <div className="h-4 bg-gray-200 dark:bg-zinc-800 rounded w-1/2 animate-pulse" />
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    </div>
-);
-
-const DetailSkeleton = () => (
-    <div className="w-full max-w-[1000px] mt-6 md:mt-10 animate-fade-in">
-        <div className="h-4 w-64 bg-gray-200 dark:bg-zinc-800 rounded mb-8 animate-pulse" />
-        <div className="bg-surface rounded-3xl border border-border-color overflow-hidden shadow-soft mb-8">
-            <div className="h-[300px] md:h-[400px] bg-zinc-900 animate-pulse relative">
-                <div className="absolute bottom-10 left-10 space-y-4">
-                    <div className="flex gap-2">
-                        <div className="h-6 w-20 bg-white/20 rounded-full" />
-                        <div className="h-6 w-20 bg-white/20 rounded-full" />
-                    </div>
-                    <div className="h-10 w-80 bg-white/30 rounded-lg" />
-                    <div className="h-6 w-40 bg-white/20 rounded-lg" />
-                </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-6 md:p-10">
-                <div className="md:col-span-2 space-y-8">
-                    <div className="h-8 w-48 bg-gray-200 dark:bg-zinc-800 rounded" />
-                    <div className="flex gap-6">
-                        <div className="h-64 w-48 bg-gray-200 dark:bg-zinc-800 rounded-xl" />
-                        <div className="flex-1 space-y-4">
-                            <div className="h-4 w-full bg-gray-200 dark:bg-zinc-800 rounded" />
-                            <div className="h-4 w-full bg-gray-200 dark:bg-zinc-800 rounded" />
-                            <div className="h-4 w-3/4 bg-gray-200 dark:bg-zinc-800 rounded" />
-                        </div>
-                    </div>
-                </div>
-                <div className="md:col-span-1 space-y-6">
-                    <div className="h-64 bg-gray-100 dark:bg-zinc-900 rounded-2xl" />
-                    <div className="h-16 bg-primary/20 rounded-xl" />
-                </div>
-            </div>
-        </div>
-    </div>
-);
+const DEFAULT_HELP_CONTENT = {
+  shortenerExplanation: "Mantener un repositorio como ZonaGM conlleva costos de servidores. Al usar acortadores generamos ingresos para que el proyecto siga siendo gratuito.",
+  faqs: [
+    { q: "¿Cómo se descargan los juegos?", a: "Busca el título, entra en detalles y haz clic en Descargar. Espera 5 segundos y pulsa Ir al Servidor." },
+    { q: "¿Qué necesito para ejecutar los juegos?", a: "Necesitas un emulador correspondiente a la consola. En cada juego verás botones para descargar el oficial." },
+    { q: "¿Cuál es la contraseña de los archivos?", a: "La mayoría no tiene, pero si pide prueba con: zonagm" },
+    { q: "¿Qué hago si un enlace no funciona?", a: "Usa el botón Reportar Problema debajo de la descarga para avisarnos." },
+    { q: "¿Cómo filtro por consola?", a: "En el menú superior haz clic en Consolas y selecciona tu sistema preferido." }
+  ]
+};
 
 const App: React.FC = () => {
   const { toast } = useToast();
   const [games, setGames] = useState<Game[]>([]); 
   const [reports, setReports] = useState<Report[]>([]);
+  const [helpContent, setHelpContent] = useState(DEFAULT_HELP_CONTENT);
   const [isLoading, setIsLoading] = useState(true); 
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -94,6 +53,7 @@ const App: React.FC = () => {
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
   
   const [isSitemapOpen, setIsSitemapOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [selectedConsole, setSelectedConsole] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -108,13 +68,13 @@ const App: React.FC = () => {
   , [games, selectedGameId]);
 
   useEffect(() => {
-    if (selectedGameId === null && scrollPositionRef.current > 0) {
+    if (selectedGameId === null && scrollPositionRef.current > 0 && !isSitemapOpen && !isHelpOpen) {
       const timeoutId = setTimeout(() => {
         window.scrollTo({ top: scrollPositionRef.current, behavior: 'auto' });
       }, 50);
       return () => clearTimeout(timeoutId);
     }
-  }, [selectedGameId]);
+  }, [selectedGameId, isSitemapOpen, isHelpOpen]);
 
   useLayoutEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -142,16 +102,26 @@ const App: React.FC = () => {
     const unsubReports = onSnapshot(collection(db, 'reports'), (snapshot) => {
         setReports(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Report[]);
     });
-    return () => { unsubGames(); unsubReports(); };
+    const unsubHelp = onSnapshot(doc(db, 'settings', 'help'), (snapshot) => {
+        if (snapshot.exists()) {
+            setHelpContent(snapshot.data() as any);
+        } else {
+            // Inicializar si no existe
+            setDoc(doc(db, 'settings', 'help'), DEFAULT_HELP_CONTENT);
+        }
+    });
+    return () => { unsubGames(); unsubReports(); unsubHelp(); };
   }, []);
 
   const handleSetSearchTerm = useCallback((term: string) => {
     setSearchTerm(term);
-    if (term.trim() !== '' && selectedGameId !== null) {
+    if (term.trim() !== '' && (selectedGameId !== null || isSitemapOpen || isHelpOpen)) {
         setSelectedGameId(null);
+        setIsSitemapOpen(false);
+        setIsHelpOpen(false);
         setCurrentPage(1);
     }
-  }, [selectedGameId]);
+  }, [selectedGameId, isSitemapOpen, isHelpOpen]);
 
   useEffect(() => {
     if (isLoading || games.length === 0) return; 
@@ -165,6 +135,8 @@ const App: React.FC = () => {
             if (found) {
                 setSelectedGameId(found.id);
                 setIsSearchOpen(false);
+                setIsSitemapOpen(false);
+                setIsHelpOpen(false);
             }
         } else {
             setSelectedGameId(null);
@@ -200,22 +172,26 @@ const App: React.FC = () => {
     scrollPositionRef.current = window.scrollY;
     setSelectedGameId(game.id);
     setIsSitemapOpen(false);
+    setIsHelpOpen(false);
     setIsSearchOpen(false);
     setSearchTerm('');
     window.history.pushState({ gameId: game.id }, '', `?game=${slugify(game.title)}`);
     requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }));
   }, []);
 
-  const handleSelectGameById = useCallback((gameId: string): void => {
-    scrollPositionRef.current = window.scrollY;
-    setSelectedGameId(gameId);
-    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }));
-  }, []);
+  // Define handleSelectGameById to fix "Cannot find name 'handleSelectGameById'" error
+  const handleSelectGameById = useCallback((gameId: string) => {
+    const game = games.find(g => g.id === gameId);
+    if (game) {
+      handleSelectGame(game);
+    }
+  }, [games, handleSelectGame]);
 
   const handleHome = useCallback(() => {
     scrollPositionRef.current = 0;
     setSelectedGameId(null);
     setIsSitemapOpen(false);
+    setIsHelpOpen(false);
     setIsSearchOpen(false);
     setSearchTerm('');
     setSelectedConsole(null);
@@ -229,6 +205,7 @@ const App: React.FC = () => {
     setSelectedConsole(console);
     setSelectedGameId(null);
     setIsSitemapOpen(false);
+    setIsHelpOpen(false);
     setIsSearchOpen(false);
     setSearchTerm('');
     setCurrentPage(1);
@@ -238,12 +215,33 @@ const App: React.FC = () => {
   const handleOpenSitemap = useCallback(() => {
     scrollPositionRef.current = window.scrollY;
     setIsSitemapOpen(true);
+    setIsHelpOpen(false);
     setSelectedGameId(null);
     setIsSearchOpen(false);
     setSearchTerm('');
     window.history.pushState({}, '', '/');
     window.scrollTo({ top: 0 });
   }, []);
+
+  const handleOpenHelp = useCallback(() => {
+    scrollPositionRef.current = window.scrollY;
+    setIsHelpOpen(true);
+    setIsSitemapOpen(false);
+    setSelectedGameId(null);
+    setIsSearchOpen(false);
+    setSearchTerm('');
+    window.history.pushState({}, '', '/');
+    window.scrollTo({ top: 0 });
+  }, []);
+
+  const handleSaveHelp = async (newContent: typeof DEFAULT_HELP_CONTENT) => {
+    try {
+        await setDoc(doc(db, 'settings', 'help'), newContent);
+        toast.success("Ayuda Actualizada", "Los cambios se han guardado correctamente.");
+    } catch (e) {
+        toast.error("Error", "No se pudo guardar la configuración.");
+    }
+  };
 
   const handleGameSubmit = async (gameData: Game) => {
     try {
@@ -321,6 +319,7 @@ const App: React.FC = () => {
         setIsSearchOpen={setIsSearchOpen}
         onAddGame={() => { setEditingGame(null); setIsFormOpen(true); }} 
         onHome={handleHome}
+        onOpenHelp={handleOpenHelp}
         onOpenAdmin={() => setIsAdminPanelOpen(true)}
         pendingReportsCount={reports.filter(r => r.status === 'Pending').length}
         isLoggedIn={isLoggedIn} onOpenLogin={() => setIsLoginModalOpen(true)}
@@ -336,9 +335,14 @@ const App: React.FC = () => {
 
       <main className="flex-1 flex flex-col items-center px-4 md:px-6 w-full max-w-[1200px] mx-auto pb-16 min-h-[800px]">
         {isLoading ? (
-            <SkeletonGrid />
+            <div className="w-full flex flex-col items-center">
+                <div className="w-full hero-placeholder" />
+                <div className="w-full grid-skeleton animate-pulse px-4">
+                  {[...Array(8)].map((_, i) => <div key={i} className="card-stub" />)}
+                </div>
+            </div>
         ) : selectedGame ? (
-            <Suspense fallback={<DetailSkeleton />}>
+            <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={48} /></div>}>
                 <GameDetail 
                     game={selectedGame} allGames={games} onBack={() => setSelectedGameId(null)} 
                     onSelectGame={handleSelectGame} onSelectConsole={handleSelectConsole}
@@ -354,8 +358,12 @@ const App: React.FC = () => {
                     isLoggedIn={isLoggedIn}
                 />
             </Suspense>
+        ) : isHelpOpen ? (
+            <Suspense fallback={null}>
+                <HelpView content={helpContent} />
+            </Suspense>
         ) : isSitemapOpen ? (
-            <Suspense fallback={<SkeletonGrid />}>
+            <Suspense fallback={null}>
                 <SitemapView games={games} onSelectGame={handleSelectGame} />
             </Suspense>
         ) : (
@@ -392,7 +400,6 @@ const App: React.FC = () => {
                             onClick={goToPrevPage}
                             disabled={currentPage === 1}
                             className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 border ${currentPage === 1 ? 'opacity-30 cursor-not-allowed border-border-color' : 'bg-surface border-border-color hover:border-primary hover:text-primary shadow-sm hover:shadow-md active:scale-90'}`}
-                            aria-label="Página anterior"
                         >
                             <ChevronLeft size={24} />
                         </button>
@@ -408,7 +415,6 @@ const App: React.FC = () => {
                             onClick={goToNextPage}
                             disabled={currentPage === totalPages}
                             className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 border ${currentPage === totalPages ? 'opacity-30 cursor-not-allowed border-border-color' : 'bg-surface border-border-color hover:border-primary hover:text-primary shadow-sm hover:shadow-md active:scale-90'}`}
-                            aria-label="Siguiente página"
                         >
                             <ChevronRight size={24} />
                         </button>
@@ -434,6 +440,8 @@ const App: React.FC = () => {
               isOpen={isAdminPanelOpen} 
               onClose={() => setIsAdminPanelOpen(false)} 
               reports={reports} 
+              helpContent={helpContent}
+              onSaveHelp={handleSaveHelp}
               onResolve={handleResolveReport} 
               onDelete={handleDeleteReport} 
               onNavigateToGame={handleSelectGameById} 

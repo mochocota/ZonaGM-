@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Report, Game } from '../types';
-import { X, CheckCircle, Trash2, ExternalLink, ShieldAlert, DownloadCloud, Loader2, Plus, AlertCircle, CheckCircle2, Globe } from 'lucide-react';
+import { X, CheckCircle, Trash2, ExternalLink, ShieldAlert, DownloadCloud, Loader2, Plus, AlertCircle, CheckCircle2, Globe, HelpCircle, Save } from 'lucide-react';
 import { scrapeUniversalMetadata } from '../services/scraper';
 import { searchIGDB } from '../services/igdb';
 import { db } from '../firebase';
@@ -12,6 +12,11 @@ interface AdminPanelProps {
   isOpen: boolean;
   onClose: () => void;
   reports: Report[];
+  helpContent: {
+      shortenerExplanation: string;
+      faqs: { q: string, a: string }[];
+  };
+  onSaveHelp: (content: any) => Promise<void>;
   onResolve: (id: string) => void;
   onDelete: (id: string) => void;
   onNavigateToGame: (gameId: string) => void;
@@ -28,17 +33,27 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   isOpen, 
   onClose, 
   reports, 
+  helpContent,
+  onSaveHelp,
   onResolve, 
   onDelete,
   onNavigateToGame
 }) => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<'reports' | 'importer'>('reports');
+  const [activeTab, setActiveTab] = useState<'reports' | 'importer' | 'help'>('reports');
   
   // Importer States
   const [urlsText, setUrlsText] = useState('');
   const [importingList, setImportingList] = useState<ImportItem[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Help Content Local State
+  const [localHelp, setLocalHelp] = useState(helpContent);
+  const [isSavingHelp, setIsSavingHelp] = useState(false);
+
+  useEffect(() => {
+    setLocalHelp(helpContent);
+  }, [helpContent]);
 
   if (!isOpen) return null;
 
@@ -57,17 +72,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         setImportingList(prev => prev.map((item, idx) => idx === i ? { ...item, status: 'loading' } : item));
         
         try {
-            // 1. Universal Scraping for Meta/Description
             const scraped = await scrapeUniversalMetadata(initialList[i].url);
-            
-            // 2. Search IGDB using the scraped title for visuals
             let igdbData: any = null;
             try {
                 const results = await searchIGDB(scraped.title);
                 if (results && results.length > 0) igdbData = results[0];
             } catch (e) { console.warn("IGDB failed", e); }
 
-            // 3. Assemble and save
             const newGame: Omit<Game, 'id'> = {
                 title: igdbData?.title || scraped.title,
                 description: scraped.description || igdbData?.description || 'Sin descripción.',
@@ -87,7 +98,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             };
 
             await addDoc(collection(db, 'games'), newGame);
-
             setImportingList(prev => prev.map((item, idx) => idx === i ? { ...item, status: 'success', title: newGame.title } : item));
         } catch (err: any) {
             setImportingList(prev => prev.map((item, idx) => idx === i ? { ...item, status: 'error', error: err.message } : item));
@@ -96,6 +106,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
     setIsProcessing(false);
     toast.success("Finalizado", "Se ha completado la importación masiva.");
+  };
+
+  const handleUpdateHelp = async () => {
+      setIsSavingHelp(true);
+      await onSaveHelp(localHelp);
+      setIsSavingHelp(false);
+  };
+
+  const updateFAQ = (index: number, field: 'q' | 'a', value: string) => {
+      const newFaqs = [...localHelp.faqs];
+      newFaqs[index] = { ...newFaqs[index], [field]: value };
+      setLocalHelp({ ...localHelp, faqs: newFaqs });
   };
 
   return (
@@ -136,6 +158,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 >
                     Importador Universal
                 </button>
+                <button 
+                    onClick={() => setActiveTab('help')}
+                    className={`pb-3 text-sm font-bold border-b-2 transition-all ${activeTab === 'help' ? 'border-primary text-text-main' : 'border-transparent text-text-muted hover:text-text-main'}`}
+                >
+                    Editar Ayuda
+                </button>
             </div>
         </div>
 
@@ -175,7 +203,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 ))
               )}
             </div>
-          ) : (
+          ) : activeTab === 'importer' ? (
             <div className="space-y-6">
                 <div className="bg-surface border border-border-color rounded-2xl p-6 shadow-sm">
                     <h3 className="text-lg font-bold text-text-main mb-2 flex items-center gap-2">
@@ -185,7 +213,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <p className="text-sm text-text-muted mb-4">
                         Pega URLs de sitios como AN1, CdRomance, etc. Extraeremos el texto y buscaremos las imágenes en IGDB automáticamente.
                     </p>
-                    
                     <textarea 
                         value={urlsText}
                         onChange={(e) => setUrlsText(e.target.value)}
@@ -194,7 +221,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         disabled={isProcessing}
                         className="w-full bg-background border border-border-color rounded-xl px-4 py-3 text-text-main focus:outline-none focus:border-primary resize-none font-mono text-xs"
                     />
-
                     <button 
                         onClick={handleStartImport}
                         disabled={isProcessing || !urlsText.trim()}
@@ -204,7 +230,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <span>{isProcessing ? 'Procesando Enlaces...' : 'Comenzar Importación Universal'}</span>
                     </button>
                 </div>
-
                 {importingList.length > 0 && (
                     <div className="bg-surface border border-border-color rounded-2xl p-6 shadow-sm">
                         <h4 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-4">Estado de los Enlaces</h4>
@@ -226,6 +251,61 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         </div>
                     </div>
                 )}
+            </div>
+          ) : (
+            <div className="space-y-8 animate-fade-in">
+                <div className="bg-surface border border-border-color rounded-2xl p-6 shadow-sm">
+                    <h3 className="text-lg font-bold text-text-main mb-4 flex items-center gap-2">
+                        <HelpCircle className="text-primary" /> Explicación de Acortadores
+                    </h3>
+                    <textarea 
+                        value={localHelp.shortenerExplanation}
+                        onChange={(e) => setLocalHelp({...localHelp, shortenerExplanation: e.target.value})}
+                        rows={5}
+                        className="w-full bg-background border border-border-color rounded-xl px-4 py-3 text-sm text-text-main focus:outline-none focus:border-primary resize-none"
+                        placeholder="Escribe aquí la razón de los acortadores..."
+                    />
+                </div>
+
+                <div className="space-y-4">
+                    <h3 className="text-lg font-bold text-text-main px-2">Preguntas Frecuentes (FAQ)</h3>
+                    {localHelp.faqs.map((faq, idx) => (
+                        <div key={idx} className="bg-surface border border-border-color rounded-2xl p-6 space-y-4 shadow-sm">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="bg-primary text-black text-[10px] font-bold px-2 py-0.5 rounded uppercase">Pregunta {idx + 1}</span>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold uppercase text-text-muted">Pregunta</label>
+                                <input 
+                                    type="text" 
+                                    value={faq.q}
+                                    onChange={(e) => updateFAQ(idx, 'q', e.target.value)}
+                                    className="w-full bg-background border border-border-color rounded-xl px-4 py-2 text-sm font-bold"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold uppercase text-text-muted">Respuesta</label>
+                                <textarea 
+                                    value={faq.a}
+                                    onChange={(e) => updateFAQ(idx, 'a', e.target.value)}
+                                    rows={2}
+                                    className="w-full bg-background border border-border-color rounded-xl px-4 py-2 text-sm text-text-muted resize-none"
+                                />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="sticky bottom-0 p-4 bg-surface border-t border-border-color flex justify-end rounded-b-2xl">
+                    <button 
+                        onClick={handleUpdateHelp}
+                        disabled={isSavingHelp}
+                        className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-black font-bold px-8 py-3 rounded-xl shadow-lg transition-all disabled:opacity-50"
+                    >
+                        {isSavingHelp ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
+                        <span>Guardar Cambios en Ayuda</span>
+                    </button>
+                </div>
             </div>
           )}
         </div>

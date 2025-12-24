@@ -1,5 +1,6 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, Save, Search, PlusCircle, ShieldAlert, LogOut, ChevronDown, Moon, Sun, User } from 'lucide-react';
+import { Menu, X, Save, Search, PlusCircle, ShieldAlert, LogOut, ChevronDown, Moon, Sun, User, HelpCircle } from 'lucide-react';
 
 interface HeaderProps {
   searchTerm: string;
@@ -8,6 +9,7 @@ interface HeaderProps {
   setIsSearchOpen: (isOpen: boolean) => void;
   onAddGame: () => void;
   onHome: () => void;
+  onOpenHelp: () => void;
   onOpenAdmin: () => void;
   pendingReportsCount: number;
   isLoggedIn: boolean;
@@ -27,6 +29,7 @@ const Header: React.FC<HeaderProps> = ({
     setIsSearchOpen,
     onAddGame, 
     onHome, 
+    onOpenHelp,
     onOpenAdmin, 
     pendingReportsCount,
     isLoggedIn,
@@ -122,6 +125,13 @@ const Header: React.FC<HeaderProps> = ({
                 </div>
             )}
           </div>
+
+          <button 
+            onClick={onOpenHelp} 
+            className="text-sm font-medium text-text-main hover:text-text-muted transition-colors flex items-center gap-1"
+          >
+            <HelpCircle size={16} /> Ayuda
+          </button>
         </nav>
 
         {/* Right Actions */}
@@ -251,6 +261,16 @@ const Header: React.FC<HeaderProps> = ({
             className={`text-lg font-medium text-left ${!selectedConsole ? 'text-primary-hover font-bold' : 'text-text-main'}`}
           >
             Home
+          </button>
+          
+          <button 
+            onClick={() => {
+                onOpenHelp();
+                setIsMobileMenuOpen(false);
+            }} 
+            className="text-lg font-medium text-text-main text-left flex items-center gap-2"
+          >
+            <HelpCircle size={20} /> Ayuda
           </button>
           
           {isLoggedIn && (

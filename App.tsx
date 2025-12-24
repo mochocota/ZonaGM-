@@ -62,10 +62,19 @@ const App: React.FC = () => {
     games.find(g => g.id === selectedGameId) || null
   , [games, selectedGameId]);
 
+  // Si el usuario escribe en el buscador, cerramos cualquier vista abierta para mostrar los resultados
+  useEffect(() => {
+    if (searchTerm.trim().length > 0) {
+      setSelectedGameId(null);
+      setIsHelpOpen(false);
+      setIsSitemapOpen(false);
+      setCurrentPage(1);
+    }
+  }, [searchTerm]);
+
   // Manejo del historial para el botón atrás del navegador
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      // Si el evento tiene estado y no hay gameId, cerramos el detalle
       if (!event.state?.gameId) {
         setSelectedGameId(null);
       }
@@ -154,6 +163,8 @@ const App: React.FC = () => {
       setSelectedGameId(game.id);
       setIsSitemapOpen(false);
       setIsHelpOpen(false);
+      setSearchTerm('');
+      setIsSearchOpen(false);
       window.history.pushState({ gameId: game.id }, '');
       window.scrollTo({ top: 0, behavior: 'auto' });
     }
@@ -213,6 +224,7 @@ const App: React.FC = () => {
           setSelectedGameId(null); 
           setIsHelpOpen(false); 
           setIsSitemapOpen(false);
+          setSearchTerm('');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         isDarkMode={isDarkMode} toggleTheme={() => {
@@ -232,7 +244,7 @@ const App: React.FC = () => {
             <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={48} /></div>}>
                 <GameDetail 
                     game={selectedGame} allGames={games} onBack={() => { setSelectedGameId(null); window.history.back(); }} 
-                    onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={(c) => { setSelectedConsole(c); setCurrentPage(1); setSelectedGameId(null); }}
+                    onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={(c) => { setSelectedConsole(c); setCurrentPage(1); setSelectedGameId(null); setSearchTerm(''); }}
                     onHome={handleHome} onEdit={(g) => { setEditingGame(g); setIsFormOpen(true); }} 
                     onDelete={async (id) => { await deleteDoc(doc(db, 'games', id)); handleHome(); }} 
                     onReport={async (id, title, reason, desc) => {
@@ -270,7 +282,7 @@ const App: React.FC = () => {
                 </div>
                 
                 <div className="min-h-[600px] mt-6">
-                    <GameList games={currentGames} viewMode={viewMode} onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={(c) => { setSelectedConsole(c); setCurrentPage(1); setSelectedGameId(null); }} />
+                    <GameList games={currentGames} viewMode={viewMode} onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={(c) => { setSelectedConsole(c); setCurrentPage(1); setSelectedGameId(null); setSearchTerm(''); }} />
                 </div>
 
                 {totalPages > 1 && (

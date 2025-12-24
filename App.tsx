@@ -45,6 +45,41 @@ const SkeletonGrid = () => (
     </div>
 );
 
+const DetailSkeleton = () => (
+    <div className="w-full max-w-[1000px] mt-6 md:mt-10 animate-fade-in">
+        <div className="h-4 w-64 bg-gray-200 dark:bg-zinc-800 rounded mb-8 animate-pulse" />
+        <div className="bg-surface rounded-3xl border border-border-color overflow-hidden shadow-soft mb-8">
+            <div className="h-[300px] md:h-[400px] bg-zinc-900 animate-pulse relative">
+                <div className="absolute bottom-10 left-10 space-y-4">
+                    <div className="flex gap-2">
+                        <div className="h-6 w-20 bg-white/20 rounded-full" />
+                        <div className="h-6 w-20 bg-white/20 rounded-full" />
+                    </div>
+                    <div className="h-10 w-80 bg-white/30 rounded-lg" />
+                    <div className="h-6 w-40 bg-white/20 rounded-lg" />
+                </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-6 md:p-10">
+                <div className="md:col-span-2 space-y-8">
+                    <div className="h-8 w-48 bg-gray-200 dark:bg-zinc-800 rounded" />
+                    <div className="flex gap-6">
+                        <div className="h-64 w-48 bg-gray-200 dark:bg-zinc-800 rounded-xl" />
+                        <div className="flex-1 space-y-4">
+                            <div className="h-4 w-full bg-gray-200 dark:bg-zinc-800 rounded" />
+                            <div className="h-4 w-full bg-gray-200 dark:bg-zinc-800 rounded" />
+                            <div className="h-4 w-3/4 bg-gray-200 dark:bg-zinc-800 rounded" />
+                        </div>
+                    </div>
+                </div>
+                <div className="md:col-span-1 space-y-6">
+                    <div className="h-64 bg-gray-100 dark:bg-zinc-900 rounded-2xl" />
+                    <div className="h-16 bg-primary/20 rounded-xl" />
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
 const App: React.FC = () => {
   const { toast } = useToast();
   const [games, setGames] = useState<Game[]>([]); 
@@ -55,10 +90,7 @@ const App: React.FC = () => {
   const [sortBy, setSortBy] = useState<SortOption>('Alphabetically');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
   
-  // Referencia para guardar la posición del scroll
   const scrollPositionRef = useRef<number>(0);
-  
-  // Guardamos solo el ID del juego seleccionado para que siempre esté sincronizado con la lista global
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
   
   const [isSitemapOpen, setIsSitemapOpen] = useState(false);
@@ -71,19 +103,14 @@ const App: React.FC = () => {
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Derivamos el objeto de juego actual de la lista maestra
   const selectedGame = useMemo(() => 
     games.find(g => g.id === selectedGameId) || null
   , [games, selectedGameId]);
 
-  // Efecto para restaurar el scroll cuando volvemos a la lista
   useEffect(() => {
     if (selectedGameId === null && scrollPositionRef.current > 0) {
-      // Pequeño timeout para asegurar que el DOM de la lista se ha montado
       const timeoutId = setTimeout(() => {
         window.scrollTo({ top: scrollPositionRef.current, behavior: 'auto' });
-        // No reseteamos inmediatamente para evitar saltos si hay re-renders rápidos
-        // pero lo limpiamos después de una navegación exitosa
       }, 50);
       return () => clearTimeout(timeoutId);
     }
@@ -170,26 +197,24 @@ const App: React.FC = () => {
   [filteredGames, currentPage]);
 
   const handleSelectGame = useCallback((game: Game) => {
-    // Guardamos la posición actual antes de navegar al post
     scrollPositionRef.current = window.scrollY;
-    
     setSelectedGameId(game.id);
     setIsSitemapOpen(false);
     setIsSearchOpen(false);
     setSearchTerm('');
-    window.scrollTo({ top: 0 });
     window.history.pushState({ gameId: game.id }, '', `?game=${slugify(game.title)}`);
+    // Usamos requestAnimationFrame para asegurar que el scroll ocurre en el siguiente tick visual
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }));
   }, []);
 
   const handleSelectGameById = useCallback((gameId: string): void => {
     scrollPositionRef.current = window.scrollY;
     setSelectedGameId(gameId);
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }));
   }, []);
 
   const handleHome = useCallback(() => {
-    // Reseteamos la memoria del scroll al ir a Home explícitamente
     scrollPositionRef.current = 0;
-    
     setSelectedGameId(null);
     setIsSitemapOpen(false);
     setIsSearchOpen(false);
@@ -201,9 +226,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectConsole = useCallback((console: string | null) => {
-    // Reseteamos la memoria del scroll al cambiar de categoría
     scrollPositionRef.current = 0;
-    
     setSelectedConsole(console);
     setSelectedGameId(null);
     setIsSitemapOpen(false);
@@ -302,7 +325,7 @@ const App: React.FC = () => {
         {isLoading ? (
             <SkeletonGrid />
         ) : selectedGame ? (
-            <Suspense fallback={<div className="py-20 animate-pulse text-text-muted">Cargando detalles...</div>}>
+            <Suspense fallback={<DetailSkeleton />}>
                 <GameDetail 
                     game={selectedGame} allGames={games} onBack={() => setSelectedGameId(null)} 
                     onSelectGame={handleSelectGame} onSelectConsole={handleSelectConsole}

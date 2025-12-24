@@ -436,7 +436,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
   const fullShareText = `🎮 Mira este juego en ZonaGM: ${shareTitle}.`;
 
   return (
-    <>
+    <div className="w-full flex flex-col items-center">
       <SEO 
         title={`Descargar ${game.title} (${game.year}) - ${game.console}`}
         description={`Descarga segura de ${game.title} para ${game.console}.`}
@@ -539,7 +539,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
         </div>
       )}
 
-      <div className="w-full max-w-[1000px] animate-slide-in-up duration-500">
+      <div className="w-full max-w-[1000px] animate-fade-in duration-500">
         <nav className="flex items-center gap-2 text-sm text-text-muted mt-6 md:mt-10 mb-4 overflow-x-auto whitespace-nowrap px-1">
             <button 
                 onClick={(e) => { e.preventDefault(); onHome(); }} 
@@ -569,7 +569,12 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
         <article className="bg-surface rounded-3xl border border-border-color overflow-hidden shadow-soft mb-8">
             <div className="relative h-[300px] md:h-[400px] w-full bg-gray-900">
-            <img src={game.imageUrl} alt={game.title} className="w-full h-full object-cover opacity-60" />
+            <img 
+              src={game.imageUrl} 
+              alt={game.title} 
+              className="w-full h-full object-cover opacity-60" 
+              fetchPriority="high" 
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             <div className="absolute bottom-0 left-0 w-full p-6 md:p-10">
                 <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -720,7 +725,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
             </div>
         </article>
       </div>
-    </>
+    </div>
   );
 };
 

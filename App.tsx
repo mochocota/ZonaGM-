@@ -64,8 +64,11 @@ const App: React.FC = () => {
 
   // Manejo del historial para el botón atrás del navegador
   useEffect(() => {
-    const handlePopState = () => {
-      setSelectedGameId(null);
+    const handlePopState = (event: PopStateEvent) => {
+      // Si el evento tiene estado y no hay gameId, cerramos el detalle
+      if (!event.state?.gameId) {
+        setSelectedGameId(null);
+      }
       setIsHelpOpen(false);
       setIsSitemapOpen(false);
     };
@@ -203,7 +206,15 @@ const App: React.FC = () => {
         pendingReportsCount={reports.filter(r => r.status === 'Pending').length}
         isLoggedIn={isLoggedIn} onOpenLogin={() => setIsLoginModalOpen(true)}
         onLogout={() => signOut(auth)} consoles={useMemo(() => Array.from(new Set(games.map(g => g.console))).sort(), [games])}
-        selectedConsole={selectedConsole} onSelectConsole={(c) => { setSelectedConsole(c); setCurrentPage(1); }}
+        selectedConsole={selectedConsole} 
+        onSelectConsole={(c) => { 
+          setSelectedConsole(c); 
+          setCurrentPage(1); 
+          setSelectedGameId(null); 
+          setIsHelpOpen(false); 
+          setIsSitemapOpen(false);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
         isDarkMode={isDarkMode} toggleTheme={() => {
             const next = !isDarkMode;
             setIsDarkMode(next);
@@ -221,7 +232,7 @@ const App: React.FC = () => {
             <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={48} /></div>}>
                 <GameDetail 
                     game={selectedGame} allGames={games} onBack={() => { setSelectedGameId(null); window.history.back(); }} 
-                    onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={(c) => { setSelectedConsole(c); setCurrentPage(1); }}
+                    onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={(c) => { setSelectedConsole(c); setCurrentPage(1); setSelectedGameId(null); }}
                     onHome={handleHome} onEdit={(g) => { setEditingGame(g); setIsFormOpen(true); }} 
                     onDelete={async (id) => { await deleteDoc(doc(db, 'games', id)); handleHome(); }} 
                     onReport={async (id, title, reason, desc) => {
@@ -259,7 +270,7 @@ const App: React.FC = () => {
                 </div>
                 
                 <div className="min-h-[600px] mt-6">
-                    <GameList games={currentGames} viewMode={viewMode} onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={(c) => { setSelectedConsole(c); setCurrentPage(1); }} />
+                    <GameList games={currentGames} viewMode={viewMode} onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={(c) => { setSelectedConsole(c); setCurrentPage(1); setSelectedGameId(null); }} />
                 </div>
 
                 {totalPages > 1 && (

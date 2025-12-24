@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { HelpCircle, ChevronDown, DollarSign, Download, Gamepad2, AlertCircle, Key, Filter, Heart } from 'lucide-react';
+import { HelpCircle, ChevronDown, DollarSign, Download, Gamepad2, AlertCircle, Key, Filter } from 'lucide-react';
 
 interface HelpViewProps {
   content: {
@@ -52,10 +52,6 @@ const HelpView: React.FC<HelpViewProps> = ({ content }) => {
                     <p className="text-text-muted text-lg leading-relaxed whitespace-pre-wrap">
                         {content.shortenerExplanation}
                     </p>
-                    <div className="flex items-center gap-2 text-primary-hover font-bold text-sm bg-primary/5 px-4 py-3 rounded-xl border border-primary/20">
-                        <Heart size={16} className="fill-primary" />
-                        <span>Gracias por ayudarnos a preservar estos clásicos.</span>
-                    </div>
                 </div>
             </section>
 
@@ -103,11 +99,6 @@ const HelpView: React.FC<HelpViewProps> = ({ content }) => {
             </section>
 
         </div>
-      </div>
-      
-      {/* Footer Support Message */}
-      <div className="mt-8 text-center p-8 bg-surface rounded-3xl border border-border-color italic text-text-muted">
-          "La preservación de los videojuegos es tarea de todos. Si encuentras un error, por favor repórtalo."
       </div>
     </div>
   );

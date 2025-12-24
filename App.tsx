@@ -7,10 +7,9 @@ import Footer from './components/Footer';
 import SEO from './components/SEO';
 import AdBlockDetector from './components/AdBlockDetector';
 import { SortOption, Game, Report } from './types';
-// Import Loader2 to fix "Cannot find name 'Loader2'" error
 import { LayoutGrid, List as ListIcon, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { db, auth } from './firebase';
-import { collection, onSnapshot, query, orderBy, addDoc, updateDoc, doc, deleteDoc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, addDoc, updateDoc, doc, deleteDoc, setDoc } from 'firebase/firestore';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { useToast } from './components/Toast';
 
@@ -28,13 +27,13 @@ const slugify = (text: string) => {
 };
 
 const DEFAULT_HELP_CONTENT = {
-  shortenerExplanation: "Mantener un repositorio como ZonaGM conlleva costos de servidores. Al usar acortadores generamos ingresos para que el proyecto siga siendo gratuito.",
+  shortenerExplanation: "Mantener todos estos juegos guardados y listos para descargar tiene un costo mensual de servidores. En lugar de cobrarte por entrar o llenar el sitio de anuncios molestos que saltan por todos lados, usamos estos enlaces. Al esperar esos pocos segundos, nos ayudas a pagar los gastos del sitio para que ZonaGM siga existiendo y sea gratis para todos. ¡Gracias por ayudarnos a seguir en línea!",
   faqs: [
-    { q: "¿Cómo se descargan los juegos?", a: "Busca el título, entra en detalles y haz clic en Descargar. Espera 5 segundos y pulsa Ir al Servidor." },
-    { q: "¿Qué necesito para ejecutar los juegos?", a: "Necesitas un emulador correspondiente a la consola. En cada juego verás botones para descargar el oficial." },
-    { q: "¿Cuál es la contraseña de los archivos?", a: "La mayoría no tiene, pero si pide prueba con: zonagm" },
-    { q: "¿Qué hago si un enlace no funciona?", a: "Usa el botón Reportar Problema debajo de la descarga para avisarnos." },
-    { q: "¿Cómo filtro por consola?", a: "En el menú superior haz clic en Consolas y selecciona tu sistema preferido." }
+    { q: "¿Cómo se descargan los juegos?", a: "Busca el título que desees, entra en sus detalles y haz clic en el botón amarillo \"Descargar\". Se abrirá una ventana con un contador de 5 segundos por seguridad; una vez termine, pulsa \"Ir al Servidor\" para acceder al enlace final en el servidor de almacenamiento." },
+    { q: "¿Qué necesito para ejecutar los juegos (ISOs/ROMs)?", a: "Necesitas un emulador correspondiente a la consola del juego (por ejemplo, Dolphin para GameCube o PCSX2 para PS2). En la ficha de cada juego, debajo de la información técnica, encontrarás botones naranjas que te llevan directamente a la descarga de los emuladores oficiales recomendados." },
+    { q: "¿Cuál es la contraseña de los archivos comprimidos?", a: "La gran mayoría de nuestros archivos están libres de contraseña para facilitar el acceso. En caso de que un archivo comprimido (.zip, .rar o .7z) te solicite una y no esté especificada en la descripción, prueba siempre con: zonagm." },
+    { q: "¿Qué debo hacer si un enlace no funciona?", a: "Si encuentras un link caído, utiliza el botón \"Reportar Problema\" que aparece justo debajo del botón de descarga. Selecciona el motivo \"Link Caído\" y envíalo; esto notificará inmediatamente a los administradores para que resubamos el archivo en tiempo récord." },
+    { q: "¿Cómo puedo filtrar los juegos por consola?", a: "En la parte superior de la página (cabecera), haz clic en el menú \"Consolas\". Se desplegará una lista con todos los sistemas disponibles (PS2, GameCube, PSP, etc.). Al seleccionar uno, el sitio te mostrará exclusivamente el catálogo de esa plataforma para facilitar tu búsqueda." }
   ]
 };
 
@@ -68,24 +67,6 @@ const App: React.FC = () => {
   , [games, selectedGameId]);
 
   useEffect(() => {
-    if (selectedGameId === null && scrollPositionRef.current > 0 && !isSitemapOpen && !isHelpOpen) {
-      const timeoutId = setTimeout(() => {
-        window.scrollTo({ top: scrollPositionRef.current, behavior: 'auto' });
-      }, 50);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [selectedGameId, isSitemapOpen, isHelpOpen]);
-
-  useLayoutEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-        setIsDarkMode(true);
-        document.documentElement.classList.add('dark');
-    }
-  }, []);
-
-  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
         setIsLoggedIn(!!user);
     });
@@ -106,47 +87,53 @@ const App: React.FC = () => {
         if (snapshot.exists()) {
             setHelpContent(snapshot.data() as any);
         } else {
-            // Inicializar si no existe
             setDoc(doc(db, 'settings', 'help'), DEFAULT_HELP_CONTENT);
         }
     });
     return () => { unsubGames(); unsubReports(); unsubHelp(); };
   }, []);
 
-  const handleSetSearchTerm = useCallback((term: string) => {
-    setSearchTerm(term);
-    if (term.trim() !== '' && (selectedGameId !== null || isSitemapOpen || isHelpOpen)) {
-        setSelectedGameId(null);
-        setIsSitemapOpen(false);
-        setIsHelpOpen(false);
-        setCurrentPage(1);
+  const handleOpenHelp = useCallback(() => {
+    scrollPositionRef.current = window.scrollY;
+    setIsHelpOpen(true);
+    setIsSitemapOpen(false);
+    setSelectedGameId(null);
+    setIsSearchOpen(false);
+    setSearchTerm('');
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, []);
+
+  const handleHome = useCallback(() => {
+    scrollPositionRef.current = 0;
+    setSelectedGameId(null);
+    setIsSitemapOpen(false);
+    setIsHelpOpen(false);
+    setIsSearchOpen(false);
+    setSearchTerm('');
+    setSelectedConsole(null);
+    setCurrentPage(1);
+    window.scrollTo({ top: 0 });
+  }, []);
+
+  const handleSaveHelp = async (newContent: typeof DEFAULT_HELP_CONTENT) => {
+    try {
+        await setDoc(doc(db, 'settings', 'help'), newContent);
+        toast.success("Ayuda Actualizada", "Los cambios se han guardado correctamente.");
+    } catch (e) {
+        toast.error("Error", "No se pudo guardar la configuración.");
     }
-  }, [selectedGameId, isSitemapOpen, isHelpOpen]);
+  };
 
-  useEffect(() => {
-    if (isLoading || games.length === 0) return; 
-    
-    const handlePopState = () => {
-        const params = new URLSearchParams(window.location.search);
-        const gameSlug = params.get('game');
-        
-        if (gameSlug) {
-            const found = games.find(g => slugify(g.title) === gameSlug);
-            if (found) {
-                setSelectedGameId(found.id);
-                setIsSearchOpen(false);
-                setIsSitemapOpen(false);
-                setIsHelpOpen(false);
-            }
-        } else {
-            setSelectedGameId(null);
-        }
-    };
-
-    handlePopState();
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [games.length, isLoading]); 
+  const handleSelectGameById = useCallback((gameId: string) => {
+    const game = games.find(g => g.id === gameId);
+    if (game) {
+      scrollPositionRef.current = window.scrollY;
+      setSelectedGameId(game.id);
+      setIsSitemapOpen(false);
+      setIsHelpOpen(false);
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+  }, [games]);
 
   const filteredGames = useMemo(() => {
     let result = [...games];
@@ -163,168 +150,25 @@ const App: React.FC = () => {
   }, [games, searchTerm, sortBy, selectedConsole]);
 
   const totalPages = Math.ceil(filteredGames.length / ITEMS_PER_PAGE);
-
   const currentGames = useMemo(() => 
     filteredGames.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE),
   [filteredGames, currentPage]);
 
-  const handleSelectGame = useCallback((game: Game) => {
-    scrollPositionRef.current = window.scrollY;
-    setSelectedGameId(game.id);
-    setIsSitemapOpen(false);
-    setIsHelpOpen(false);
-    setIsSearchOpen(false);
-    setSearchTerm('');
-    window.history.pushState({ gameId: game.id }, '', `?game=${slugify(game.title)}`);
-    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }));
-  }, []);
-
-  // Define handleSelectGameById to fix "Cannot find name 'handleSelectGameById'" error
-  const handleSelectGameById = useCallback((gameId: string) => {
-    const game = games.find(g => g.id === gameId);
-    if (game) {
-      handleSelectGame(game);
-    }
-  }, [games, handleSelectGame]);
-
-  const handleHome = useCallback(() => {
-    scrollPositionRef.current = 0;
-    setSelectedGameId(null);
-    setIsSitemapOpen(false);
-    setIsHelpOpen(false);
-    setIsSearchOpen(false);
-    setSearchTerm('');
-    setSelectedConsole(null);
-    setCurrentPage(1);
-    window.history.pushState({}, '', '/');
-    window.scrollTo({ top: 0 });
-  }, []);
-
-  const handleSelectConsole = useCallback((console: string | null) => {
-    scrollPositionRef.current = 0;
-    setSelectedConsole(console);
-    setSelectedGameId(null);
-    setIsSitemapOpen(false);
-    setIsHelpOpen(false);
-    setIsSearchOpen(false);
-    setSearchTerm('');
-    setCurrentPage(1);
-    window.scrollTo({ top: 0 });
-  }, []);
-
-  const handleOpenSitemap = useCallback(() => {
-    scrollPositionRef.current = window.scrollY;
-    setIsSitemapOpen(true);
-    setIsHelpOpen(false);
-    setSelectedGameId(null);
-    setIsSearchOpen(false);
-    setSearchTerm('');
-    window.history.pushState({}, '', '/');
-    window.scrollTo({ top: 0 });
-  }, []);
-
-  const handleOpenHelp = useCallback(() => {
-    scrollPositionRef.current = window.scrollY;
-    setIsHelpOpen(true);
-    setIsSitemapOpen(false);
-    setSelectedGameId(null);
-    setIsSearchOpen(false);
-    setSearchTerm('');
-    window.history.pushState({}, '', '/');
-    window.scrollTo({ top: 0 });
-  }, []);
-
-  const handleSaveHelp = async (newContent: typeof DEFAULT_HELP_CONTENT) => {
-    try {
-        await setDoc(doc(db, 'settings', 'help'), newContent);
-        toast.success("Ayuda Actualizada", "Los cambios se han guardado correctamente.");
-    } catch (e) {
-        toast.error("Error", "No se pudo guardar la configuración.");
-    }
-  };
-
-  const handleGameSubmit = async (gameData: Game) => {
-    try {
-        if (editingGame) {
-            const gameRef = doc(db, 'games', editingGame.id);
-            const { id, ...data } = gameData;
-            await updateDoc(gameRef, data);
-            toast.success("Actualizado", "El juego se ha modificado correctamente.");
-        } else {
-            const { id, ...data } = gameData;
-            await addDoc(collection(db, 'games'), data);
-            toast.success("Creado", "El juego se ha añadido al repositorio.");
-        }
-        setEditingGame(null);
-        setIsFormOpen(false);
-        return true;
-    } catch (error) {
-        console.error("Error saving game:", error);
-        toast.error("Error", "No se pudo guardar la información en la base de datos.");
-        return false;
-    }
-  };
-
-  const handleGameDelete = async (gameId: string) => {
-    try {
-        await deleteDoc(doc(db, 'games', gameId));
-        toast.success("Eliminado", "El juego ha sido borrado.");
-        handleHome();
-    } catch (error) {
-        toast.error("Error", "No se pudo eliminar el juego.");
-    }
-  };
-
-  const handleResolveReport = async (reportId: string) => {
-    try {
-        await updateDoc(doc(db, 'reports', reportId), { status: 'Resolved' });
-        toast.success("Reporte Resuelto", "El estado ha sido actualizado.");
-    } catch (e) {
-        toast.error("Error", "No se pudo actualizar el reporte.");
-    }
-  };
-
-  const handleDeleteReport = async (reportId: string) => {
-    try {
-        await deleteDoc(doc(db, 'reports', reportId));
-        toast.info("Reporte Borrado");
-    } catch (e) {
-        toast.error("Error", "No se pudo borrar el reporte.");
-    }
-  };
-
-  const goToPrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-      window.scrollTo({ top: 300, behavior: 'smooth' });
-    }
-  };
-
-  const goToNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-      window.scrollTo({ top: 300, behavior: 'smooth' });
-    }
-  };
-
   return (
     <div className="relative flex min-h-screen w-full flex-col bg-background text-text-main">
       <AdBlockDetector />
-      <SEO title="ZonaGM | ROMs e ISOs Verificadas" description="El mejor archivo de juegos clásicos." />
+      <SEO title="ZonaGM | ROMs e ISOs Verificadas" />
 
       <Header 
-        searchTerm={searchTerm} 
-        setSearchTerm={handleSetSearchTerm} 
-        isSearchOpen={isSearchOpen}
-        setIsSearchOpen={setIsSearchOpen}
+        searchTerm={searchTerm} setSearchTerm={setSearchTerm} 
+        isSearchOpen={isSearchOpen} setIsSearchOpen={setIsSearchOpen}
         onAddGame={() => { setEditingGame(null); setIsFormOpen(true); }} 
-        onHome={handleHome}
-        onOpenHelp={handleOpenHelp}
+        onHome={handleHome} onOpenHelp={handleOpenHelp}
         onOpenAdmin={() => setIsAdminPanelOpen(true)}
         pendingReportsCount={reports.filter(r => r.status === 'Pending').length}
         isLoggedIn={isLoggedIn} onOpenLogin={() => setIsLoginModalOpen(true)}
-        onLogout={() => signOut(auth)} consoles={useMemo(() => Array.from(new Set(games.map(g => g.console))).sort(), [games.length])}
-        selectedConsole={selectedConsole} onSelectConsole={handleSelectConsole}
+        onLogout={() => signOut(auth)} consoles={useMemo(() => Array.from(new Set(games.map(g => g.console))).sort(), [games])}
+        selectedConsole={selectedConsole} onSelectConsole={setSelectedConsole}
         isDarkMode={isDarkMode} toggleTheme={() => {
             const next = !isDarkMode;
             setIsDarkMode(next);
@@ -335,25 +179,18 @@ const App: React.FC = () => {
 
       <main className="flex-1 flex flex-col items-center px-4 md:px-6 w-full max-w-[1200px] mx-auto pb-16 min-h-[800px]">
         {isLoading ? (
-            <div className="w-full flex flex-col items-center">
-                <div className="w-full hero-placeholder" />
-                <div className="w-full grid-skeleton animate-pulse px-4">
-                  {[...Array(8)].map((_, i) => <div key={i} className="card-stub" />)}
-                </div>
+            <div className="w-full grid-skeleton animate-pulse px-4 mt-20">
+              {[...Array(8)].map((_, i) => <div key={i} className="card-stub" />)}
             </div>
         ) : selectedGame ? (
             <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={48} /></div>}>
                 <GameDetail 
                     game={selectedGame} allGames={games} onBack={() => setSelectedGameId(null)} 
-                    onSelectGame={handleSelectGame} onSelectConsole={handleSelectConsole}
+                    onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={setSelectedConsole}
                     onHome={handleHome} onEdit={(g) => { setEditingGame(g); setIsFormOpen(true); }} 
-                    onDelete={handleGameDelete} 
+                    onDelete={async (id) => { await deleteDoc(doc(db, 'games', id)); handleHome(); }} 
                     onReport={async (id, title, reason, desc) => {
-                        await addDoc(collection(db, 'reports'), {
-                            gameId: id, gameTitle: title, reason, description: desc,
-                            date: new Date().toLocaleString(), status: 'Pending'
-                        });
-                        toast.success("Reporte Enviado", "Gracias por ayudarnos a mejorar.");
+                        await addDoc(collection(db, 'reports'), { gameId: id, gameTitle: title, reason, description: desc, date: new Date().toLocaleString(), status: 'Pending' });
                     }} 
                     isLoggedIn={isLoggedIn}
                 />
@@ -364,86 +201,39 @@ const App: React.FC = () => {
             </Suspense>
         ) : isSitemapOpen ? (
             <Suspense fallback={null}>
-                <SitemapView games={games} onSelectGame={handleSelectGame} />
+                <SitemapView games={games} onSelectGame={(g) => handleSelectGameById(g.id)} />
             </Suspense>
         ) : (
             <div className="flex w-full flex-col gap-2">
-                <Hero searchTerm={searchTerm} setSearchTerm={handleSetSearchTerm} />
-                
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-border-color pb-4 mt-2 gap-4 min-h-[48px]">
-                  <h3 className="text-lg font-bold text-text-main">
-                      {searchTerm.trim() ? `Buscando "${searchTerm}"` : (selectedConsole ? `${selectedConsole} - ` : '') + `${filteredGames.length} títulos`}
-                  </h3>
+                <Hero searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-border-color pb-4 mt-2 gap-4">
+                  <h3 className="text-lg font-bold text-text-main">Catálogo: {filteredGames.length} títulos</h3>
                   <div className="flex items-center gap-4">
-                    <select 
-                      value={sortBy} onChange={(e) => setSortBy(e.target.value as SortOption)}
-                      className="bg-transparent font-bold text-sm text-text-main focus:outline-none cursor-pointer"
-                    >
+                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value as SortOption)} className="bg-transparent font-bold text-sm text-text-main focus:outline-none cursor-pointer">
                       <option value="Alphabetically">A-Z</option>
                       <option value="Date">Fecha</option>
                       <option value="Popularity">Popularidad</option>
                     </select>
-                    <div className="flex items-center bg-surface border border-border-color rounded-lg p-1 gap-1">
+                    <div className="flex items-center bg-surface border border-border-color rounded-lg p-1">
                       <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md ${viewMode === 'list' ? 'bg-background shadow-sm' : 'text-text-muted'}`}><ListIcon size={18} /></button>
                       <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md ${viewMode === 'grid' ? 'bg-background shadow-sm' : 'text-text-muted'}`}><LayoutGrid size={18} /></button>
                     </div>
                   </div>
                 </div>
-
-                <div className="min-h-[800px] mt-6">
-                    <GameList games={currentGames} viewMode={viewMode} onSelectGame={handleSelectGame} onSelectConsole={handleSelectConsole} />
-                </div>
-
-                {totalPages > 1 && (
-                    <div className="flex items-center justify-center gap-6 py-12">
-                        <button 
-                            onClick={goToPrevPage}
-                            disabled={currentPage === 1}
-                            className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 border ${currentPage === 1 ? 'opacity-30 cursor-not-allowed border-border-color' : 'bg-surface border-border-color hover:border-primary hover:text-primary shadow-sm hover:shadow-md active:scale-90'}`}
-                        >
-                            <ChevronLeft size={24} />
-                        </button>
-                        
-                        <div className="flex items-center gap-2 bg-surface border border-border-color px-6 py-3 rounded-2xl shadow-sm">
-                            <span className="text-sm font-bold text-text-muted uppercase tracking-widest">Página</span>
-                            <span className="text-lg font-black text-text-main">{currentPage}</span>
-                            <span className="text-sm font-bold text-text-muted">/</span>
-                            <span className="text-sm font-bold text-text-muted">{totalPages}</span>
-                        </div>
-
-                        <button 
-                            onClick={goToNextPage}
-                            disabled={currentPage === totalPages}
-                            className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 border ${currentPage === totalPages ? 'opacity-30 cursor-not-allowed border-border-color' : 'bg-surface border-border-color hover:border-primary hover:text-primary shadow-sm hover:shadow-md active:scale-90'}`}
-                        >
-                            <ChevronRight size={24} />
-                        </button>
-                    </div>
-                )}
+                <GameList games={currentGames} viewMode={viewMode} onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={setSelectedConsole} />
             </div>
         )}
       </main>
 
-      <Footer onOpenSitemap={handleOpenSitemap} />
+      <Footer onOpenSitemap={() => { setIsSitemapOpen(true); setIsHelpOpen(false); setSelectedGameId(null); window.scrollTo(0,0); }} />
 
       <Suspense fallback={null}>
-          {isFormOpen && (
-            <GameForm 
-                isOpen={isFormOpen} 
-                onClose={() => { setIsFormOpen(false); setEditingGame(null); }} 
-                onSubmit={handleGameSubmit} 
-                initialData={editingGame} 
-            />
-          )}
           {isAdminPanelOpen && (
             <AdminPanel 
-              isOpen={isAdminPanelOpen} 
-              onClose={() => setIsAdminPanelOpen(false)} 
-              reports={reports} 
-              helpContent={helpContent}
-              onSaveHelp={handleSaveHelp}
-              onResolve={handleResolveReport} 
-              onDelete={handleDeleteReport} 
+              isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} 
+              reports={reports} helpContent={helpContent} onSaveHelp={handleSaveHelp}
+              onResolve={async (id) => await updateDoc(doc(db, 'reports', id), { status: 'Resolved' })}
+              onDelete={async (id) => await deleteDoc(doc(db, 'reports', id))}
               onNavigateToGame={handleSelectGameById} 
             />
           )}

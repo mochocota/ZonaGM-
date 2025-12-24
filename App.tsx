@@ -96,7 +96,6 @@ const App: React.FC = () => {
         if (snapshot.exists()) {
             setHelpContent(snapshot.data() as any);
         } else {
-            // Inicializar solo si es necesario
             setDoc(doc(db, 'settings', 'help'), DEFAULT_HELP_CONTENT).catch(e => console.warn("Init help failed:", e));
         }
     });
@@ -127,13 +126,12 @@ const App: React.FC = () => {
 
   const handleSaveHelp = async (newContent: typeof DEFAULT_HELP_CONTENT) => {
     try {
-        // Asegurar que el objeto es plano para evitar errores de Firebase
         const cleanContent = JSON.parse(JSON.stringify(newContent));
         await setDoc(doc(db, 'settings', 'help'), cleanContent);
         toast.success("Ayuda Actualizada", "Los cambios se han guardado correctamente.");
     } catch (e: any) {
         console.error("Save Help Error:", e);
-        toast.error("Error al Guardar", e.message || "Verifica los permisos en Firebase Console.");
+        toast.error("Error de Permisos", "Asegúrate de que las reglas de Firebase permitan escribir en la colección 'settings'.");
     }
   };
 
@@ -167,6 +165,20 @@ const App: React.FC = () => {
     filteredGames.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE),
   [filteredGames, currentPage]);
 
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 300, behavior: 'smooth' });
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 300, behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="relative flex min-h-screen w-full flex-col bg-background text-text-main">
       <AdBlockDetector />
@@ -181,7 +193,7 @@ const App: React.FC = () => {
         pendingReportsCount={reports.filter(r => r.status === 'Pending').length}
         isLoggedIn={isLoggedIn} onOpenLogin={() => setIsLoginModalOpen(true)}
         onLogout={() => signOut(auth)} consoles={useMemo(() => Array.from(new Set(games.map(g => g.console))).sort(), [games])}
-        selectedConsole={selectedConsole} onSelectConsole={setSelectedConsole}
+        selectedConsole={selectedConsole} onSelectConsole={(c) => { setSelectedConsole(c); setCurrentPage(1); }}
         isDarkMode={isDarkMode} toggleTheme={() => {
             const next = !isDarkMode;
             setIsDarkMode(next);
@@ -199,7 +211,7 @@ const App: React.FC = () => {
             <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={48} /></div>}>
                 <GameDetail 
                     game={selectedGame} allGames={games} onBack={() => setSelectedGameId(null)} 
-                    onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={setSelectedConsole}
+                    onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={(c) => { setSelectedConsole(c); setCurrentPage(1); }}
                     onHome={handleHome} onEdit={(g) => { setEditingGame(g); setIsFormOpen(true); }} 
                     onDelete={async (id) => { await deleteDoc(doc(db, 'games', id)); handleHome(); }} 
                     onReport={async (id, title, reason, desc) => {
@@ -220,9 +232,11 @@ const App: React.FC = () => {
             <div className="flex w-full flex-col gap-2">
                 <Hero searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-border-color pb-4 mt-2 gap-4">
-                  <h3 className="text-lg font-bold text-text-main">Catálogo: {filteredGames.length} títulos</h3>
+                  <h3 className="text-lg font-bold text-text-main">
+                    {searchTerm.trim() ? `Buscando "${searchTerm}"` : (selectedConsole ? `${selectedConsole} - ` : '') + `${filteredGames.length} títulos`}
+                  </h3>
                   <div className="flex items-center gap-4">
-                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value as SortOption)} className="bg-transparent font-bold text-sm text-text-main focus:outline-none cursor-pointer">
+                    <select value={sortBy} onChange={(e) => { setSortBy(e.target.value as SortOption); setCurrentPage(1); }} className="bg-transparent font-bold text-sm text-text-main focus:outline-none cursor-pointer">
                       <option value="Alphabetically">A-Z</option>
                       <option value="Date">Fecha</option>
                       <option value="Popularity">Popularidad</option>
@@ -233,7 +247,37 @@ const App: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <GameList games={currentGames} viewMode={viewMode} onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={setSelectedConsole} />
+                
+                <div className="min-h-[600px] mt-6">
+                    <GameList games={currentGames} viewMode={viewMode} onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={(c) => { setSelectedConsole(c); setCurrentPage(1); }} />
+                </div>
+
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-6 py-12">
+                        <button 
+                            onClick={goToPrevPage}
+                            disabled={currentPage === 1}
+                            className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 border ${currentPage === 1 ? 'opacity-30 cursor-not-allowed border-border-color' : 'bg-surface border-border-color hover:border-primary hover:text-primary shadow-sm hover:shadow-md active:scale-90'}`}
+                        >
+                            <ChevronLeft size={24} />
+                        </button>
+                        
+                        <div className="flex items-center gap-2 bg-surface border border-border-color px-6 py-3 rounded-2xl shadow-sm">
+                            <span className="text-sm font-bold text-text-muted uppercase tracking-widest">Página</span>
+                            <span className="text-lg font-black text-text-main">{currentPage}</span>
+                            <span className="text-sm font-bold text-text-muted">/</span>
+                            <span className="text-sm font-bold text-text-muted">{totalPages}</span>
+                        </div>
+
+                        <button 
+                            onClick={goToNextPage}
+                            disabled={currentPage === totalPages}
+                            className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 border ${currentPage === totalPages ? 'opacity-30 cursor-not-allowed border-border-color' : 'bg-surface border-border-color hover:border-primary hover:text-primary shadow-sm hover:shadow-md active:scale-90'}`}
+                        >
+                            <ChevronRight size={24} />
+                        </button>
+                    </div>
+                )}
             </div>
         )}
       </main>

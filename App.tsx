@@ -7,7 +7,7 @@ import Footer from './components/Footer';
 import SEO from './components/SEO';
 import AdBlockDetector from './components/AdBlockDetector';
 import { SortOption, Game, Report } from './types';
-import { LayoutGrid, List as ListIcon } from 'lucide-react';
+import { LayoutGrid, List as ListIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { db, auth } from './firebase';
 import { collection, onSnapshot, query, orderBy, addDoc, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
@@ -203,7 +203,6 @@ const App: React.FC = () => {
     setIsSearchOpen(false);
     setSearchTerm('');
     window.history.pushState({ gameId: game.id }, '', `?game=${slugify(game.title)}`);
-    // Usamos requestAnimationFrame para asegurar que el scroll ocurre en el siguiente tick visual
     requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }));
   }, []);
 
@@ -296,6 +295,20 @@ const App: React.FC = () => {
     }
   };
 
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 300, behavior: 'smooth' });
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 300, behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="relative flex min-h-screen w-full flex-col bg-background text-text-main">
       <AdBlockDetector />
@@ -374,15 +387,31 @@ const App: React.FC = () => {
                 </div>
 
                 {totalPages > 1 && (
-                    <div className="flex items-center justify-center gap-2 py-12">
-                        {[...Array(totalPages)].map((_, i) => (
-                            <button 
-                                key={i} onClick={() => { setCurrentPage(i + 1); window.scrollTo({ top: 300 }); }}
-                                className={`w-9 h-9 rounded-full font-bold text-sm transition-all duration-200 ${currentPage === i + 1 ? 'bg-primary text-black shadow-md scale-110' : 'text-text-muted hover:bg-surface border border-transparent hover:border-border-color'}`}
-                            >
-                                {i + 1}
-                            </button>
-                        ))}
+                    <div className="flex items-center justify-center gap-6 py-12">
+                        <button 
+                            onClick={goToPrevPage}
+                            disabled={currentPage === 1}
+                            className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 border ${currentPage === 1 ? 'opacity-30 cursor-not-allowed border-border-color' : 'bg-surface border-border-color hover:border-primary hover:text-primary shadow-sm hover:shadow-md active:scale-90'}`}
+                            aria-label="Página anterior"
+                        >
+                            <ChevronLeft size={24} />
+                        </button>
+                        
+                        <div className="flex items-center gap-2 bg-surface border border-border-color px-6 py-3 rounded-2xl shadow-sm">
+                            <span className="text-sm font-bold text-text-muted uppercase tracking-widest">Página</span>
+                            <span className="text-lg font-black text-text-main">{currentPage}</span>
+                            <span className="text-sm font-bold text-text-muted">/</span>
+                            <span className="text-sm font-bold text-text-muted">{totalPages}</span>
+                        </div>
+
+                        <button 
+                            onClick={goToNextPage}
+                            disabled={currentPage === totalPages}
+                            className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 border ${currentPage === totalPages ? 'opacity-30 cursor-not-allowed border-border-color' : 'bg-surface border-border-color hover:border-primary hover:text-primary shadow-sm hover:shadow-md active:scale-90'}`}
+                            aria-label="Siguiente página"
+                        >
+                            <ChevronRight size={24} />
+                        </button>
                     </div>
                 )}
             </div>

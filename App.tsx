@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect, Suspense, useCallback, useLayoutEffect } from 'react';
+import React, { useState, useMemo, useEffect, Suspense, useCallback, useLayoutEffect, useRef } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import GameList from './components/GameList';
@@ -55,6 +55,9 @@ const App: React.FC = () => {
   const [sortBy, setSortBy] = useState<SortOption>('Alphabetically');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
   
+  // Referencia para guardar la posición del scroll
+  const scrollPositionRef = useRef<number>(0);
+  
   // Guardamos solo el ID del juego seleccionado para que siempre esté sincronizado con la lista global
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
   
@@ -72,6 +75,19 @@ const App: React.FC = () => {
   const selectedGame = useMemo(() => 
     games.find(g => g.id === selectedGameId) || null
   , [games, selectedGameId]);
+
+  // Efecto para restaurar el scroll cuando volvemos a la lista
+  useEffect(() => {
+    if (selectedGameId === null && scrollPositionRef.current > 0) {
+      // Pequeño timeout para asegurar que el DOM de la lista se ha montado
+      const timeoutId = setTimeout(() => {
+        window.scrollTo({ top: scrollPositionRef.current, behavior: 'auto' });
+        // No reseteamos inmediatamente para evitar saltos si hay re-renders rápidos
+        // pero lo limpiamos después de una navegación exitosa
+      }, 50);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [selectedGameId]);
 
   useLayoutEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -154,6 +170,9 @@ const App: React.FC = () => {
   [filteredGames, currentPage]);
 
   const handleSelectGame = useCallback((game: Game) => {
+    // Guardamos la posición actual antes de navegar al post
+    scrollPositionRef.current = window.scrollY;
+    
     setSelectedGameId(game.id);
     setIsSitemapOpen(false);
     setIsSearchOpen(false);
@@ -163,10 +182,14 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectGameById = useCallback((gameId: string): void => {
+    scrollPositionRef.current = window.scrollY;
     setSelectedGameId(gameId);
   }, []);
 
   const handleHome = useCallback(() => {
+    // Reseteamos la memoria del scroll al ir a Home explícitamente
+    scrollPositionRef.current = 0;
+    
     setSelectedGameId(null);
     setIsSitemapOpen(false);
     setIsSearchOpen(false);
@@ -178,6 +201,9 @@ const App: React.FC = () => {
   }, []);
 
   const handleSelectConsole = useCallback((console: string | null) => {
+    // Reseteamos la memoria del scroll al cambiar de categoría
+    scrollPositionRef.current = 0;
+    
     setSelectedConsole(console);
     setSelectedGameId(null);
     setIsSitemapOpen(false);
@@ -188,6 +214,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleOpenSitemap = useCallback(() => {
+    scrollPositionRef.current = window.scrollY;
     setIsSitemapOpen(true);
     setSelectedGameId(null);
     setIsSearchOpen(false);

@@ -224,7 +224,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
   const cleanDescription = useMemo(() => {
       if (!game.description) return '';
-      const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/g;
+      const regex = /(?:https?:\/\/)??:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/g;
       return game.description.replace(regex, '').trim();
   }, [game.description]);
 
@@ -540,22 +540,22 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
       )}
 
       <div className="w-full max-w-[1000px] animate-fade-in duration-500">
-        <nav className="flex items-center gap-2 text-sm text-text-muted mt-6 md:mt-10 mb-4 overflow-x-auto whitespace-nowrap px-1">
+        <nav className="flex flex-wrap items-start gap-y-2 gap-x-2 text-sm text-text-muted mt-6 md:mt-10 mb-4 px-1">
             <button 
                 onClick={(e) => { e.preventDefault(); onHome(); }} 
-                className="flex items-center gap-1 hover:text-primary-hover transition-colors"
+                className="flex items-center gap-1 hover:text-primary-hover transition-colors shrink-0"
             >
                 <Home size={14} /> Inicio
             </button>
-            <ChevronRight size={14} className="opacity-50" />
+            <ChevronRight size={14} className="opacity-50 shrink-0 mt-0.5" />
             <button 
                 onClick={(e) => { e.preventDefault(); onSelectConsole(game.console); }} 
-                className="hover:text-primary-hover transition-colors font-medium"
+                className="hover:text-primary-hover transition-colors font-medium shrink-0"
             >
                 {game.console}
             </button>
-            <ChevronRight size={14} className="opacity-50" />
-            <span className="text-text-main font-bold truncate">{game.title}</span>
+            <ChevronRight size={14} className="opacity-50 shrink-0 mt-0.5" />
+            <span className="text-text-main font-bold break-words leading-snug">{game.title}</span>
         </nav>
 
         {isLoggedIn && (

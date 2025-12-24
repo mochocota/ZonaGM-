@@ -670,7 +670,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                 <section className="pt-8 border-t border-border-color">
                 <button onClick={() => setIsCommentsOpen(!isCommentsOpen)} className="w-full flex items-center justify-between mb-6 group">
                     <h3 className="text-2xl font-bold text-text-main flex items-center gap-2"><MessageSquare size={24} /> Comentarios <span className="text-base font-medium text-text-muted">({localComments.length})</span></h3>
-                    <div className={`p-2 rounded-full bg-surface border border-border-color transition-transform duration-300 ${isCommentsOpen ? 'rotate-180 bg-gray-50' : ''}`}><ChevronDown size={20} /></div>
+                    <div className={`p-2 rounded-full bg-surface border border-border-color transition-transform duration-300 ${isCommentsOpen ? 'rotate-180 bg-background' : ''}`}><ChevronDown size={20} className="text-text-main" /></div>
                 </button>
                 {isCommentsOpen && (
                     <div className="animate-slide-in-up duration-300">

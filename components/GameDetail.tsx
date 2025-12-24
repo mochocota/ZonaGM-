@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Game, Comment } from '../types';
-import { Download, HardDrive, Calendar, Gamepad2, Layers, ShieldCheck, MessageSquare, Send, User, Globe, Star, Pencil, Trash2, Sparkles, Image as ImageIcon, X, AlertTriangle, Crown, Ban, CornerDownRight, ChevronDown, CheckCircle2, Lock, Unlock, Timer, Loader2, ChevronRight, Home, Share2, Facebook, Twitter, Youtube, MonitorPlay } from 'lucide-react';
+import { Download, HardDrive, Calendar, Gamepad2, Layers, ShieldCheck, MessageSquare, Send, User, Globe, Star, Pencil, Trash2, Sparkles, Image as ImageIcon, X, AlertTriangle, Crown, Ban, CornerDownRight, ChevronDown, CheckCircle2, Lock, Unlock, Timer, Loader2, ChevronRight, Home, Share2, Facebook, Twitter, Youtube, MonitorPlay, ChevronLeft } from 'lucide-react';
 import SEO from './SEO';
 import { db } from '../firebase';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
@@ -28,7 +28,6 @@ const FORBIDDEN_WORDS = [
     'myrient', 'pendejadas', 'babosadas'
 ];
 
-// Se usa una cadena para evitar errores de escape en el literal de regex durante la compilación
 const YT_REGEX_STR = '(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/(?:[^/\\n\\s]+\\/\\S+\\/|(?:v|e(?:mbed)?)\\/|\\S*?[?&]v=)|youtu\\.be\\/)([a-zA-Z0-9_-]{11})';
 
 const getYoutubeId = (text: string) => {
@@ -439,7 +438,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
   const fullShareText = `🎮 Mira este juego en ZonaGM: ${shareTitle}.`;
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className="w-full flex flex-col items-center pb-20">
       <SEO 
         title={`Descargar ${game.title} (${game.year}) - ${game.console}`}
         description={`Descarga segura de ${game.title} para ${game.console}.`}
@@ -449,7 +448,7 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
 
       {isDeleteModalOpen && (
           <div className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in" onClick={() => setIsDeleteModalOpen(false)}>
-              <div className="bg-surface w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-red-200 text-center animate-zoom-in" onClick={(e) => e.stopPropagation()}>
+              <div className="bg-surface w-full max-sm rounded-2xl p-6 shadow-2xl border border-red-200 text-center animate-zoom-in" onClick={(e) => e.stopPropagation()}>
                   <Trash2 size={32} className="mx-auto mb-4 text-red-600" />
                   <h3 className="text-xl font-bold text-text-main mb-2">¿Eliminar Juego?</h3>
                   <p className="text-text-muted mb-6">Esta acción es irreversible.</p>
@@ -543,23 +542,32 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
       )}
 
       <div className="w-full max-w-[1000px] animate-fade-in duration-500">
-        <nav className="flex flex-wrap items-start gap-y-2 gap-x-2 text-sm text-text-muted mt-6 md:mt-10 mb-4 px-1">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-6 md:mt-10 mb-6 px-1">
+            <nav className="flex flex-wrap items-start gap-y-2 gap-x-2 text-sm text-text-muted">
+                <button 
+                    onClick={(e) => { e.preventDefault(); onHome(); }} 
+                    className="flex items-center gap-1 hover:text-primary-hover transition-colors shrink-0"
+                >
+                    <Home size={14} /> Inicio
+                </button>
+                <ChevronRight size={14} className="opacity-50 shrink-0 mt-0.5" />
+                <button 
+                    onClick={(e) => { e.preventDefault(); onSelectConsole(game.console); }} 
+                    className="hover:text-primary-hover transition-colors font-medium shrink-0"
+                >
+                    {game.console}
+                </button>
+                <ChevronRight size={14} className="opacity-50 shrink-0 mt-0.5" />
+                <span className="text-text-main font-bold break-words leading-snug">{game.title}</span>
+            </nav>
+            
             <button 
-                onClick={(e) => { e.preventDefault(); onHome(); }} 
-                className="flex items-center gap-1 hover:text-primary-hover transition-colors shrink-0"
+                onClick={onBack}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface border border-border-color hover:border-primary hover:text-primary-hover transition-all text-sm font-bold shadow-sm self-start md:self-auto"
             >
-                <Home size={14} /> Inicio
+                <ChevronLeft size={18} /> Volver al Listado
             </button>
-            <ChevronRight size={14} className="opacity-50 shrink-0 mt-0.5" />
-            <button 
-                onClick={(e) => { e.preventDefault(); onSelectConsole(game.console); }} 
-                className="hover:text-primary-hover transition-colors font-medium shrink-0"
-            >
-                {game.console}
-            </button>
-            <ChevronRight size={14} className="opacity-50 shrink-0 mt-0.5" />
-            <span className="text-text-main font-bold break-words leading-snug">{game.title}</span>
-        </nav>
+        </div>
 
         {isLoggedIn && (
             <div className="flex items-center justify-end mb-6">

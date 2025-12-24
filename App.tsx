@@ -22,10 +22,6 @@ const HelpView = React.lazy(() => import('./components/HelpView'));
 
 const ITEMS_PER_PAGE = 20;
 
-const slugify = (text: string) => {
-  return text.toString().toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-};
-
 const DEFAULT_HELP_CONTENT = {
   shortenerExplanation: "Mantener todos estos juegos guardados y listos para descargar tiene un costo mensual de servidores. En lugar de cobrarte por entrar o llenar el sitio de anuncios molestos que saltan por todos lados, usamos estos enlaces. Al esperar esos pocos segundos, nos ayudas a pagar los gastos del sitio para que ZonaGM siga existiendo y sea gratis para todos. ¡Gracias por ayudarnos a seguir en línea!",
   faqs: [
@@ -65,6 +61,18 @@ const App: React.FC = () => {
   const selectedGame = useMemo(() => 
     games.find(g => g.id === selectedGameId) || null
   , [games, selectedGameId]);
+
+  // Manejo del historial para el botón atrás del navegador
+  useEffect(() => {
+    const handlePopState = () => {
+      setSelectedGameId(null);
+      setIsHelpOpen(false);
+      setIsSitemapOpen(false);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   useLayoutEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -109,6 +117,7 @@ const App: React.FC = () => {
     setSelectedGameId(null);
     setIsSearchOpen(false);
     setSearchTerm('');
+    window.history.pushState({ view: 'help' }, '');
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, []);
 
@@ -131,7 +140,7 @@ const App: React.FC = () => {
         toast.success("Ayuda Actualizada", "Los cambios se han guardado correctamente.");
     } catch (e: any) {
         console.error("Save Help Error:", e);
-        toast.error("Error de Permisos", "Asegúrate de que las reglas de Firebase permitan escribir en la colección 'settings'.");
+        toast.error("Error de Permisos", "Verifica las reglas de seguridad en tu consola de Firebase.");
     }
   };
 
@@ -142,6 +151,7 @@ const App: React.FC = () => {
       setSelectedGameId(game.id);
       setIsSitemapOpen(false);
       setIsHelpOpen(false);
+      window.history.pushState({ gameId: game.id }, '');
       window.scrollTo({ top: 0, behavior: 'auto' });
     }
   }, [games]);
@@ -210,7 +220,7 @@ const App: React.FC = () => {
         ) : selectedGame ? (
             <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={48} /></div>}>
                 <GameDetail 
-                    game={selectedGame} allGames={games} onBack={() => setSelectedGameId(null)} 
+                    game={selectedGame} allGames={games} onBack={() => { setSelectedGameId(null); window.history.back(); }} 
                     onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={(c) => { setSelectedConsole(c); setCurrentPage(1); }}
                     onHome={handleHome} onEdit={(g) => { setEditingGame(g); setIsFormOpen(true); }} 
                     onDelete={async (id) => { await deleteDoc(doc(db, 'games', id)); handleHome(); }} 

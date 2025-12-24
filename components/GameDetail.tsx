@@ -24,7 +24,8 @@ interface GameDetailProps {
 const FORBIDDEN_WORDS = [
     'http://', 'https://', 'www.', '.com', '.net', '.org', 'whatsapp', 'telegram', 'ganar dinero', 'free money', 'crypto',
     'puto', 'puta', 'mierda', 'pendejo', 'estupido', 'idiota', 'cabron', 'verga', 'zorra', 'maldito', 'imbecil', 'basura', 'chinguen', 'joder',
-    'fuck', 'shit', 'bitch', 'asshole', 'cunt', 'dick', 'scam'
+    'fuck', 'shit', 'bitch', 'asshole', 'cunt', 'dick', 'scam',
+    'myrient', 'pendejadas', 'babosadas'
 ];
 
 const getYoutubeId = (text: string) => {
@@ -48,7 +49,7 @@ const TelegramIcon = () => (
 
 const RedditIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-    <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.688-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
+    <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.249a1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.688-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
   </svg>
 );
 
@@ -65,6 +66,7 @@ interface CommentNodeProps {
   replyText: string;
   setReplyText: (text: string) => void;
   handlePostReply: (parentId: string, replyToUser?: string) => void;
+  onDeleteComment: (commentId: string) => void;
 }
 
 const CommentNode: React.FC<CommentNodeProps> = ({ 
@@ -79,7 +81,8 @@ const CommentNode: React.FC<CommentNodeProps> = ({
   setReplyName,
   replyText,
   setReplyText,
-  handlePostReply
+  handlePostReply,
+  onDeleteComment
 }) => {
   const isReplying = replyingToId === comment.id;
 
@@ -99,26 +102,37 @@ const CommentNode: React.FC<CommentNodeProps> = ({
             {comment.isAdmin ? <ShieldCheck size={20} /> : <User size={20} />}
           </div>
         </div>
-        <div className="flex-1">
-          <div className="flex flex-wrap items-center justify-between mb-1">
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center justify-between mb-1 gap-2">
             <div className="flex items-center gap-2">
-              <span className={`font-bold ${comment.isAdmin ? 'text-text-main flex items-center gap-1' : 'text-text-main'}`}>
+              <span className={`font-bold truncate ${comment.isAdmin ? 'text-text-main flex items-center gap-1' : 'text-text-main'}`}>
                   {comment.user}
                   {comment.isAdmin && <span className="bg-primary text-[10px] px-1.5 py-0.5 rounded text-black font-bold uppercase">Admin</span>}
               </span>
-              <span className="text-xs text-text-muted font-medium">{comment.date}</span>
+              <span className="text-xs text-text-muted font-medium shrink-0">{comment.date}</span>
             </div>
-            <button 
-              onClick={() => {
-                  setReplyingToId(isReplying ? null : comment.id);
-                  setCommentError('');
-              }}
-              className="text-xs font-bold text-text-muted hover:text-primary-hover flex items-center gap-1 transition-colors"
-            >
-              <CornerDownRight size={14} /> Responder
-            </button>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => {
+                    setReplyingToId(isReplying ? null : comment.id);
+                    setCommentError('');
+                }}
+                className="text-xs font-bold text-text-muted hover:text-primary-hover flex items-center gap-1 transition-colors"
+              >
+                <CornerDownRight size={14} /> Responder
+              </button>
+              {isLoggedIn && (
+                <button 
+                  onClick={() => onDeleteComment(comment.id)}
+                  className="text-xs font-bold text-red-400 hover:text-red-600 flex items-center gap-1 transition-colors"
+                  title="Borrar Comentario"
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
+            </div>
           </div>
-          <p className={`leading-relaxed text-sm ${comment.isAdmin ? 'text-text-main font-medium' : 'text-text-muted'}`}>
+          <p className={`leading-relaxed text-sm break-words ${comment.isAdmin ? 'text-text-main font-medium' : 'text-text-muted'}`}>
             {comment.content}
           </p>
 
@@ -191,6 +205,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
               replyText={replyText}
               setReplyText={setReplyText}
               handlePostReply={handlePostReply}
+              onDeleteComment={onDeleteComment}
             />
           ))}
         </div>
@@ -282,11 +297,28 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
         return false;
     };
     return nodes.map(node => {
-      if (hasDescendant(node, parentId)) {
+      if (node.id === parentId) {
         return { ...node, replies: [...(node.replies || []), reply] };
+      }
+      if (node.replies && node.replies.length > 0) {
+        return { ...node, replies: addReplyToTree(node.replies, parentId, reply) };
       }
       return node;
     });
+  };
+
+  const removeCommentById = (nodes: Comment[], idToRemove: string): Comment[] => {
+    return nodes.reduce((acc: Comment[], node) => {
+      if (node.id === idToRemove) {
+        return acc;
+      }
+      const updatedNode = { ...node };
+      if (node.replies && node.replies.length > 0) {
+        updatedNode.replies = removeCommentById(node.replies, idToRemove);
+      }
+      acc.push(updatedNode);
+      return acc;
+    }, []);
   };
 
   const validateContent = (text: string, name: string, isAdmin: boolean) => {
@@ -357,6 +389,12 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
       setReplyingToId(null);
       setReplyText('');
       if(!isAdminComment) setReplyName('');
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    const updatedComments = removeCommentById(localComments, commentId);
+    await saveCommentsToFirestore(updatedComments);
+    toast.info("Comentario eliminado");
   };
 
   const handleRateGame = async (score: number) => {
@@ -648,7 +686,30 @@ const GameDetail: React.FC<GameDetailProps> = ({ game, allGames, onBack, onSelec
                             {commentError && <div className="p-3 bg-red-50 text-red-600 border border-red-100 rounded-xl text-sm">{commentError}</div>}
                             <div className="flex justify-end"><button type="submit" disabled={(!(isLoggedIn && isAdminComment) && !newCommentName.trim()) || !newCommentText.trim()} className="bg-primary hover:bg-primary-hover text-black font-bold px-6 py-2.5 rounded-full">Publicar</button></div>
                         </form>
-                        <div className="space-y-4 mb-10">{localComments.length > 0 ? localComments.map((comment) => (<CommentNode key={comment.id} comment={comment} replyingToId={replyingToId} setReplyingToId={setReplyingToId} setCommentError={setCommentError} isLoggedIn={isLoggedIn} isAdminComment={isAdminComment} setIsAdminComment={setIsAdminComment} replyName={replyName} setReplyName={setReplyName} replyText={replyText} setReplyText={setReplyText} handlePostReply={handlePostReply} />)) : <div className="text-center py-8 text-text-muted italic">No hay comentarios aún.</div>}</div>
+                        <div className="space-y-4 mb-10">
+                          {localComments.length > 0 ? (
+                            localComments.map((comment) => (
+                              <CommentNode 
+                                key={comment.id} 
+                                comment={comment} 
+                                replyingToId={replyingToId} 
+                                setReplyingToId={setReplyingToId} 
+                                setCommentError={setCommentError} 
+                                isLoggedIn={isLoggedIn} 
+                                isAdminComment={isAdminComment} 
+                                setIsAdminComment={setIsAdminComment} 
+                                replyName={replyName} 
+                                setReplyName={setReplyName} 
+                                replyText={replyText} 
+                                setReplyText={setReplyText} 
+                                handlePostReply={handlePostReply}
+                                onDeleteComment={handleDeleteComment}
+                              />
+                            ))
+                          ) : (
+                            <div className="text-center py-8 text-text-muted italic">No hay comentarios aún.</div>
+                          )}
+                        </div>
                     </div>
                 )}
                 </section>

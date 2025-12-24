@@ -91,16 +91,16 @@ const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
         <div className="flex items-center justify-between text-[11px] text-text-muted mt-auto font-medium">
           <div className="flex items-center gap-3">
               <div className="flex items-center gap-1" title="Descargas">
-                  <Download size={12} className="text-black dark:text-primary" /> 
-                  <span className="opacity-80">{formatNumber(game.downloads)}</span>
+                  <Download size={11} className="text-black dark:text-primary" /> 
+                  <span className="opacity-80 leading-none">{formatNumber(game.downloads)}</span>
               </div>
               <div className="flex items-center gap-1" title="Calificación">
-                  <Star size={12} className="fill-black text-black dark:fill-primary dark:text-primary" /> 
-                  <span className="opacity-80">{game.rating || '0.0'}</span>
+                  <Star size={11} className="fill-black text-black dark:fill-primary dark:text-primary" /> 
+                  <span className="opacity-80 leading-none">{game.rating || '0.0'}</span>
               </div>
               <div className="flex items-center gap-1" title="Comentarios">
-                  <MessageSquare size={12} className="text-text-muted" /> 
-                  <span className="opacity-80">{commentCount}</span>
+                  <MessageSquare size={11} className="text-text-muted" /> 
+                  <span className="opacity-80 leading-none">{commentCount}</span>
               </div>
           </div>
           <div className="shrink-0">
@@ -152,16 +152,16 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
         {/* Information Row: Downloads, Rating, Comments, Flags */}
         <div className="mt-4 flex items-center gap-4">
            <div className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-xl border border-border-color text-xs font-bold text-text-muted">
-              <Download size={16} className="text-black dark:text-primary" /> 
-              <span>{formatNumber(game.downloads)}</span>
+              <Download size={13} className="text-black dark:text-primary" /> 
+              <span className="leading-none">{formatNumber(game.downloads)}</span>
            </div>
            <div className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-xl border border-border-color text-xs font-bold text-text-muted">
-              <Star size={16} className="fill-black text-black dark:fill-primary dark:text-primary" /> 
-              <span>{game.rating || '0.0'}</span>
+              <Star size={13} className="fill-black text-black dark:fill-primary dark:text-primary" /> 
+              <span className="leading-none">{game.rating || '0.0'}</span>
            </div>
            <div className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-xl border border-border-color text-xs font-bold text-text-muted">
-              <MessageSquare size={16} className="text-text-muted" /> 
-              <span>{commentCount}</span>
+              <MessageSquare size={13} className="text-text-muted" /> 
+              <span className="leading-none">{commentCount}</span>
            </div>
            <div className="ml-auto">
               <LanguageFlags languages={game.languages} />

@@ -44,7 +44,7 @@ const LanguageFlags = ({ languages }: { languages: Game['languages'] }) => {
   };
 
   return (
-    <div className="flex gap-1 items-center">
+    <div className="flex gap-1.5 items-center justify-center">
       {languages.map(lang => (
         <span key={lang} className="text-[17px] leading-none drop-shadow-sm" title={lang}>
           {getFlag(lang)}
@@ -85,11 +85,16 @@ const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
       </div>
       
       <div className="p-4 flex flex-col flex-grow">
-        <h3 className="text-base font-bold text-text-main leading-snug line-clamp-2 mb-3 group-hover:text-primary-hover transition-colors">{game.title}</h3>
+        {/* Language Flags: Centered below image */}
+        <div className="mb-3">
+          <LanguageFlags languages={game.languages} />
+        </div>
+
+        <h3 className="text-base font-bold text-text-main text-center leading-snug line-clamp-2 mb-3 group-hover:text-primary-hover transition-colors">{game.title}</h3>
         
-        {/* Information Footer: Downloads, Rating, Comments, Flags */}
-        <div className="flex items-center justify-between text-[11px] text-text-muted mt-auto font-medium">
-          <div className="flex items-center gap-3">
+        {/* Information Footer: Downloads, Rating, Comments */}
+        <div className="flex items-center justify-center text-[11px] text-text-muted mt-auto font-medium border-t border-border-color/30 pt-3">
+          <div className="flex items-center gap-4">
               <div className="flex items-center gap-1" title="Descargas">
                   <Download size={11} className="text-black dark:text-primary" /> 
                   <span className="opacity-80 leading-none">{formatNumber(game.downloads)}</span>
@@ -102,9 +107,6 @@ const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
                   <MessageSquare size={11} className="text-text-muted" /> 
                   <span className="opacity-80 leading-none">{commentCount}</span>
               </div>
-          </div>
-          <div className="shrink-0">
-              <LanguageFlags languages={game.languages} />
           </div>
         </div>
       </div>
@@ -120,17 +122,21 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
       onClick={onClick}
       className="group flex flex-col md:flex-row gap-6 rounded-3xl bg-surface p-4 shadow-soft border border-transparent hover:border-primary/20 transition-all cursor-pointer"
     >
-      <div className="shrink-0 w-full md:w-[160px] aspect-[3/4] rounded-2xl bg-gray-100 dark:bg-zinc-800 overflow-hidden relative shadow-inner">
-        <img 
-            src={game.imageUrl} 
-            alt={game.title}
-            loading={isLCP ? "eager" : "lazy"}
-            fetchPriority={isLCP ? "high" : "auto"}
-            width="160"
-            height="220"
-            decoding="async"
-            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-        />
+      <div className="shrink-0 flex flex-col items-center gap-3">
+        <div className="w-full md:w-[160px] aspect-[3/4] rounded-2xl bg-gray-100 dark:bg-zinc-800 overflow-hidden relative shadow-inner">
+          <img 
+              src={game.imageUrl} 
+              alt={game.title}
+              loading={isLCP ? "eager" : "lazy"}
+              fetchPriority={isLCP ? "high" : "auto"}
+              width="160"
+              height="220"
+              decoding="async"
+              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+          />
+        </div>
+        {/* Flags below list image */}
+        <LanguageFlags languages={game.languages} />
       </div>
       
       <div className="flex flex-1 flex-col justify-between py-1">
@@ -149,7 +155,7 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
           <p className="text-text-muted text-sm leading-relaxed line-clamp-2 max-w-2xl">{game.description}</p>
         </div>
         
-        {/* Information Row: Downloads, Rating, Comments, Flags */}
+        {/* Information Row: Downloads, Rating, Comments */}
         <div className="mt-4 flex items-center gap-4">
            <div className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-xl border border-border-color text-xs font-bold text-text-muted">
               <Download size={13} className="text-black dark:text-primary" /> 
@@ -162,9 +168,6 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
            <div className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-xl border border-border-color text-xs font-bold text-text-muted">
               <MessageSquare size={13} className="text-text-muted" /> 
               <span className="leading-none">{commentCount}</span>
-           </div>
-           <div className="ml-auto">
-              <LanguageFlags languages={game.languages} />
            </div>
         </div>
       </div>

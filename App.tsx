@@ -359,7 +359,7 @@ const App: React.FC = () => {
           {isAdminPanelOpen && (
             <AdminPanel 
               isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} 
-              reports={reports} helpContent={helpContent} onSaveHelp={handleSaveHelp}
+              reports={reports} games={games} helpContent={helpContent} onSaveHelp={handleSaveHelp}
               onResolve={async (id) => await updateDoc(doc(db, 'reports', id), { status: 'Resolved' })}
               onDelete={async (id) => await deleteDoc(doc(db, 'reports', id))}
               onNavigateToGame={handleSelectGameById} 

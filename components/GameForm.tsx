@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Game } from '../types';
-import { X, Save, Upload, Download, Search, Loader2, Gamepad2, Globe, AlertCircle, Image as ImageIcon } from 'lucide-react';
+import { X, Save, Upload, Download, Search, Loader2, Gamepad2, Globe, AlertCircle, Image as ImageIcon, Youtube } from 'lucide-react';
 import { searchIGDB } from '../services/igdb';
 import { useToast } from './Toast';
 
@@ -29,6 +30,21 @@ const emptyGame: Omit<Game, 'id'> = {
   comments: []
 };
 
+const YT_REGEX_STR = '(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/(?:[^/\\n\\s]+\\/\\S+\\/|(?:v|e(?:mbed)?)\\/|\\S*?[?&]v=)|youtu\\.be\\/)([a-zA-Z0-9_-]{11})';
+
+const getYoutubeId = (text: string) => {
+  if (!text) return null;
+  const regex = new RegExp(YT_REGEX_STR);
+  const match = text.match(regex);
+  return match ? match[1] : null;
+};
+
+const cleanDescriptionOfVideos = (text: string) => {
+    if (!text) return '';
+    const regex = new RegExp(YT_REGEX_STR, 'g');
+    return text.replace(regex, '').trim();
+};
+
 // Expanded list of popular consoles
 const POPULAR_CONSOLES = [
   'PlayStation 5', 'PlayStation 4', 'Nintendo Switch', 'PC', 'Xbox Series X/S',
@@ -43,6 +59,7 @@ const LANGUAGES = ['English', 'Spanish', 'Japanese', 'Multi'] as const;
 const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState<Omit<Game, 'id'>>({ ...emptyGame });
+  const [trailerUrl, setTrailerUrl] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   
   // States
@@ -58,8 +75,16 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
     if (initialData) {
       const { id, ...rest } = initialData;
       setFormData(rest);
+      // Extraer trailer si existe
+      const videoId = getYoutubeId(rest.description);
+      if (videoId) {
+          setTrailerUrl(`https://www.youtube.com/watch?v=${videoId}`);
+      } else {
+          setTrailerUrl('');
+      }
     } else {
       setFormData({ ...emptyGame });
+      setTrailerUrl('');
     }
     setErrors({});
     setIsSubmitting(false);
@@ -92,7 +117,6 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) {
-        // Scroll to error
         const firstErrorInput = document.querySelector('[aria-invalid="true"]');
         if (firstErrorInput) {
             firstErrorInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -103,9 +127,15 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
     }
 
     setIsSubmitting(true);
+    
+    // Limpiar descripción de videos y añadir el actual para evitar duplicados o pérdidas
+    const baseDesc = cleanDescriptionOfVideos(formData.description);
+    const finalDesc = baseDesc + (trailerUrl.trim() ? `\n\n${trailerUrl.trim()}` : '');
+
     const gameToSubmit: Game = {
       id: initialData?.id || Date.now().toString(),
-      ...formData
+      ...formData,
+      description: finalDesc
     };
 
     const success = await onSubmit(gameToSubmit);
@@ -114,7 +144,6 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
     if (success) {
         onClose();
     }
-    // If fail, we keep form open so user can retry or check error toast
   };
 
   const handleIGDBSearch = async (e: React.FormEvent) => {
@@ -146,18 +175,20 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
         imageUrl: data.imageUrl,
         screenshots: data.screenshots || [],
         publisher: data.publisher,
-        console: data.console, // Use whatever string comes back, or user can change it
+        console: data.console,
         rating: data.rating > 0 ? data.rating : prev.rating,
-        voteCount: data.voteCount || 0, // Import vote count
-        // Autofill size if empty to prevent validation block (IGDB doesn't provide file size)
+        voteCount: data.voteCount || 0,
         size: prev.size || 'TBD',
         format: prev.format || suggestedFormat
     }));
-    
-    // Clear errors if any
-    setErrors({});
 
-    // Close search and reset
+    // Sincronizar campo de trailer
+    const videoId = getYoutubeId(data.description);
+    if (videoId) {
+        setTrailerUrl(`https://www.youtube.com/watch?v=${videoId}`);
+    }
+    
+    setErrors({});
     setIsSearchOpen(false);
     setSearchQuery('');
     setSearchResults([]);
@@ -178,14 +209,13 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
   return (
     <div 
         className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in"
-        onClick={onClose} // Click outside to close
+        onClick={onClose}
     >
       <div 
         className="bg-background w-full max-w-2xl rounded-3xl shadow-2xl border border-border-color flex flex-col max-h-[90vh] relative overflow-hidden animate-slide-in-up"
-        onClick={(e) => e.stopPropagation()} // Prevent close when clicking inside
+        onClick={(e) => e.stopPropagation()}
       >
         
-        {/* Search Modal Overlay */}
         {isSearchOpen && (
              <div className="absolute inset-0 z-50 bg-background flex flex-col animate-slide-in-up">
                 <div className="flex items-center justify-between p-6 border-b border-border-color bg-surface">
@@ -262,7 +292,6 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
              </div>
         )}
 
-        {/* Normal Form Header */}
         <div className="flex items-center justify-between p-6 border-b border-border-color bg-surface rounded-t-3xl">
           <div className="flex flex-col gap-1">
             <h2 className="text-2xl font-bold text-text-main leading-none">
@@ -282,11 +311,9 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
           </button>
         </div>
 
-        {/* Scrollable Form Body */}
         <div className="overflow-y-auto p-6 flex-1">
           <form id="game-form" onSubmit={handleSubmit} className="space-y-6">
             
-            {/* IGDB Banner Button (Visible if no title is set) */}
             {!formData.title && (
                 <button
                     type="button"
@@ -307,7 +334,6 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
                 </div>
             )}
 
-            {/* Title */}
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase text-text-muted">Title</label>
                 <input
@@ -321,7 +347,6 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
                 {errors.title && <p className="text-xs text-red-500">{errors.title}</p>}
             </div>
 
-            {/* Console Tags */}
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase text-text-muted">Console</label>
                 <div className="flex flex-wrap gap-2">
@@ -349,7 +374,6 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
                 </div>
             </div>
 
-            {/* Meta Data Row 1 */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase text-text-muted">Year</label>
@@ -395,11 +419,10 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
               </div>
             </div>
 
-            {/* Description */}
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase text-text-muted">Description</label>
               <textarea
-                value={formData.description}
+                value={cleanDescriptionOfVideos(formData.description)}
                 onChange={e => setFormData({ ...formData, description: e.target.value })}
                 rows={4}
                 className="w-full bg-surface border border-border-color rounded-xl px-4 py-3 focus:outline-none focus:border-primary resize-none"
@@ -407,7 +430,20 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
               />
             </div>
 
-            {/* Image URL */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase text-text-muted">Tráiler YouTube (URL)</label>
+              <div className="relative">
+                  <Youtube className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
+                  <input
+                    type="text"
+                    value={trailerUrl}
+                    onChange={e => setTrailerUrl(e.target.value)}
+                    className="w-full bg-surface border border-border-color rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-primary"
+                    placeholder="https://www.youtube.com/watch?v=..."
+                  />
+              </div>
+            </div>
+
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase text-text-muted">Image URL</label>
               <div className="flex gap-2">
@@ -430,7 +466,6 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
               )}
             </div>
 
-            {/* Screenshots Info (Hidden field essentially, just info) */}
             {formData.screenshots && formData.screenshots.length > 0 && (
                 <div className="p-3 bg-blue-50 text-blue-800 rounded-xl text-sm flex items-center gap-2">
                     <ImageIcon size={16} />
@@ -438,7 +473,6 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
                 </div>
             )}
 
-            {/* Download URL */}
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase text-text-muted">Download URL</label>
               <div className="flex gap-2">
@@ -455,7 +489,6 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
               </div>
             </div>
 
-            {/* Languages */}
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase text-text-muted block">Languages</label>
               <div className="flex flex-wrap gap-2">
@@ -476,7 +509,6 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
               </div>
             </div>
             
-             {/* Stats (Initial values for edit or create) */}
              <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border-color/50">
                 <div className="space-y-2">
                     <label className="text-xs font-bold uppercase text-text-muted">Downloads</label>
@@ -514,7 +546,6 @@ const GameForm: React.FC<GameFormProps> = ({ isOpen, onClose, onSubmit, initialD
           </form>
         </div>
 
-        {/* Footer Actions */}
         <div className="p-6 border-t border-border-color bg-surface rounded-b-3xl flex justify-end gap-3">
           <button
             onClick={onClose}

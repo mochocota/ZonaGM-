@@ -75,11 +75,10 @@ const App: React.FC = () => {
   // Manejo del historial para el botón atrás del navegador
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      if (!event.state?.gameId) {
-        setSelectedGameId(null);
-      }
-      setIsHelpOpen(false);
-      setIsSitemapOpen(false);
+      const state = event.state;
+      setSelectedGameId(state?.gameId || null);
+      setIsHelpOpen(state?.view === 'help');
+      setIsSitemapOpen(state?.view === 'sitemap');
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -142,6 +141,10 @@ const App: React.FC = () => {
     setSearchTerm('');
     setSelectedConsole(null);
     setCurrentPage(1);
+    // Push home state if not already there to allow "back" to list
+    if (window.history.state) {
+        window.history.pushState(null, '');
+    }
     window.scrollTo({ top: 0 });
   }, []);
 
@@ -165,10 +168,23 @@ const App: React.FC = () => {
       setIsHelpOpen(false);
       setSearchTerm('');
       setIsSearchOpen(false);
-      window.history.pushState({ gameId: game.id }, '');
+      
+      // Update history
+      if (window.history.state?.gameId !== game.id) {
+          window.history.pushState({ gameId: game.id }, '');
+      }
+      
       window.scrollTo({ top: 0, behavior: 'auto' });
     }
   }, [games]);
+
+  const handleOpenSitemap = useCallback(() => {
+    setIsSitemapOpen(true);
+    setIsHelpOpen(false);
+    setSelectedGameId(null);
+    window.history.pushState({ view: 'sitemap' }, '');
+    window.scrollTo(0, 0);
+  }, []);
 
   const filteredGames = useMemo(() => {
     let result = [...games];
@@ -225,6 +241,7 @@ const App: React.FC = () => {
           setIsHelpOpen(false); 
           setIsSitemapOpen(false);
           setSearchTerm('');
+          // Push console filter to history? Usually menu clicks are cleaner without pushState
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         isDarkMode={isDarkMode} toggleTheme={() => {
@@ -243,7 +260,7 @@ const App: React.FC = () => {
         ) : selectedGame ? (
             <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={48} /></div>}>
                 <GameDetail 
-                    game={selectedGame} allGames={games} onBack={() => { setSelectedGameId(null); window.history.back(); }} 
+                    game={selectedGame} allGames={games} onBack={() => { window.history.back(); }} 
                     onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={(c) => { setSelectedConsole(c); setCurrentPage(1); setSelectedGameId(null); setSearchTerm(''); }}
                     onHome={handleHome} onEdit={(g) => { setEditingGame(g); setIsFormOpen(true); }} 
                     onDelete={async (id) => { await deleteDoc(doc(db, 'games', id)); handleHome(); }} 
@@ -315,7 +332,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      <Footer onOpenSitemap={() => { setIsSitemapOpen(true); setIsHelpOpen(false); setSelectedGameId(null); window.scrollTo(0,0); }} />
+      <Footer onOpenSitemap={handleOpenSitemap} />
 
       <Suspense fallback={null}>
           {isFormOpen && (

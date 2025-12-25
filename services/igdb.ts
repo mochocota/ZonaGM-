@@ -30,11 +30,11 @@ export async function searchIGDB(query: string) {
     // Sanitizar query
     const sanitizedQuery = query.replace(/["]/g, '\\"');
     
-    // Consulta IGDB ampliada
+    // Consulta IGDB ampliada para incluir videos
     const queryBody = `
       fields name, summary, first_release_date, cover.url, platforms.name, 
              involved_companies.company.name, total_rating, total_rating_count, 
-             screenshots.url, alternative_names.name;
+             screenshots.url, alternative_names.name, videos.video_id;
       search "${sanitizedQuery}";
       limit 50;
     `;
@@ -119,8 +119,15 @@ export async function searchIGDB(query: string) {
         const voteCount = game.total_rating_count || 0;
         const platformNames = game.platforms?.map((p: any) => p.name) || [];
 
-        // Estrategia de Expansión: Crear un resultado por cada plataforma coincidente.
-        // Esto soluciona el problema de "no encuentro el de Vita" si el juego es multiplataforma.
+        // Tráiler automático: extraer el primer video disponible
+        let trailerUrl = '';
+        if (game.videos && game.videos.length > 0) {
+            trailerUrl = `https://www.youtube.com/watch?v=${game.videos[0].video_id}`;
+        }
+
+        // Combinar descripción con el video al final para que el sistema lo detecte automáticamente
+        const combinedDescription = (game.summary || '') + (trailerUrl ? `\n\n${trailerUrl}` : '');
+
         const matchedConsoles = new Set<string>();
 
         if (platformNames.length > 0) {
@@ -136,7 +143,7 @@ export async function searchIGDB(query: string) {
             matchedConsoles.forEach(consoleName => {
                 finalResults.push({
                     title: game.name,
-                    description: game.summary || '',
+                    description: combinedDescription,
                     year,
                     imageUrl,
                     screenshots,
@@ -147,10 +154,9 @@ export async function searchIGDB(query: string) {
                 });
             });
         } else {
-            // Si no hay plataformas conocidas, añadir una entrada "Other" o usar la primera de IGDB
             finalResults.push({
                 title: game.name,
-                description: game.summary || '',
+                description: combinedDescription,
                 year,
                 imageUrl,
                 screenshots,
@@ -162,7 +168,6 @@ export async function searchIGDB(query: string) {
         }
     });
 
-    // Ordenar resultados para priorizar coincidencias exactas en el título si es posible
     return finalResults.sort((a, b) => {
         const aTitleMatch = a.title.toLowerCase() === sanitizedQuery.toLowerCase();
         const bTitleMatch = b.title.toLowerCase() === sanitizedQuery.toLowerCase();

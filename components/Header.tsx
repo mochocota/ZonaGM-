@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, Save, Search, PlusCircle, ShieldAlert, LogOut, ChevronDown, Moon, Sun, User, HelpCircle } from 'lucide-react';
+import { Menu, X, Search, PlusCircle, ShieldAlert, LogOut, ChevronDown, Moon, Sun, User, HelpCircle } from 'lucide-react';
 
 interface HeaderProps {
   searchTerm: string;
@@ -76,14 +76,18 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="relative z-50 w-full bg-background border-b border-border-color transition-all">
-      <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center gap-2 md:gap-3 cursor-pointer group shrink-0" onClick={() => { onSelectConsole(null); onHome(); setIsSearchOpen(false); }}>
-          <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary text-black group-hover:scale-105 transition-transform duration-200">
-            <Save size={18} className="md:w-5 md:h-5" strokeWidth={2.5} />
-          </div>
-          <h1 className="text-lg md:text-xl font-bold tracking-tight truncate max-w-[120px] md:max-w-none">ZonaGM</h1>
+    <header className="relative z-50 w-full bg-background border-b border-border-color transition-all overflow-hidden">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-2 flex items-center justify-between h-full">
+        {/* Logo Adaptado con corrección de espacio en blanco */}
+        <div 
+          className="flex items-center cursor-pointer group shrink-0 h-12 md:h-16 overflow-hidden" 
+          onClick={() => { onSelectConsole(null); onHome(); setIsSearchOpen(false); }}
+        >
+          <img 
+            src="https://storage.googleapis.com/static.aistudio.google.com/content/21796781-8069-424a-a035-244a3070778c.png" 
+            alt="ZonaGM Logo" 
+            className="h-32 md:h-44 w-auto object-contain -my-10 md:-my-14 transition-all duration-300 group-hover:scale-110 group-active:scale-95 dark:brightness-110"
+          />
         </div>
 
         {/* Desktop Nav */}

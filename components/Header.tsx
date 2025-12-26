@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, Search, PlusCircle, ShieldAlert, LogOut, ChevronDown, Moon, Sun, User, HelpCircle, Gamepad2 } from 'lucide-react';
+import { Menu, X, Search, PlusCircle, ShieldAlert, LogOut, ChevronDown, Moon, Sun, User, HelpCircle, Gamepad } from 'lucide-react';
 
 interface HeaderProps {
   searchTerm: string;
@@ -84,7 +84,7 @@ const Header: React.FC<HeaderProps> = ({
           onClick={() => { onSelectConsole(null); onHome(); setIsSearchOpen(false); }}
         >
           <div className="flex items-center gap-2 transition-all group-hover:scale-105">
-            <Gamepad2 className="text-primary w-7 h-7 md:w-8 md:h-8" strokeWidth={2.5} />
+            <Gamepad className="text-primary w-7 h-7 md:w-8 md:h-8" strokeWidth={2.5} />
             <span className="text-2xl font-black text-text-main tracking-tighter">
               Zona<span className="text-primary">GM</span>
             </span>

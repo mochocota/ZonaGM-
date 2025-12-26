@@ -1,6 +1,5 @@
 
 import React, { useMemo } from 'react';
-import { Gamepad2 } from 'lucide-react';
 
 interface HeroProps {
   searchTerm: string;
@@ -52,7 +51,6 @@ const Hero: React.FC<HeroProps> = ({ searchTerm, setSearchTerm }) => {
       <BubbleBackground />
       <div className="relative z-10 flex flex-col items-center gap-4 max-w-4xl">
         <div className="flex flex-col items-center animate-fade-in drop-shadow-md">
-          <Gamepad2 className="text-primary w-16 h-16 md:w-24 md:h-24 mb-2" strokeWidth={1.5} />
           <h1 className="text-6xl md:text-8xl font-black text-text-main tracking-tighter italic">
             Zona<span className="text-primary">GM</span>
           </h1>

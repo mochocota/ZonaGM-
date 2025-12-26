@@ -78,16 +78,14 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="relative z-50 w-full bg-background border-b border-border-color transition-all">
       <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-2 flex items-center justify-between h-16 md:h-20">
-        {/* Logo Corregido y Ajustado */}
+        {/* Logo de Texto Original */}
         <div 
-          className="flex items-center cursor-pointer group shrink-0 h-full py-1" 
+          className="flex items-center cursor-pointer group shrink-0" 
           onClick={() => { onSelectConsole(null); onHome(); setIsSearchOpen(false); }}
         >
-          <img 
-            src="https://storage.googleapis.com/static.aistudio.google.com/content/21796781-8069-424a-a035-244a3070778c.png" 
-            alt="ZonaGM Logo" 
-            className="h-full w-auto object-contain transition-all duration-300 group-hover:scale-110 group-active:scale-95 dark:brightness-110"
-          />
+          <span className="text-2xl font-black text-text-main tracking-tighter transition-all group-hover:scale-105">
+            ZONA<span className="text-primary">GM</span>
+          </span>
         </div>
 
         {/* Desktop Nav */}

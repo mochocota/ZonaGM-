@@ -76,17 +76,17 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="relative z-50 w-full bg-background border-b border-border-color transition-all overflow-hidden">
+    <header className="relative z-50 w-full bg-background border-b border-border-color transition-all">
       <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-2 flex items-center justify-between h-full">
-        {/* Logo Adaptado con corrección de espacio en blanco */}
+        {/* Logo Corregido - Eliminados los márgenes negativos agresivos y el overflow-hidden del contenedor */}
         <div 
-          className="flex items-center cursor-pointer group shrink-0 h-12 md:h-16 overflow-hidden" 
+          className="flex items-center cursor-pointer group shrink-0 h-12 md:h-16" 
           onClick={() => { onSelectConsole(null); onHome(); setIsSearchOpen(false); }}
         >
           <img 
             src="https://storage.googleapis.com/static.aistudio.google.com/content/21796781-8069-424a-a035-244a3070778c.png" 
             alt="ZonaGM Logo" 
-            className="h-32 md:h-44 w-auto object-contain -my-10 md:-my-14 transition-all duration-300 group-hover:scale-110 group-active:scale-95 dark:brightness-110"
+            className="h-full w-auto object-contain transition-all duration-300 group-hover:scale-105 group-active:scale-95 dark:brightness-110"
           />
         </div>
 

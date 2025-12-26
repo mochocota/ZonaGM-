@@ -10,13 +10,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://images.igdb.com">
+    <link rel="dns-prefetch" href="https://images.igdb.com">
     <link rel="preconnect" href="https://esm.sh">
 
     <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     
     <style>
       :root {
-        --color-primary: #f97316; /* Naranja en modo claro */
+        --color-primary: #f97316;
         --color-background: #F8F8F5;
         --color-text-main: #1C1C0D;
         --header-height: 72px;
@@ -25,9 +26,14 @@
         --max-width: 1200px;
       }
       .dark {
-        --color-primary: #F9F506; /* Amarillo en modo oscuro */
+        --color-primary: #F9F506;
         --color-background: #09090b;
         --color-text-main: #f4f4f5;
+      }
+      * {
+        box-sizing: border-box;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
       body {
         margin: 0;
@@ -36,9 +42,10 @@
         font-family: 'Spline Sans', sans-serif;
         min-height: 100vh;
         overflow-x: hidden;
+        text-rendering: optimizeLegibility;
       }
       
-      header { height: var(--header-height); width: 100%; border-bottom: 1px solid rgba(0,0,0,0.05); background: var(--color-background); }
+      header { height: var(--header-height); width: 100%; border-bottom: 1px solid rgba(0,0,0,0.05); background: var(--color-background); contain: layout sticky; }
       .hero-placeholder { height: var(--hero-height-mobile); width: 100%; background: transparent; }
       @media (min-width: 768px) {
         .hero-placeholder { height: var(--hero-height-desktop); }
@@ -69,6 +76,12 @@
 
       @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
       .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+      /* Optimización de Renderizado */
+      .game-grid-container {
+        content-visibility: auto;
+        contain-intrinsic-size: 1px 1000px;
+      }
     </style>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -85,6 +98,9 @@
               'text-main': 'var(--color-text-main)',
               'text-muted': 'var(--color-text-muted)',
               'border-color': 'var(--color-border)',
+            },
+            boxShadow: {
+              'hover': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
             }
           },
         },

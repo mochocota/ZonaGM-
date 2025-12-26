@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { Game, Comment } from '../types';
+import { Game } from '../types';
 import { Download, Star, HardDrive } from 'lucide-react';
 
 interface GameListProps {
   games: Game[];
   viewMode: 'list' | 'grid';
-  onSelectGame: (game: Game) => void;
+  onSelectGame: (gameId: string) => void;
   onSelectConsole: (console: string) => void;
 }
 
@@ -15,7 +15,7 @@ const formatNumber = (num: number): string => {
   return num?.toString() || '0';
 };
 
-const LanguageFlags = ({ languages }: { languages: Game['languages'] }) => {
+const LanguageFlags = React.memo(({ languages }: { languages: Game['languages'] }) => {
   if (!languages || languages.length === 0) return null;
   
   const getFlag = (lang: string) => {
@@ -37,20 +37,20 @@ const LanguageFlags = ({ languages }: { languages: Game['languages'] }) => {
       ))}
     </div>
   );
-};
+});
 
 const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: (c: string) => void; isLCP: boolean }>(({ game, onClick, onSelectConsole, isLCP }) => {
   return (
     <article 
       onClick={onClick}
-      className="group flex flex-col bg-surface rounded-3xl border border-border-color overflow-hidden h-full cursor-pointer transition-all hover:shadow-hover"
+      className="group flex flex-col bg-surface rounded-3xl border border-border-color overflow-hidden h-full cursor-pointer transition-all hover:shadow-hover will-change-transform"
     >
-      <div className="relative w-full aspect-[3/4] bg-gray-100 dark:bg-zinc-800 overflow-hidden">
+      <div className="relative w-full aspect-[3/4] bg-gray-100 dark:bg-zinc-800 overflow-hidden" style={{ aspectRatio: '3/4' }}>
         <img 
           src={game.imageUrl} 
           alt={game.title} 
           loading={isLCP ? "eager" : "lazy"}
-          fetchPriority={isLCP ? "high" : "auto"}
+          fetchPriority={isLCP ? "high" : "low"}
           width="300" 
           height="400"
           decoding="async"
@@ -58,7 +58,6 @@ const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-60" />
         
-        {/* Console Tag Top Left */}
         <button 
           onClick={(e) => { e.stopPropagation(); onSelectConsole(game.console); }}
           className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider text-white border border-white/10"
@@ -68,14 +67,12 @@ const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
       </div>
       
       <div className="p-4 flex flex-col flex-grow">
-        {/* Language Flags: Centered below image */}
         <div className="mb-3">
           <LanguageFlags languages={game.languages} />
         </div>
 
         <h3 className="text-base font-bold text-text-main text-center leading-snug line-clamp-2 mb-3 group-hover:text-primary-hover transition-colors">{game.title}</h3>
         
-        {/* Information Footer: Downloads, Rating, Size */}
         <div className="flex items-center justify-center text-[11px] text-text-muted mt-auto font-medium border-t border-border-color/30 pt-3">
           <div className="flex items-center gap-4">
               <div className="flex items-center gap-1" title="Descargas">
@@ -101,22 +98,21 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
   return (
     <article 
       onClick={onClick}
-      className="group flex flex-col md:flex-row gap-6 rounded-3xl bg-surface p-4 shadow-soft border border-transparent hover:border-primary/20 transition-all cursor-pointer"
+      className="group flex flex-col md:flex-row gap-6 rounded-3xl bg-surface p-4 shadow-soft border border-transparent hover:border-primary/20 transition-all cursor-pointer will-change-transform"
     >
       <div className="shrink-0 flex flex-col items-center gap-3">
-        <div className="w-full md:w-[160px] aspect-[3/4] rounded-2xl bg-gray-100 dark:bg-zinc-800 overflow-hidden relative shadow-inner">
+        <div className="w-full md:w-[160px] aspect-[3/4] rounded-2xl bg-gray-100 dark:bg-zinc-800 overflow-hidden relative shadow-inner" style={{ aspectRatio: '3/4' }}>
           <img 
               src={game.imageUrl} 
               alt={game.title}
               loading={isLCP ? "eager" : "lazy"}
-              fetchPriority={isLCP ? "high" : "auto"}
+              fetchPriority={isLCP ? "high" : "low"}
               width="160"
               height="220"
               decoding="async"
               className="w-full h-full object-cover transition-transform group-hover:scale-105"
           />
         </div>
-        {/* Flags below list image */}
         <LanguageFlags languages={game.languages} />
       </div>
       
@@ -136,7 +132,6 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
           <p className="text-text-muted text-sm leading-relaxed line-clamp-2 max-w-2xl">{game.description}</p>
         </div>
         
-        {/* Information Row: Downloads, Rating, Size */}
         <div className="mt-4 flex items-center gap-4">
            <div className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-xl border border-border-color text-xs font-bold text-text-muted">
               <Download size={13} className="text-black dark:text-primary" /> 
@@ -162,11 +157,11 @@ const GameList: React.FC<GameListProps> = ({ games, viewMode, onSelectGame, onSe
   return (
     <div className={`w-full ${viewMode === 'grid' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8' : 'flex flex-col gap-6'}`}>
       {games.map((game, index) => {
-        const isLCP = index === 0;
+        const isLCP = index < 4; // Primeras 4 imágenes en viewport probable
         return viewMode === 'list' ? (
-          <ListCard key={game.id} game={game} onClick={() => onSelectGame(game)} onSelectConsole={onSelectConsole} isLCP={isLCP} />
+          <ListCard key={game.id} game={game} onClick={() => onSelectGame(game.id)} onSelectConsole={onSelectConsole} isLCP={isLCP} />
         ) : (
-          <GridCard key={game.id} game={game} onClick={() => onSelectGame(game)} onSelectConsole={onSelectConsole} isLCP={isLCP} />
+          <GridCard key={game.id} game={game} onClick={() => onSelectGame(game.id)} onSelectConsole={onSelectConsole} isLCP={isLCP} />
         );
       })}
     </div>

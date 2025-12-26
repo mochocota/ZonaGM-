@@ -62,7 +62,6 @@ const App: React.FC = () => {
     games.find(g => g.id === selectedGameId) || null
   , [games, selectedGameId]);
 
-  // Si el usuario escribe en el buscador, cerramos cualquier vista abierta para mostrar los resultados
   useEffect(() => {
     if (searchTerm.trim().length > 0) {
       setSelectedGameId(null);
@@ -72,7 +71,6 @@ const App: React.FC = () => {
     }
   }, [searchTerm]);
 
-  // Manejo del historial para el botón atrás del navegador
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
       const state = event.state;
@@ -141,42 +139,34 @@ const App: React.FC = () => {
     setSearchTerm('');
     setSelectedConsole(null);
     setCurrentPage(1);
-    // Push home state if not already there to allow "back" to list
     if (window.history.state) {
         window.history.pushState(null, '');
     }
     window.scrollTo({ top: 0 });
   }, []);
 
-  const handleSaveHelp = async (newContent: typeof DEFAULT_HELP_CONTENT) => {
-    try {
-        const cleanContent = JSON.parse(JSON.stringify(newContent));
-        await setDoc(doc(db, 'settings', 'help'), cleanContent);
-        toast.success("Ayuda Actualizada", "Los cambios se han guardado correctamente.");
-    } catch (e: any) {
-        console.error("Save Help Error:", e);
-        toast.error("Error de Permisos", "Verifica las reglas de seguridad en tu consola de Firebase.");
-    }
-  };
+  const handleSelectConsole = useCallback((c: string | null) => { 
+    setSelectedConsole(c); 
+    setCurrentPage(1); 
+    setSelectedGameId(null); 
+    setIsHelpOpen(false); 
+    setIsSitemapOpen(false);
+    setSearchTerm('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   const handleSelectGameById = useCallback((gameId: string) => {
-    const game = games.find(g => g.id === gameId);
-    if (game) {
-      scrollPositionRef.current = window.scrollY;
-      setSelectedGameId(game.id);
-      setIsSitemapOpen(false);
-      setIsHelpOpen(false);
-      setSearchTerm('');
-      setIsSearchOpen(false);
-      
-      // Update history
-      if (window.history.state?.gameId !== game.id) {
-          window.history.pushState({ gameId: game.id }, '');
-      }
-      
-      window.scrollTo({ top: 0, behavior: 'auto' });
+    scrollPositionRef.current = window.scrollY;
+    setSelectedGameId(gameId);
+    setIsSitemapOpen(false);
+    setIsHelpOpen(false);
+    setSearchTerm('');
+    setIsSearchOpen(false);
+    if (window.history.state?.gameId !== gameId) {
+        window.history.pushState({ gameId: gameId }, '');
     }
-  }, [games]);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, []);
 
   const handleOpenSitemap = useCallback(() => {
     setIsSitemapOpen(true);
@@ -205,19 +195,28 @@ const App: React.FC = () => {
     filteredGames.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE),
   [filteredGames, currentPage]);
 
-  const goToPrevPage = () => {
+  const goToPrevPage = useCallback(() => {
     if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+      setCurrentPage(prev => prev - 1);
       window.scrollTo({ top: 300, behavior: 'smooth' });
     }
-  };
+  }, [currentPage]);
 
-  const goToNextPage = () => {
+  const goToNextPage = useCallback(() => {
     if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+      setCurrentPage(prev => prev + 1);
       window.scrollTo({ top: 300, behavior: 'smooth' });
     }
-  };
+  }, [currentPage, totalPages]);
+
+  const toggleTheme = useCallback(() => {
+    const next = !isDarkMode;
+    setIsDarkMode(next);
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', next ? 'dark' : 'light');
+  }, [isDarkMode]);
+
+  const consolesList = useMemo(() => Array.from(new Set(games.map(g => g.console))).sort(), [games]);
 
   return (
     <div className="relative flex min-h-screen w-full flex-col bg-background text-text-main">
@@ -232,24 +231,10 @@ const App: React.FC = () => {
         onOpenAdmin={() => setIsAdminPanelOpen(true)}
         pendingReportsCount={reports.filter(r => r.status === 'Pending').length}
         isLoggedIn={isLoggedIn} onOpenLogin={() => setIsLoginModalOpen(true)}
-        onLogout={() => signOut(auth)} consoles={useMemo(() => Array.from(new Set(games.map(g => g.console))).sort(), [games])}
+        onLogout={() => signOut(auth)} consoles={consolesList}
         selectedConsole={selectedConsole} 
-        onSelectConsole={(c) => { 
-          setSelectedConsole(c); 
-          setCurrentPage(1); 
-          setSelectedGameId(null); 
-          setIsHelpOpen(false); 
-          setIsSitemapOpen(false);
-          setSearchTerm('');
-          // Push console filter to history? Usually menu clicks are cleaner without pushState
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        isDarkMode={isDarkMode} toggleTheme={() => {
-            const next = !isDarkMode;
-            setIsDarkMode(next);
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', next ? 'dark' : 'light');
-        }}
+        onSelectConsole={handleSelectConsole}
+        isDarkMode={isDarkMode} toggleTheme={toggleTheme}
       />
 
       <main className="flex-1 flex flex-col items-center px-4 md:px-6 w-full max-w-[1200px] mx-auto pb-16 min-h-[800px]">
@@ -261,7 +246,7 @@ const App: React.FC = () => {
             <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={48} /></div>}>
                 <GameDetail 
                     game={selectedGame} allGames={games} onBack={() => { window.history.back(); }} 
-                    onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={(c) => { setSelectedConsole(c); setCurrentPage(1); setSelectedGameId(null); setSearchTerm(''); }}
+                    onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={handleSelectConsole}
                     onHome={handleHome} onEdit={(g) => { setEditingGame(g); setIsFormOpen(true); }} 
                     onDelete={async (id) => { await deleteDoc(doc(db, 'games', id)); handleHome(); }} 
                     onReport={async (id, title, reason, desc) => {
@@ -298,8 +283,9 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="min-h-[600px] mt-6">
-                    <GameList games={currentGames} viewMode={viewMode} onSelectGame={(g) => handleSelectGameById(g.id)} onSelectConsole={(c) => { setSelectedConsole(c); setCurrentPage(1); setSelectedGameId(null); setSearchTerm(''); }} />
+                <div className="min-h-[600px] mt-6 game-grid-container">
+                    {/* Fix: GameList's onSelectGame passes the game ID as a string, corrected the callback to use it directly */}
+                    <GameList games={currentGames} viewMode={viewMode} onSelectGame={(id) => handleSelectGameById(id)} onSelectConsole={handleSelectConsole} />
                 </div>
 
                 {totalPages > 1 && (
@@ -359,7 +345,10 @@ const App: React.FC = () => {
           {isAdminPanelOpen && (
             <AdminPanel 
               isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} 
-              reports={reports} games={games} helpContent={helpContent} onSaveHelp={handleSaveHelp}
+              reports={reports} games={games} helpContent={helpContent} onSaveHelp={async (c) => {
+                await setDoc(doc(db, 'settings', 'help'), c);
+                toast.success("Ayuda Actualizada");
+              }}
               onResolve={async (id) => await updateDoc(doc(db, 'reports', id), { status: 'Resolved' })}
               onDelete={async (id) => await deleteDoc(doc(db, 'reports', id))}
               onNavigateToGame={handleSelectGameById} 

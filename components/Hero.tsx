@@ -50,17 +50,17 @@ const Hero: React.FC<HeroProps> = ({ searchTerm, setSearchTerm }) => {
     <section className="hero-section relative flex flex-col gap-4 py-8 md:py-16 items-center text-center px-4 w-full overflow-hidden justify-center will-change-transform">
       <BubbleBackground />
       <div className="relative z-10 flex flex-col items-center gap-4 max-w-4xl">
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center p-2">
             <img 
-              src="https://storage.googleapis.com/static.aistudio.google.com/content/16383693-02f8-4034-9279-f538ec10bc75.png" 
+              src="https://storage.googleapis.com/static.aistudio.google.com/content/21796781-8069-424a-a035-244a3070778c.png" 
               alt="ZonaGM" 
-              className="h-32 md:h-56 lg:h-64 w-auto object-contain drop-shadow-2xl animate-fade-in"
+              className="h-32 md:h-56 lg:h-72 w-auto object-contain drop-shadow-2xl animate-fade-in"
             />
         </div>
-        <p className="text-text-muted text-base md:text-xl font-bold italic opacity-80">
+        <p className="text-text-muted text-base md:text-xl font-bold italic opacity-80 mt-2">
           "Reviviendo los clásicos, píxel a píxel."
         </p>
-        <div className="h-1.5 w-16 bg-primary mx-auto rounded-full mt-4" />
+        <div className="h-1.5 w-16 bg-primary mx-auto rounded-full mt-2" />
       </div>
     </section>
   );

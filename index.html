@@ -16,7 +16,7 @@
     
     <style>
       :root {
-        --color-primary: #F9F506;
+        --color-primary: #f97316; /* Naranja en modo claro */
         --color-background: #F8F8F5;
         --color-text-main: #1C1C0D;
         --header-height: 72px;
@@ -25,6 +25,7 @@
         --max-width: 1200px;
       }
       .dark {
+        --color-primary: #F9F506; /* Amarillo en modo oscuro */
         --color-background: #09090b;
         --color-text-main: #f4f4f5;
       }
@@ -78,7 +79,7 @@
           extend: {
             fontFamily: { sans: ['Spline Sans', 'sans-serif'] },
             colors: {
-              primary: '#F9F506',
+              primary: 'var(--color-primary)',
               background: 'var(--color-background)',
               surface: 'var(--color-surface)',
               'text-main': 'var(--color-text-main)',

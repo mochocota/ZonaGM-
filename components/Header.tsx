@@ -79,10 +79,10 @@ const Header: React.FC<HeaderProps> = ({
     <header className="relative z-50 w-full bg-background border-b border-border-color transition-all">
       <style>{`
         @keyframes logo-icon-color {
-          0% { color: #F9F506; }
-          33% { color: #FFFFFF; }
-          66% { color: #FFD700; }
-          100% { color: #F9F506; }
+          0% { color: var(--color-primary); }
+          33% { color: #888888; }
+          66% { color: #f97316; }
+          100% { color: var(--color-primary); }
         }
         .animate-logo-icon-color {
           animation: logo-icon-color 4s infinite ease-in-out;

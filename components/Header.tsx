@@ -78,19 +78,15 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="relative z-50 w-full bg-background border-b border-border-color transition-all">
       <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-2 flex items-center justify-between h-16 md:h-20">
-        {/* Logo Solicitado con fondo negro adaptado a la cabecera */}
+        {/* Logo Solicitado: Ajustado para evitar imagen rota y recortes */}
         <div 
-          className="flex items-center cursor-pointer group shrink-0 h-12 md:h-16 overflow-visible" 
+          className="flex items-center cursor-pointer group shrink-0 h-10 md:h-14" 
           onClick={() => { onSelectConsole(null); onHome(); setIsSearchOpen(false); }}
         >
           <img 
             src="https://storage.googleapis.com/static.aistudio.google.com/content/16383693-02f8-4034-9279-f538ec10bc75.png" 
             alt="ZonaGM Logo" 
-            className="h-full w-auto max-w-[200px] md:max-w-[280px] object-contain transition-all duration-300 group-hover:scale-105 group-active:scale-95"
-            onError={(e) => {
-              // Fallback en caso de que la URL temporal falle
-              console.error("Error cargando el logo solicitado");
-            }}
+            className="h-full w-auto object-contain transition-transform duration-300 group-hover:scale-105"
           />
         </div>
 

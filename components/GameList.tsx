@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Game, Comment } from '../types';
-import { Download, Star, MessageSquare } from 'lucide-react';
+import { Download, Star, HardDrive } from 'lucide-react';
 
 interface GameListProps {
   games: Game[];
@@ -13,21 +13,6 @@ interface GameListProps {
 const formatNumber = (num: number): string => {
   if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
   return num?.toString() || '0';
-};
-
-const countTotalComments = (comments?: Comment[]): number => {
-  if (!comments) return 0;
-  let count = 0;
-  const traverse = (list: Comment[]) => {
-    for (const item of list) {
-      count++;
-      if (item.replies && item.replies.length > 0) {
-        traverse(item.replies);
-      }
-    }
-  };
-  traverse(comments);
-  return count;
 };
 
 const LanguageFlags = ({ languages }: { languages: Game['languages'] }) => {
@@ -55,8 +40,6 @@ const LanguageFlags = ({ languages }: { languages: Game['languages'] }) => {
 };
 
 const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: (c: string) => void; isLCP: boolean }>(({ game, onClick, onSelectConsole, isLCP }) => {
-  const commentCount = countTotalComments(game.comments);
-  
   return (
     <article 
       onClick={onClick}
@@ -92,7 +75,7 @@ const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
 
         <h3 className="text-base font-bold text-text-main text-center leading-snug line-clamp-2 mb-3 group-hover:text-primary-hover transition-colors">{game.title}</h3>
         
-        {/* Information Footer: Downloads, Rating, Comments */}
+        {/* Information Footer: Downloads, Rating, Size */}
         <div className="flex items-center justify-center text-[11px] text-text-muted mt-auto font-medium border-t border-border-color/30 pt-3">
           <div className="flex items-center gap-4">
               <div className="flex items-center gap-1" title="Descargas">
@@ -103,9 +86,9 @@ const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
                   <Star size={11} className="fill-black text-black dark:fill-primary dark:text-primary" /> 
                   <span className="opacity-80 leading-none">{game.rating || '0.0'}</span>
               </div>
-              <div className="flex items-center gap-1" title="Comentarios">
-                  <MessageSquare size={11} className="text-text-muted" /> 
-                  <span className="opacity-80 leading-none">{commentCount}</span>
+              <div className="flex items-center gap-1" title="Tamaño">
+                  <HardDrive size={11} className="text-text-muted" /> 
+                  <span className="opacity-80 leading-none">{game.size || 'N/A'}</span>
               </div>
           </div>
         </div>
@@ -115,8 +98,6 @@ const GridCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
 });
 
 const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: (c: string) => void; isLCP: boolean }>(({ game, onClick, onSelectConsole, isLCP }) => {
-  const commentCount = countTotalComments(game.comments);
-
   return (
     <article 
       onClick={onClick}
@@ -155,7 +136,7 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
           <p className="text-text-muted text-sm leading-relaxed line-clamp-2 max-w-2xl">{game.description}</p>
         </div>
         
-        {/* Information Row: Downloads, Rating, Comments */}
+        {/* Information Row: Downloads, Rating, Size */}
         <div className="mt-4 flex items-center gap-4">
            <div className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-xl border border-border-color text-xs font-bold text-text-muted">
               <Download size={13} className="text-black dark:text-primary" /> 
@@ -166,8 +147,8 @@ const ListCard = React.memo<{ game: Game; onClick: () => void; onSelectConsole: 
               <span className="leading-none">{game.rating || '0.0'}</span>
            </div>
            <div className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-xl border border-border-color text-xs font-bold text-text-muted">
-              <MessageSquare size={13} className="text-text-muted" /> 
-              <span className="leading-none">{commentCount}</span>
+              <HardDrive size={13} className="text-text-muted" /> 
+              <span className="leading-none">{game.size || 'N/A'}</span>
            </div>
         </div>
       </div>

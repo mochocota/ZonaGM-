@@ -77,14 +77,25 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="relative z-50 w-full bg-background border-b border-border-color transition-all">
+      <style>{`
+        @keyframes logo-icon-color {
+          0% { color: #F9F506; }
+          33% { color: #FFFFFF; }
+          66% { color: #FFD700; }
+          100% { color: #F9F506; }
+        }
+        .animate-logo-icon-color {
+          animation: logo-icon-color 4s infinite ease-in-out;
+        }
+      `}</style>
       <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-2 flex items-center justify-between h-16 md:h-20">
-        {/* Logo de Texto Unido con Icono Moderno */}
+        {/* Logo de Texto Unido con Icono Moderno Animado */}
         <div 
           className="flex items-center cursor-pointer group shrink-0" 
           onClick={() => { onSelectConsole(null); onHome(); setIsSearchOpen(false); }}
         >
           <div className="flex items-center gap-2 transition-all group-hover:scale-105">
-            <Gamepad className="text-primary w-7 h-7 md:w-8 md:h-8" strokeWidth={2.5} />
+            <Gamepad className="animate-logo-icon-color w-7 h-7 md:w-8 md:h-8" strokeWidth={2.5} />
             <span className="text-2xl font-black text-text-main tracking-tighter">
               Zona<span className="text-primary">GM</span>
             </span>
@@ -186,7 +197,7 @@ const Header: React.FC<HeaderProps> = ({
             </button>
 
             {/* Auth Button Desktop */}
-            <div className="hidden md:block ml-2 pl-2 border-l border-border-color">
+            <div className="hidden md:block ml-2 po-2 border-l border-border-color">
                 {isLoggedIn ? (
                     <button onClick={onLogout} className="text-xs font-bold text-text-muted hover:text-red-500 flex items-center gap-1">
                         <LogOut size={14} /> Salir

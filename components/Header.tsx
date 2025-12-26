@@ -78,16 +78,15 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="relative z-50 w-full bg-background border-b border-border-color transition-all">
       <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-2 flex items-center justify-between h-16 md:h-20">
-        {/* Logo Ajustado y Colocado - Usando el link de almacenamiento verificado */}
+        {/* Logo Ajustado y Colocado */}
         <div 
-          className="flex items-center cursor-pointer group shrink-0 h-10 md:h-14 min-w-[120px]" 
+          className="flex items-center cursor-pointer group shrink-0 h-12 md:h-16" 
           onClick={() => { onSelectConsole(null); onHome(); setIsSearchOpen(false); }}
         >
           <img 
             src="https://storage.googleapis.com/static.aistudio.google.com/content/16383693-02f8-4034-9279-f538ec10bc75.png" 
             alt="ZonaGM Logo" 
             className="h-full w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-            loading="eager"
           />
         </div>
 

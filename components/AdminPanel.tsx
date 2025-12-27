@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Report, Game } from '../types';
-import { X, CheckCircle, Trash2, ExternalLink, ShieldAlert, DownloadCloud, Loader2, Plus, AlertCircle, CheckCircle2, Globe, HelpCircle, Save, Database, FileUp, FileDown } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Report, Game, Comment } from '../types';
+import { X, CheckCircle, Trash2, ExternalLink, ShieldAlert, DownloadCloud, Loader2, Plus, AlertCircle, CheckCircle2, Globe, HelpCircle, Save, Database, FileUp, FileDown, MessageSquare, User } from 'lucide-react';
 import { searchIGDB } from '../services/igdb';
 import { db } from '../firebase';
 import { collection, addDoc, doc, setDoc, writeBatch } from 'firebase/firestore';
@@ -30,6 +30,11 @@ interface ImportItem {
   title?: string;
 }
 
+interface FlattenedComment extends Comment {
+  gameId: string;
+  gameTitle: string;
+}
+
 const AdminPanel: React.FC<AdminPanelProps> = ({ 
   isOpen, 
   onClose, 
@@ -42,7 +47,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   onNavigateToGame
 }) => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<'reports' | 'importer' | 'backup' | 'help'>('reports');
+  const [activeTab, setActiveTab] = useState<'reports' | 'importer' | 'backup' | 'help' | 'interactions'>('reports');
   
   // Importer States
   const [namesText, setNamesText] = useState('');
@@ -60,6 +65,31 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   useEffect(() => {
     setLocalHelp(helpContent);
   }, [helpContent]);
+
+  // Logic to get last 7 comments across all games
+  const latestComments = useMemo(() => {
+    const allFlattened: FlattenedComment[] = [];
+    
+    const flatten = (comments: Comment[], gId: string, gTitle: string) => {
+      comments.forEach(c => {
+        allFlattened.push({ ...c, gameId: gId, gameTitle: gTitle });
+        if (c.replies && c.replies.length > 0) {
+          flatten(c.replies, gId, gTitle);
+        }
+      });
+    };
+
+    games.forEach(game => {
+      if (game.comments && game.comments.length > 0) {
+        flatten(game.comments, game.id, game.title);
+      }
+    });
+
+    // Sort by ID descending (ID is Date.now().toString() in this app)
+    return allFlattened
+      .sort((a, b) => b.id.localeCompare(a.id))
+      .slice(0, 7);
+  }, [games]);
 
   if (!isOpen) return null;
 
@@ -86,7 +116,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             let igdbData: any = null;
             
             if (results && results.length > 0) {
-                // Si el usuario especificó consola, buscamos coincidencia
                 if (item.console) {
                     igdbData = results.find(r => r.console.toLowerCase() === item.console?.toLowerCase()) || results[0];
                 } else {
@@ -156,14 +185,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
               const batch = writeBatch(db);
               
-              // Restaurar Juegos
               for (const game of data.games) {
                   const { id, ...gameData } = game;
                   const gameRef = doc(collection(db, 'games'), id);
                   batch.set(gameRef, gameData);
               }
 
-              // Restaurar Reportes
               if (data.reports && Array.isArray(data.reports)) {
                   for (const report of data.reports) {
                       const { id, ...reportData } = report;
@@ -172,7 +199,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   }
               }
 
-              // Restaurar Ayuda
               if (data.help) {
                   const helpRef = doc(db, 'settings', 'help');
                   batch.set(helpRef, data.help);
@@ -229,28 +255,34 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 </button>
             </div>
 
-            <div className="flex px-6 gap-6">
+            <div className="flex px-6 gap-6 overflow-x-auto no-scrollbar">
                 <button 
                     onClick={() => setActiveTab('reports')}
-                    className={`pb-3 text-sm font-bold border-b-2 transition-all ${activeTab === 'reports' ? 'border-primary text-text-main' : 'border-transparent text-text-muted hover:text-text-main'}`}
+                    className={`pb-3 text-sm font-bold border-b-2 transition-all shrink-0 ${activeTab === 'reports' ? 'border-primary text-text-main' : 'border-transparent text-text-muted hover:text-text-main'}`}
                 >
                     Reportes ({reports.filter(r => r.status === 'Pending').length})
                 </button>
                 <button 
+                    onClick={() => setActiveTab('interactions')}
+                    className={`pb-3 text-sm font-bold border-b-2 transition-all shrink-0 ${activeTab === 'interactions' ? 'border-primary text-text-main' : 'border-transparent text-text-muted hover:text-text-main'}`}
+                >
+                    Interacciones
+                </button>
+                <button 
                     onClick={() => setActiveTab('importer')}
-                    className={`pb-3 text-sm font-bold border-b-2 transition-all ${activeTab === 'importer' ? 'border-primary text-text-main' : 'border-transparent text-text-muted hover:text-text-main'}`}
+                    className={`pb-3 text-sm font-bold border-b-2 transition-all shrink-0 ${activeTab === 'importer' ? 'border-primary text-text-main' : 'border-transparent text-text-muted hover:text-text-main'}`}
                 >
                     Importar IGDB
                 </button>
                 <button 
                     onClick={() => setActiveTab('backup')}
-                    className={`pb-3 text-sm font-bold border-b-2 transition-all ${activeTab === 'backup' ? 'border-primary text-text-main' : 'border-transparent text-text-muted hover:text-text-main'}`}
+                    className={`pb-3 text-sm font-bold border-b-2 transition-all shrink-0 ${activeTab === 'backup' ? 'border-primary text-text-main' : 'border-transparent text-text-muted hover:text-text-main'}`}
                 >
                     Respaldo
                 </button>
                 <button 
                     onClick={() => setActiveTab('help')}
-                    className={`pb-3 text-sm font-bold border-b-2 transition-all ${activeTab === 'help' ? 'border-primary text-text-main' : 'border-transparent text-text-muted hover:text-text-main'}`}
+                    className={`pb-3 text-sm font-bold border-b-2 transition-all shrink-0 ${activeTab === 'help' ? 'border-primary text-text-main' : 'border-transparent text-text-muted hover:text-text-main'}`}
                 >
                     Editar Ayuda
                 </button>
@@ -261,9 +293,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           {activeTab === 'reports' ? (
             <div className="space-y-4">
               {reports.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-64 text-text-muted">
+                <div className="flex flex-col items-center justify-center h-64 text-text-muted text-center">
                     <CheckCircle size={48} className="mb-4 text-green-500 opacity-50" />
-                    <p className="text-lg font-medium">Todo limpio.</p>
+                    <p className="text-lg font-medium">Todo limpio. No hay reportes pendientes.</p>
                 </div>
               ) : (
                 reports.map((report) => (
@@ -292,6 +324,55 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     </div>
                 ))
               )}
+            </div>
+          ) : activeTab === 'interactions' ? (
+            <div className="space-y-4">
+                <div className="flex items-center justify-between px-2 mb-2">
+                    <h3 className="text-lg font-bold text-text-main flex items-center gap-2">
+                        <MessageSquare className="text-primary" size={20} />
+                        Últimos Comentarios
+                    </h3>
+                    <span className="text-xs font-medium text-text-muted">Mostrando los 7 más recientes</span>
+                </div>
+                
+                {latestComments.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-64 text-text-muted text-center">
+                        <MessageSquare size={48} className="mb-4 opacity-20" />
+                        <p className="text-lg font-medium">Aún no hay comentarios en el sitio.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 gap-3">
+                        {latestComments.map((comment) => (
+                            <div key={comment.id} className="bg-surface border border-border-color rounded-2xl p-4 shadow-sm hover:border-primary/30 transition-all group">
+                                <div className="flex items-start gap-4">
+                                    <div className={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center ${comment.isAdmin ? 'bg-primary text-black' : 'bg-gray-100 text-text-muted'}`}>
+                                        {comment.isAdmin ? <ShieldAlert size={20} /> : <User size={20} />}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 mb-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-bold text-text-main truncate">
+                                                    {comment.user}
+                                                </span>
+                                                {comment.isAdmin && <span className="text-[9px] bg-primary text-black px-1.5 py-0.5 rounded font-black uppercase">Staff</span>}
+                                                <span className="text-[10px] text-text-muted font-medium">{comment.date}</span>
+                                            </div>
+                                            <button 
+                                                onClick={() => { onNavigateToGame(comment.gameId); onClose(); }}
+                                                className="text-[10px] font-bold text-primary-hover hover:text-text-main flex items-center gap-1 bg-primary/5 px-2 py-1 rounded-md transition-colors"
+                                            >
+                                                Ver en {comment.gameTitle} <ExternalLink size={10} />
+                                            </button>
+                                        </div>
+                                        <p className="text-sm text-text-muted leading-relaxed line-clamp-3">
+                                            {comment.content}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
           ) : activeTab === 'importer' ? (
             <div className="space-y-6">
